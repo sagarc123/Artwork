@@ -50,6 +50,21 @@ The stack in `03-architecture.md` §1 is final:
   - An email adapter (Resend).
 - **Before going public:** create the owner account first, because `/admin/create-first-user` is open until an owner exists.
 
+**Design direction (22 Oct 2026, from the art direction, motion and usability agents):**
+- **Look:** "उंबरठा / Umbartha — the doorstep".
+  - Full-bleed coloured "floors" (paper, charcoal, kumkum, peacock, leaf), separated by a paithani border and a row of powder dots (`Threshold`).
+  - One giant Devanagari word per section, in Rozha One.
+  - Powder heaps for categories; tape-framed artworks.
+  - A seeded, code-drawn rangoli (`GenerativeRangoli`) stands in for every photo until real photos arrive.
+  - No mandala clip-art.
+- **Motion:** "bindu → rekha → rang" (dot → line → colour).
+  - Includes: the hero draw, scroll reveals and drawn lines (CSS `animation-timeline: view()`), page transitions (React `<ViewTransition>` plus cross-document `@view-transition`), a sliding tab indicator, a powder tap burst, and a scroll progress bar.
+  - Extra JS is about 1 KB.
+- **Guardrails:**
+  - The headline never fades in, and nothing loops.
+  - `data-motion="off"` comes from the footer switch; `data-fx="lite"` is set automatically on slow phones and data saver. Both give the final, still state, as does `prefers-reduced-motion`.
+- **Code:** `src/components/Art.tsx`, `GenerativeRangoli.tsx`, `MotionSettings.tsx`, `TapRipple.tsx`, and the motion section of `src/app/globals.css`.
+
 ## 2. Who owns which data
 
 | Owner | Holds | Edited through |

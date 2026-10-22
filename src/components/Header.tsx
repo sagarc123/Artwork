@@ -6,14 +6,14 @@ import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
-import { RangoliDraw } from './Rangoli'
+import { GenerativeRangoli } from './GenerativeRangoli'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
 function Logo({ locale }: { locale: Locale }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${site.brandName} — home`}>
-      <RangoliDraw animate={false} className="size-9 shrink-0" />
+      <GenerativeRangoli seed="siddesh-logo" className="size-9 shrink-0" />
       <span className="font-heading text-[1.375rem] leading-none whitespace-nowrap xl:text-[1.625rem]">{site.brandName}</span>
     </Link>
   )
@@ -35,7 +35,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
     'py-2 font-medium whitespace-nowrap hover:text-kumkum aria-[current=page]:text-kumkum aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8'
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
       {/* Desktop utility row */}
       <div className="hidden border-b border-border/20 xl:block">
         <div className="wrap flex h-11 items-center justify-between text-muted">

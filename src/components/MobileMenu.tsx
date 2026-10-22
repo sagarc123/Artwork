@@ -41,7 +41,7 @@ export function MobileMenu({ locale, labels, featured, links, whatsappHref, phon
         onClick={(e) => e.target === e.currentTarget && close()}
         className="drawer m-0 h-dvh max-h-dvh w-[88vw] max-w-sm bg-paper p-0 text-charcoal shadow-lg backdrop:bg-charcoal/40"
       >
-        <div className="kolam flex min-h-full flex-col gap-6 p-5">
+        <div className="grain flex min-h-full flex-col gap-6 p-5">
           <button type="button" onClick={close} className="ml-auto flex min-h-12 items-center gap-2 rounded-ui px-3 hover:bg-charcoal/5">
             <X aria-hidden="true" className="size-6" />
             {labels.close}

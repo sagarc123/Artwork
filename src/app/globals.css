@@ -37,11 +37,18 @@
   --radius-ui: 6px;
   --radius-sheet: 20px;
   --shadow-frame: 0 12px 28px rgb(30 27 24 / 0.18), 0 2px 6px rgb(230 160 10 / 0.08);
+
+  /* Motion: a patient, sure hand. */
+  --ease-pour: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-settle: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-lift: cubic-bezier(0.4, 0, 1, 1);
 }
 
 @theme inline {
   --font-heading: var(--font-tiro), "Martel", serif;
   --font-body: var(--font-mukta), system-ui, sans-serif;
+  --font-display: var(--font-rozha), var(--font-tiro), serif;
 }
 
 @layer base {
@@ -83,10 +90,12 @@
   padding-inline: 1.25rem;
 }
 
-/* Low-opacity kolam dot grid; never behind artwork. */
-@utility kolam {
-  background-image: radial-gradient(rgb(30 27 24 / 0.07) 1.5px, transparent 1.6px);
-  background-size: 24px 24px;
+/* Paper grain (charcoal noise) and chalky floor (white noise). Tiled data-URI: no extra request. */
+@utility grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@utility grain-dark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @utility footer-link {
@@ -127,31 +136,459 @@ dialog.drawer[open] {
   }
 }
 
-/* Rangoli that draws itself in. */
-.rangoli-draw path,
-.rangoli-draw circle:not([stroke-dasharray]):not(.rangoli-dot) {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: rangoli-draw 1.6s ease-out forwards;
+/* ─────────────── "Umbartha" (doorstep) art pieces ─────────────── */
+
+/* Woven paithani border between floors. */
+.paithani {
+  height: 16px;
+  background:
+    conic-gradient(from 135deg at 50% 0, var(--color-turmeric) 90deg, #0000 0) 0 0 / 16px 8px repeat-x,
+    radial-gradient(circle, var(--color-paper) 1.5px, #0000 2px) 0 8px / 16px 8px repeat-x,
+    var(--color-kumkum);
 }
-.rangoli-draw .rangoli-dot,
-.rangoli-draw circle[stroke-dasharray] {
-  opacity: 0;
-  animation: rangoli-fade 0.5s ease-out 1.2s forwards;
+.powder-dots {
+  height: 14px;
+  background:
+    radial-gradient(circle, var(--color-marigold) 2.2px, #0000 2.8px) 0 50% / 26px 14px repeat-x,
+    radial-gradient(circle, var(--color-peacock) 1.6px, #0000 2.2px) 13px 50% / 26px 14px repeat-x;
 }
-@keyframes rangoli-draw {
-  to {
-    stroke-dashoffset: 0;
+/* Mango-leaf toran over a doorway. */
+.toran {
+  background:
+    radial-gradient(ellipse 7px 11px at 50% 0, var(--color-leaf) 95%, #0000) 0 4px / 18px 16px repeat-x,
+    linear-gradient(var(--color-marigold), var(--color-marigold)) 0 0 / 100% 5px no-repeat;
+}
+.diya {
+  width: 26px;
+  height: 11px;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: var(--color-marigold);
+}
+.diya::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 8px;
+  height: 13px;
+  translate: -50% 2px;
+  border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%;
+  background: var(--color-turmeric);
+  box-shadow: 0 0 14px 4px rgb(242 183 5 / 0.45);
+}
+/* Giant Devanagari word used as texture. */
+.display-word {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 3rem + 8vw, 11rem);
+  line-height: 0.9;
+  white-space: nowrap;
+}
+.brush {
+  display: block;
+  height: 14px;
+  overflow: visible;
+}
+.brush path {
+  fill: none;
+  stroke: var(--color-marigold);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+/* A heap of rangoli powder. */
+.powder-heap {
+  display: block;
+  width: 6.5rem;
+  height: 3.5rem;
+  background:
+    radial-gradient(circle, var(--heap) 1.4px, #0000 2px) 50% 100% / 11px 9px,
+    radial-gradient(ellipse 50% 80% at 50% 100%, var(--heap) 62%, color-mix(in oklab, var(--heap), black 28%) 86%, #0000 88%);
+  -webkit-mask: radial-gradient(ellipse 60% 100% at 50% 100%, #000 70%, #0000 72%);
+  mask: radial-gradient(ellipse 60% 100% at 50% 100%, #000 70%, #0000 72%);
+}
+.tilt-left {
+  rotate: -3deg;
+}
+.tilt-right {
+  rotate: 2deg;
+}
+.chalk-arrow path,
+.sketch-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chalk-arrow path {
+  stroke: var(--color-paper);
+  stroke-width: 2.5;
+}
+/* Masking tape on framed artworks. */
+.tape::before,
+.tape::after {
+  content: '';
+  position: absolute;
+  width: 56px;
+  height: 18px;
+  background: rgb(242 183 5 / 0.55);
+  z-index: 1;
+}
+.tape::before {
+  top: -8px;
+  left: -14px;
+  rotate: -35deg;
+}
+.tape::after {
+  top: -8px;
+  right: -14px;
+  rotate: 35deg;
+}
+.kolam-weave .kolam-dots circle {
+  fill: var(--color-paper);
+  opacity: 0.85;
+}
+.kolam-weave path {
+  fill: none;
+  stroke: var(--color-turmeric);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.lined-paper {
+  background:
+    linear-gradient(90deg, #0000 2.5rem, rgb(166 38 29 / 0.35) 2.5rem 2.6rem, #0000 2.6rem),
+    repeating-linear-gradient(#0000 0 31px, rgb(11 94 115 / 0.16) 31px 32px),
+    var(--color-surface);
+}
+.torn {
+  clip-path: polygon(0 3%, 6% 0, 13% 2%, 21% 0, 30% 3%, 38% 1%, 47% 3%, 55% 0, 63% 2%, 72% 0, 80% 3%, 88% 1%, 95% 3%, 100% 0, 100% 97%, 94% 100%, 86% 97%, 78% 100%, 69% 98%, 60% 100%, 51% 97%, 43% 100%, 34% 98%, 25% 100%, 17% 97%, 9% 100%, 0 98%);
+}
+
+/* Code-drawn rangoli colours. */
+.grangoli .g-dot {
+  fill: var(--color-charcoal);
+  opacity: 0.4;
+}
+.grangoli .g-line {
+  fill: none;
+  stroke: var(--color-charcoal);
+  stroke-width: 1.1;
+}
+.grangoli .g-fill {
+  fill: var(--fill);
+  opacity: 0.92;
+}
+.grangoli--dark .g-dot {
+  fill: var(--color-paper);
+  opacity: 0.55;
+}
+.grangoli--dark .g-line {
+  stroke: var(--color-paper);
+  stroke-width: 1.4;
+}
+
+/* Hand-drawn wavy underline that inks in on hover/focus. Uses currentColor, so it works on any floor. */
+.ink-link {
+  position: relative;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, #0000);
+  text-underline-offset: 6px;
+}
+.ink-link::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -8px;
+  height: 7px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4C20 1 35 5 50 3S80 1 99 4' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 6' preserveAspectRatio='none'%3E%3Cpath d='M1 4C20 1 35 5 50 3S80 1 99 4' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 360ms var(--ease-draw);
+  pointer-events: none;
+}
+.ink-link:is(:hover, :focus-visible, :active)::after {
+  clip-path: inset(0);
+}
+
+/* Press and card feedback (transform/opacity only). */
+.press {
+  transition: transform 120ms var(--ease-pour);
+}
+.press:active {
+  transform: scale(0.97);
+}
+.card {
+  position: relative;
+  transition: transform 240ms var(--ease-pour);
+}
+.card::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px dotted var(--color-marigold);
+  border-radius: var(--radius-ui);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 420ms var(--ease-draw);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-4px);
+  }
+  .card:hover::after,
+  .card:focus-within::after {
+    clip-path: inset(0);
   }
 }
-@keyframes rangoli-fade {
-  to {
-    opacity: 1;
+.card:active {
+  transform: scale(0.98);
+}
+
+/* ─────────────── Motion: bindu → rekha → rang (dot → line → colour) ─────────────── */
+@keyframes rise {
+  from {
+    opacity: 0.01;
+    transform: translateY(16px);
   }
+}
+@keyframes rise-still {
+  from {
+    transform: translateY(14px);
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+@keyframes powder {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 0.9;
+  }
+}
+@keyframes drift {
+  from {
+    transform: translateY(-24px) rotate(-4deg);
+  }
+  to {
+    transform: translateY(24px) rotate(4deg);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes bloom {
+  50% {
+    transform: scale(1.12);
+  }
+}
+@keyframes wa-nudge {
+  0%, 60%, 100% {
+    transform: none;
+  }
+  15% {
+    transform: rotate(-6deg);
+  }
+  30% {
+    transform: rotate(5deg);
+  }
+  45% {
+    transform: rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero: the headline is visible from the first frame (only moves, never fades), the rest rises in. */
+  .hero-title {
+    animation: rise-still 600ms var(--ease-pour) 80ms both;
+  }
+  .hero-in {
+    animation: rise 520ms var(--ease-pour) both;
+    animation-delay: calc(200ms + var(--n, 0) * 100ms);
+  }
+  .grangoli--draw .g-dot,
+  .grangoli--draw .g-fill {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .grangoli--draw .g-dot {
+    animation: dot-in 320ms var(--ease-settle) both;
+    animation-delay: calc(var(--i) * 110ms);
+  }
+  .grangoli--draw .g-line {
+    stroke-dasharray: 1;
+    animation: draw 900ms var(--ease-draw) both;
+    animation-delay: calc(450ms + var(--j) * 140ms + var(--w) * 45ms);
+  }
+  .grangoli--draw .g-fill {
+    animation: powder 700ms var(--ease-pour) both;
+    animation-delay: calc(1200ms + var(--j) * 90ms + var(--w) * 30ms);
+  }
+  .brush--draw path {
+    stroke-dasharray: 1;
+    animation: draw 900ms var(--ease-draw) 700ms both;
+  }
+  .tab-bloom {
+    animation: bloom 320ms var(--ease-settle);
+  }
+  .wa-nudge {
+    animation: wa-nudge 1.2s var(--ease-settle) 8s 2;
+  }
+}
+
+/* Thin colour bar showing how far down the page you are (driven by scrolling, so not autoplay). */
+.scroll-ink {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 3px;
+  z-index: 50;
+  pointer-events: none;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, var(--color-kumkum), var(--color-marigold), var(--color-turmeric), var(--color-peacock));
+}
+@supports (animation-timeline: view()) {
+  .scroll-ink {
+    transform: none;
+    animation: grow-x linear both;
+    animation-timeline: scroll(root);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise var(--ease-pour) both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover;
+    }
+    .scroll-draw path,
+    .scroll-draw .sketch-line {
+      stroke-dasharray: 1;
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 55%;
+    }
+    .brush--view path {
+      stroke-dasharray: 1;
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 30% cover 40%;
+    }
+  }
+}
+
+/* Page transitions: React <ViewTransition> within a language, native cross-document for language switches. */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(site-header),
+::view-transition-group(tabbar) {
+  animation: none;
+}
+::view-transition-group(tab-ink) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-pour);
+}
+::view-transition-old(.page) {
+  animation: 160ms var(--ease-lift) both vt-out;
+}
+::view-transition-new(.page) {
+  animation: 280ms var(--ease-pour) 60ms both vt-in;
+}
+@keyframes vt-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Tap burst of powder. */
+.tap-burst {
+  position: fixed;
+  z-index: 60;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.tap-burst::before {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-marigold);
+  animation: tap-ring 500ms var(--ease-pour) forwards;
+}
+.tap-burst i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  animation: tap-dot 600ms var(--ease-pour) forwards;
+}
+@keyframes tap-ring {
+  from {
+    transform: scale(0.3);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+@keyframes tap-dot {
+  from {
+    transform: rotate(var(--a)) translateY(0);
+  }
+  to {
+    transform: rotate(var(--a)) translateY(-28px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+/* Calm mode: the footer switch (data-motion="off") and slow phones (data-fx="lite") get the final, still state. */
+:root:is([data-motion='off'], [data-fx='lite']) :is(*, *::before, *::after) {
+  animation: none !important;
+  transition-duration: 0.01ms !important;
+}
+:root:is([data-motion='off'], [data-fx='lite']) .scroll-ink,
+:root:is([data-motion='off'], [data-fx='lite']) .tap-burst {
+  display: none;
+}
+html:is([data-motion='off'], [data-fx='lite'])::view-transition-group(*),
+html:is([data-motion='off'], [data-fx='lite'])::view-transition-old(*),
+html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
+  animation: none !important;
 }
 
 /* Respect "reduce motion": everything jumps to its final state. */
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-delay: 0ms !important;

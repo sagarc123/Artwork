@@ -45,17 +45,30 @@
       "sub": "Hand-made rangoli, portraits and paintings from my studio in Maharashtra — made slowly, with love, for your walls and your festivals.",
       "ctaEvent": "Book Event Rangoli",
       "ctaShop": "Shop Art",
-      "ctaLearn": "or learn with me →"
+      "ctaLearn": "Learn with me"
     },
     "events": {
       "title": "Let me colour your celebration",
       "sub": "Weddings, festivals, housewarmings and office events across Maharashtra. Tell me the date — I reply within 4 hours.",
-      "cta": "Plan my event rangoli"
+      "cta": "Plan my event rangoli",
+      "kicker": "Event rangoli",
+      "steps": [
+        "Send me your date and place on WhatsApp",
+        "Together we choose the design and colours",
+        "On the day, I draw it at your doorstep"
+      ],
+      "scenes": [
+        "Wedding",
+        "Festival",
+        "Society"
+      ]
     },
     "portraits": {
       "title": "Your photo, drawn by hand",
       "sub": "Pencil, charcoal or colour portraits — a gift people keep for life. Ready in 10–14 days.",
-      "cta": "Start my portrait"
+      "cta": "Start my portrait",
+      "photo": "Your photo",
+      "drawing": "Drawn by hand"
     },
     "categories": {
       "title": "Explore my work",
@@ -69,7 +82,9 @@
       "title": "Fresh from the studio",
       "seeAll": "See all art →",
       "itemTitle": "Artwork name",
-      "priceSoon": "Price coming soon"
+      "priceSoon": "Price coming soon",
+      "soon": "New pieces arriving soon",
+      "ask": "Ask on WhatsApp"
     },
     "artist": {
       "title": "Hello, I'm Siddesh Mokashi",
@@ -80,14 +95,17 @@
       "title": "Learn rangoli from home",
       "name": "Rangoli for Beginners",
       "meta": "Beginner · Short video lessons · मराठी / हिंदी / English",
-      "cta": "See the course"
+      "cta": "See the course",
+      "kicker": "Online course",
+      "tag": "Beginner friendly"
     },
     "festivals": {
       "title": "Rangoli through the festivals",
       "diwali": "Diwali",
       "ganesh": "Ganesh Chaturthi",
       "gudi": "Gudi Padwa",
-      "weddings": "Weddings"
+      "weddings": "Weddings",
+      "next": "Next festival"
     },
     "help": {
       "title": "New to buying online?",
@@ -110,7 +128,9 @@
     "call": "Call",
     "whatsapp": "WhatsApp",
     "email": "Email",
-    "follow": "Follow my work"
+    "follow": "Follow my work",
+    "motionStop": "Stop animations",
+    "motionStart": "Start animations"
   },
   "whatsapp": {
     "label": "WhatsApp",

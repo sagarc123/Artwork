@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ButtonLink } from '@/components/ButtonLink'
-import { RangoliDraw } from '@/components/Rangoli'
+import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { localePath } from '@/i18n/config'
 import { getDictionary, getLocale, type Dictionary } from '@/i18n/dictionaries'
 import { whatsappLink } from '@/lib/site'
@@ -33,9 +33,9 @@ export default async function ComingSoonPage({ params }: PageProps<'/[lang]/[...
   const t = await getDictionary()
 
   return (
-    <section className="kolam">
+    <section className="bg-paper grain">
       <div className="wrap grid justify-items-center gap-6 py-20 text-center lg:py-28">
-        <RangoliDraw className="size-28" />
+        <GenerativeRangoli seed={key} animate className="size-36" />
         <h1 className="font-heading text-h1 lg:text-h1-lg">{t.pages[key]}</h1>
         <p className="font-heading text-h3">{t.comingSoon.title}</p>
         <p className="max-w-[48ch] text-muted">{t.comingSoon.body}</p>
