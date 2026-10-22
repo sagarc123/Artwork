@@ -35,8 +35,26 @@ export function PowderHeap({ color, className = '' }: { color: string; className
   return <span aria-hidden="true" className={`powder-heap ${className}`} style={{ '--heap': color } as CSSProperties} />
 }
 
+const DEVA_DIGITS = ['१', '२', '३', '४', '५', '६']
+
+/** Numbered steps with big Devanagari numerals (decorative; the list itself carries the order). */
+export function StepList({ steps, className = '' }: { steps: string[]; className?: string }) {
+  return (
+    <ol className={`grid gap-5 ${className}`}>
+      {steps.map((step, i) => (
+        <li key={step} className="reveal grid grid-cols-[3.5rem_1fr] items-center gap-3">
+          <span aria-hidden="true" className="font-display text-[3.25rem] leading-none text-kumkum">
+            {DEVA_DIGITS[i]}
+          </span>
+          <span className="text-h3-sm">{step}</span>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 /** Top-down doorstep: dark floor, toran on top, a rangoli in front, a stone step and diyas. */
-export function DoorstepScene({ seed, label, className = '' }: { seed: string; label: string; className?: string }) {
+export function DoorstepScene({ seed, label, className = '' }: { seed: string; label?: string; className?: string }) {
   return (
     <figure className={`grid gap-2 ${className}`}>
       <div aria-hidden="true" className="relative aspect-[4/5] overflow-hidden bg-charcoal grain-dark">
@@ -46,7 +64,7 @@ export function DoorstepScene({ seed, label, className = '' }: { seed: string; l
         <span className="diya absolute right-[8%] bottom-[16%]" />
         <div className="absolute inset-x-0 bottom-0 h-[12%] bg-[#d8cfc0]" />
       </div>
-      <figcaption className="font-heading text-h3">{label}</figcaption>
+      {label && <figcaption className="font-heading text-h3">{label}</figcaption>}
     </figure>
   )
 }

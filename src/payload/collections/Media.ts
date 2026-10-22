@@ -1,10 +1,12 @@
 import path from 'node:path'
+import { refreshOnChange } from '../hooks'
 import type { CollectionConfig } from 'payload'
 import { anyone, canEditContent, isOwner } from '../access'
 
 /** Photos for products, artworks, courses and pages. */
 export const Media: CollectionConfig = {
   slug: 'media',
+  hooks: refreshOnChange('media'),
   admin: { group: 'Content', description: 'Upload photos here. Always describe what the photo shows.' },
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   upload: {

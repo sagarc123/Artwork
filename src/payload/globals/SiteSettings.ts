@@ -1,9 +1,11 @@
 import type { GlobalConfig } from 'payload'
+import { refreshGlobalOnChange } from '../hooks'
 import { anyone, isOwner } from '../access'
 
 /** Business details shown in the footer, policies and invoices (E-Commerce Rules 2020). */
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
+  hooks: refreshGlobalOnChange('site-settings'),
   admin: { group: 'Settings' },
   access: { read: anyone, update: isOwner },
   fields: [

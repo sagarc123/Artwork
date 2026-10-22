@@ -1,8 +1,10 @@
 import type { CollectionConfig } from 'payload'
+import { refreshOnChange } from '../hooks'
 import { anyone, canEditContent, isOwner } from '../access'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
+  hooks: refreshOnChange('testimonials'),
   admin: { useAsTitle: 'name', group: 'Content', defaultColumns: ['name', 'context', 'rating', 'featured'] },
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [

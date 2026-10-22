@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
+import { refreshOnChange } from '../hooks'
 import { canEditContent, isOwner, publishedOrStaff } from '../access'
 import { rupeesField, seoFields, slugField, validateVariants } from '../fields'
 
 /** Things for sale: originals, prints and digital downloads. */
 export const Products: CollectionConfig = {
   slug: 'products',
+  hooks: refreshOnChange('products'),
   admin: {
     useAsTitle: 'title',
     group: 'Shop',

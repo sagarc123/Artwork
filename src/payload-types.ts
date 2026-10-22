@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    enquiries: Enquiry;
     products: Product;
     artworks: Artwork;
     courses: Course;
@@ -84,6 +85,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     artworks: ArtworksSelect<false> | ArtworksSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
@@ -136,6 +138,36 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * New requests from the website. Reply on WhatsApp, then update the status.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries".
+ */
+export interface Enquiry {
+  id: number;
+  type: 'event' | 'portrait' | 'workshop' | 'general';
+  status?: ('new' | 'replied' | 'quoted' | 'advance_paid' | 'done' | 'lost') | null;
+  name: string;
+  phone: string;
+  email?: string | null;
+  city?: string | null;
+  eventDate?: string | null;
+  venue?: string | null;
+  size?: string | null;
+  styles?: string[] | null;
+  medium?: string | null;
+  paperSize?: string | null;
+  faces?: number | null;
+  framing?: boolean | null;
+  occasion?: string | null;
+  message?: string | null;
+  wantsOffers?: boolean | null;
+  locale?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Add a painting, drawing, print or download for sale.
@@ -389,7 +421,7 @@ export interface Course {
   level: 'beginner' | 'intermediate' | 'advanced';
   languages: ('en' | 'mr' | 'hi')[];
   /**
-   * 0 = free course
+   * In ₹, including GST. 0 = free course.
    */
   price: number;
   /**
@@ -543,6 +575,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'enquiries';
+        value: number | Enquiry;
+      } | null)
+    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -623,6 +659,33 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries_select".
+ */
+export interface EnquiriesSelect<T extends boolean = true> {
+  type?: T;
+  status?: T;
+  name?: T;
+  phone?: T;
+  email?: T;
+  city?: T;
+  eventDate?: T;
+  venue?: T;
+  size?: T;
+  styles?: T;
+  medium?: T;
+  paperSize?: T;
+  faces?: T;
+  framing?: T;
+  occasion?: T;
+  message?: T;
+  wantsOffers?: T;
+  locale?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

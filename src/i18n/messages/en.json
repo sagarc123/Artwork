@@ -168,5 +168,195 @@
   },
   "photo": {
     "soon": "Photo coming soon"
+  },
+  "forms": {
+    "required": "(required)",
+    "optional": "(optional)",
+    "name": "Your name",
+    "phone": "WhatsApp number",
+    "phoneHint": "10-digit mobile number",
+    "email": "Email",
+    "city": "City / area",
+    "date": "Event date",
+    "neededBy": "Needed by",
+    "venue": "Where?",
+    "venues": {
+      "home": "Home",
+      "society": "Society",
+      "hall": "Hall",
+      "office": "Office",
+      "outdoor": "Outdoor"
+    },
+    "size": "Approximate size",
+    "sizes": {
+      "small": "Up to 4×4 ft",
+      "medium": "About 6×6 ft",
+      "large": "10×10 ft or more",
+      "unsure": "Not sure"
+    },
+    "styles": "Styles you like",
+    "styleOptions": {
+      "sanskar": "Sanskar Bharti",
+      "flower": "Flower",
+      "dot": "Dot / kolam",
+      "portrait": "Portrait rangoli",
+      "theme": "Theme / logo"
+    },
+    "message": "Anything else?",
+    "offers": "Send me festival offers on WhatsApp",
+    "medium": "Medium",
+    "mediums": {
+      "pencil": "Pencil",
+      "charcoal": "Charcoal",
+      "colour": "Colour"
+    },
+    "paperSize": "Size",
+    "faces": "How many people in the portrait?",
+    "occasion": "Occasion (birthday, anniversary…)",
+    "framing": "I want it framed",
+    "photoNote": "You will send the photos on WhatsApp after this step — no upload needed.",
+    "submit": "Send my enquiry",
+    "sending": "Sending…",
+    "errors": {
+      "summary": "Please check these:",
+      "type": "Please choose what you need.",
+      "name": "Please write your name.",
+      "phone": "Please enter your 10-digit mobile number.",
+      "email": "This email looks incomplete.",
+      "date": "Please choose a date from today onwards.",
+      "rate": "You have sent a few enquiries already. Please message me on WhatsApp instead.",
+      "failed": "Something went wrong. Please message me on WhatsApp — I will reply soon."
+    },
+    "success": {
+      "title": "Thank you! I have your details.",
+      "body": "Tap below to send them on WhatsApp so we can talk. I reply within 4 hours.",
+      "whatsapp": "Continue on WhatsApp"
+    },
+    "waIntro": "Namaste! I just sent an enquiry on your website."
+  },
+  "eventsPage": {
+    "metaTitle": "Book event rangoli",
+    "metaDesc": "Rangoli for weddings, festivals, housewarmings and office events across Maharashtra by Siddesh Mokashi. Tell me the date — I reply within 4 hours.",
+    "typesTitle": "For every celebration",
+    "types": [
+      {
+        "name": "Wedding & sangeet",
+        "desc": "Mandap, entrance and stage rangoli in your colours."
+      },
+      {
+        "name": "Festival & society",
+        "desc": "Diwali, Ganesh Chaturthi, Gudi Padwa — doorsteps to society gates."
+      },
+      {
+        "name": "Housewarming & naming",
+        "desc": "A welcoming design for your new beginning."
+      },
+      {
+        "name": "Office & corporate",
+        "desc": "Logo and theme rangoli for receptions and launches."
+      },
+      {
+        "name": "Workshops",
+        "desc": "Rangoli and drawing sessions for schools and teams."
+      }
+    ],
+    "stepsTitle": "How it works",
+    "formTitle": "Tell me about your event",
+    "formSub": "Takes one minute. Then we continue on WhatsApp."
+  },
+  "portraitsPage": {
+    "metaTitle": "Custom hand-drawn portraits",
+    "metaDesc": "Pencil, charcoal and colour portraits drawn by hand from your photo by Siddesh Mokashi. A gift people keep for life.",
+    "stepsTitle": "How it works",
+    "steps": [
+      "Send your details here",
+      "Share the photos on WhatsApp",
+      "Pay an advance by secure link",
+      "Approve a preview photo, then I ship it"
+    ],
+    "tipsTitle": "Photo tips",
+    "tipsGood": [
+      "Natural daylight",
+      "Eyes clearly visible",
+      "A phone camera is perfect"
+    ],
+    "tipsBad": [
+      "Dark or blurry photos",
+      "Faces turned away",
+      "Heavy filters"
+    ],
+    "good": "Good",
+    "bad": "Avoid",
+    "formTitle": "Start your portrait",
+    "formSub": "Tell me what you have in mind — I quote within 4 hours."
+  },
+  "gallery": {
+    "metaTitle": "Artwork gallery",
+    "metaDesc": "Rangoli, drawings, paintings and commissions by Siddesh Mokashi — with the story behind each piece.",
+    "title": "Everything I have made — sold, kept and still waiting",
+    "intro": "Some of these live in homes across India now. Some I could not part with. Tap any piece to hear its story.",
+    "all": "All",
+    "empty": "The gallery is being filled with photos. Please check back soon.",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "forSale": "For sale",
+    "private": "Private collection",
+    "buy": "See it in the shop",
+    "enquire": "Commission something like this",
+    "story": "The story"
+  },
+  "festivalsPage": {
+    "metaTitle": "Rangoli through the festivals",
+    "metaDesc": "Diwali, Ganesh Chaturthi, Gudi Padwa and wedding rangoli designs by Siddesh Mokashi.",
+    "title": "Rangoli through the festivals",
+    "intro": "Every festival has its own colours and shapes. Here is what I have drawn for homes and societies.",
+    "empty": "Festival pages are being prepared.",
+    "book": "Book rangoli for this festival",
+    "nextDate": "Next date",
+    "gallery": "Designs from this festival",
+    "emptyGallery": "Photos from this festival are coming soon.",
+    "shop": "For this festival"
+  },
+  "shop": {
+    "metaTitle": "Shop original art and prints",
+    "metaDesc": "Buy original rangoli designs, drawings, paintings and prints by Siddesh Mokashi. Prices in ₹, delivered across India.",
+    "title": "Take a piece of my studio home",
+    "intro": "Originals are one of a kind. Prints and downloads are made from my favourite pieces.",
+    "all": "All",
+    "type": "Type",
+    "types": {
+      "original": "Original",
+      "print": "Print",
+      "digital": "Digital download"
+    },
+    "sort": "Sort",
+    "sorts": {
+      "newest": "Newest",
+      "low": "Price: low to high",
+      "high": "Price: high to low"
+    },
+    "count": "pieces",
+    "empty": "New pieces are on their way. Message me on WhatsApp to ask what is available.",
+    "emptyFilter": "Nothing matches. Try another type.",
+    "from": "from",
+    "sold": "Sold",
+    "size": "Size",
+    "frame": "Frame",
+    "noFrame": "No frame",
+    "order": "Order on WhatsApp",
+    "orderNote": "Online payment is coming soon. For now, I confirm the price, delivery and payment with you on WhatsApp.",
+    "details": "Details",
+    "dimensions": "Size",
+    "year": "Year",
+    "medium": "Medium",
+    "story": "The story behind it",
+    "shipping": "Shipping",
+    "shippingBody": "Packed flat and insured. Delivered across India in 5–8 days; framed pieces take 3 days more.",
+    "returns": "Returns",
+    "returnsBody": "Prints can be returned within 7 days. Originals within 3 days if damaged in transit.",
+    "related": "You may also like",
+    "back": "Back to the shop",
+    "waOrder": "Namaste! I would like to order"
   }
 }

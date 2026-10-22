@@ -6,6 +6,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { Artworks } from './payload/collections/Artworks'
 import { Courses, Lessons } from './payload/collections/Courses'
+import { Enquiries } from './payload/collections/Enquiries'
 import { Media } from './payload/collections/Media'
 import { Products } from './payload/collections/Products'
 import { Categories, Festivals, Mediums } from './payload/collections/Taxonomies'
@@ -29,7 +30,7 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' — Siddesh Mokashi admin' },
   },
-  collections: [Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, Users],
+  collections: [Enquiries, Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, Users],
   globals: [SiteSettings],
   localization: {
     locales: [

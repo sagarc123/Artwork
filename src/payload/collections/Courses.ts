@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
+import { refreshOnChange } from '../hooks'
 import { anyone, canEditContent, isOwner, publishedOrStaff } from '../access'
 import { rupeesField, seoFields, slugField } from '../fields'
 
 export const Courses: CollectionConfig = {
   slug: 'courses',
+  hooks: refreshOnChange('courses'),
   admin: { useAsTitle: 'title', group: 'Courses', defaultColumns: ['title', 'level', 'price', '_status'] },
   versions: { drafts: true },
   access: { read: publishedOrStaff, create: canEditContent, update: canEditContent, delete: isOwner },
@@ -81,6 +83,7 @@ export const Courses: CollectionConfig = {
 
 export const Lessons: CollectionConfig = {
   slug: 'lessons',
+  hooks: refreshOnChange('lessons'),
   admin: { useAsTitle: 'title', group: 'Courses', defaultColumns: ['title', 'course', 'section', 'order', 'isFreePreview'] },
   // Titles are public (course curriculum); the video itself is protected by signed links (milestone 12).
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },

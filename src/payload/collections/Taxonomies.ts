@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { refreshOnChange } from '../hooks'
 import { anyone, canEditContent, isOwner } from '../access'
 import { slugField } from '../fields'
 
@@ -6,6 +7,7 @@ const access = { read: anyone, create: canEditContent, update: canEditContent, d
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  hooks: refreshOnChange('categories'),
   admin: { useAsTitle: 'name', group: 'Settings', defaultColumns: ['name', 'scope', 'order'] },
   access,
   fields: [
@@ -27,6 +29,7 @@ export const Categories: CollectionConfig = {
 
 export const Mediums: CollectionConfig = {
   slug: 'mediums',
+  hooks: refreshOnChange('mediums'),
   admin: { useAsTitle: 'name', group: 'Settings', description: 'Pencil, charcoal, acrylic, watercolour, rangoli colours…' },
   access,
   fields: [{ name: 'name', type: 'text', required: true, localized: true }, slugField('name')],
@@ -34,6 +37,7 @@ export const Mediums: CollectionConfig = {
 
 export const Festivals: CollectionConfig = {
   slug: 'festivals',
+  hooks: refreshOnChange('festivals'),
   admin: { useAsTitle: 'name', group: 'Content', defaultColumns: ['name', 'nextDate', 'order'] },
   access,
   fields: [

@@ -1,10 +1,12 @@
 import type { CollectionConfig } from 'payload'
+import { refreshOnChange } from '../hooks'
 import { canEditContent, isOwner, publishedOrStaff } from '../access'
 import { seoFields, slugField } from '../fields'
 
 /** Portfolio pieces, including ones that are not for sale. */
 export const Artworks: CollectionConfig = {
   slug: 'artworks',
+  hooks: refreshOnChange('artworks'),
   admin: { useAsTitle: 'title', group: 'Content', defaultColumns: ['title', 'category', 'forSale', '_status'] },
   versions: { drafts: true },
   access: { read: publishedOrStaff, create: canEditContent, update: canEditContent, delete: isOwner },

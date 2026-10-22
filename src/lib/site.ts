@@ -12,6 +12,10 @@ export const site = {
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
 }
 
+/** ₹4,500 style prices (Indian grouping). Stored as whole rupees. */
+export const formatPrice = (rupees: number) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(rupees)
+
 /** wa.me link with a prefilled message. Without a number, WhatsApp asks which chat to use. */
 export const whatsappLink = (message: string) =>
   `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`
