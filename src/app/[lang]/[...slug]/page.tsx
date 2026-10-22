@@ -15,6 +15,8 @@ const PAGES = (Object.keys(en.pages) as PageKey[]).filter((k) => !BUILT.has(k))
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
+// Allowed to wait on navigation: unknown slugs must render fully so notFound() sends a real 404.
+export const instant = false
 
 export function generateStaticParams() {
   return PAGES.map((key) => ({ slug: key.split('/') }))

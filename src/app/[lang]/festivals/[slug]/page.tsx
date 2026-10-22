@@ -11,6 +11,8 @@ import { festivalLook, getArtworks, getFestivals, getProducts, getSlugs, toGalle
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
+// Allowed to wait on navigation: unknown slugs must render fully so notFound() sends a real 404.
+export const instant = false
 
 export async function generateStaticParams() {
   return (await getSlugs('festivals')).map((slug) => ({ slug }))
