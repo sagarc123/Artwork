@@ -7,12 +7,15 @@ import sharp from 'sharp'
 import { Artworks } from './payload/collections/Artworks'
 import { Courses, Lessons } from './payload/collections/Courses'
 import { Enquiries } from './payload/collections/Enquiries'
+import { Invoices } from './payload/collections/Invoices'
 import { Orders } from './payload/collections/Orders'
 import { Media } from './payload/collections/Media'
 import { Products } from './payload/collections/Products'
 import { Categories, Festivals, Mediums } from './payload/collections/Taxonomies'
+import { TaxClasses } from './payload/collections/TaxClasses'
 import { Testimonials } from './payload/collections/Testimonials'
 import { Users } from './payload/collections/Users'
+import { CommerceSettings } from './payload/globals/CommerceSettings'
 import { SiteSettings } from './payload/globals/SiteSettings'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -31,8 +34,8 @@ export default buildConfig({
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' — Siddesh Mokashi admin' },
   },
-  collections: [Orders, Enquiries, Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, Users],
-  globals: [SiteSettings],
+  collections: [Orders, Invoices, Enquiries, Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, TaxClasses, Users],
+  globals: [SiteSettings, CommerceSettings],
   localization: {
     locales: [
       { code: 'en', label: 'English' },

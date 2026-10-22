@@ -395,7 +395,6 @@
     "pincode": "Pincode",
     "pincodeHint": "6 digits",
     "note": "Note for delivery (optional)",
-    "pay": "Pay safely",
     "paying": "Opening payment…",
     "safe": "Safe payment by Razorpay — UPI, cards, net banking or wallets. You will get a confirmation as soon as it is done.",
     "summary": "Your order",
@@ -416,8 +415,28 @@
       "verify": "We could not confirm the payment. If money was taken, message me on WhatsApp with your order number.",
       "rate": "Too many tries in a short time. Please wait a few minutes, or order on WhatsApp.",
       "quote": "Could not check prices. Please check your connection.",
-      "retry": "Try again"
-    }
+      "retry": "Try again",
+      "gstin": "This GSTIN does not look right. Please check the 15 characters.",
+      "businessName": "Please write the business name."
+    },
+    "payOnline": "Pay online",
+    "payOnlineOff": "Online payment is being switched on. For now, please choose cash on delivery.",
+    "cod": "Cash on delivery",
+    "codHint": "+{fee} COD fee · for orders up to {max} · prints and originals only. I will confirm your order on WhatsApp before packing.",
+    "codFee": "Cash on delivery fee",
+    "payButton": "Pay {amount} safely",
+    "codButton": "Place order · pay {amount} on delivery",
+    "placing": "Placing your order…",
+    "codBlocked": {
+      "off": "Cash on delivery is not available right now.",
+      "type": "Cash on delivery is only for prints and originals, not downloads.",
+      "limit": "Cash on delivery is available for orders up to {max}.",
+      "pincode": "Cash on delivery is not available for pincode {pincode}.",
+      "open": "You already have a cash-on-delivery order on its way. Please pay online, or wait until it is delivered."
+    },
+    "gstToggle": "Need a GST invoice?",
+    "gstin": "GSTIN",
+    "businessName": "Business name (as registered for GST)"
   },
   "order": {
     "metaTitle": "Your order",
@@ -437,7 +456,17 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "needs_refund": "Being refunded",
-      "refunded": "Refunded"
-    }
+      "refunded": "Refunded",
+      "cod_pending_confirmation": "Waiting for your confirmation",
+      "cod_confirmed": "Confirmed — being packed"
+    },
+    "codPlaced": "Order placed! I will confirm it with you on WhatsApp.",
+    "codPlacedBody": "Please send the confirmation message below. Once you confirm, I pack your order — you pay when it arrives.",
+    "codConfirm": "Confirm on WhatsApp",
+    "codConfirmMessage": "Hello! Please confirm my cash-on-delivery order {number} for {amount}.",
+    "payment": "Payment",
+    "paidOnline": "Paid online",
+    "codDue": "Cash on delivery · {amount} due on delivery",
+    "invoice": "Download invoice (PDF)"
   }
 }

@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { Product } from '@/payload-types'
-import { priceCart } from './cart.ts'
+import { codBlock, parsePincodes, priceCart } from './cart.ts'
 
 const product = (slug: string, type: string, variants: object[], framing: object[] = []) =>
   ({ id: slug.length, slug, title: slug, type, variants, framing, images: [] }) as unknown as Product
@@ -39,4 +39,17 @@ test('held or missing items are flagged or dropped', () => {
   assert.equal(q.lines.length, 1)
   assert.equal(q.lines[0].available, false)
   assert.equal(q.ok, false)
+})
+
+test('COD: prints and originals only, fee counts towards the limit, blocked pincodes, one open order', () => {
+  const rules = { enabled: true, maxTotal: 5000, fee: 49, blockedPincodes: parsePincodes('700001, 110001\n400001') }
+  const print = [{ type: 'print' as const }]
+  assert.equal(codBlock(rules, print, 1899), null)
+  assert.equal(codBlock({ ...rules, enabled: false }, print, 1899), 'off')
+  assert.equal(codBlock(rules, [...print, { type: 'digital' }], 1899), 'type')
+  assert.equal(codBlock(rules, print, 4951), null) // 4951 + 49 = 5000
+  assert.equal(codBlock(rules, print, 4952), 'limit')
+  assert.equal(codBlock(rules, print, 1899, '400001'), 'pincode')
+  assert.equal(codBlock(rules, print, 1899, '411001'), null)
+  assert.equal(codBlock(rules, print, 1899, '411001', true), 'open')
 })

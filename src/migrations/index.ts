@@ -1,6 +1,7 @@
 import * as migration_20261022_072803_initial from './20261022_072803_initial';
 import * as migration_20261022_090425_enquiries from './20261022_090425_enquiries';
 import * as migration_20261022_093043_orders from './20261022_093043_orders';
+import * as migration_20261022_113331_cod_invoices from './20261022_113331_cod_invoices';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20261022_093043_orders.up,
     down: migration_20261022_093043_orders.down,
-    name: '20261022_093043_orders'
+    name: '20261022_093043_orders',
+  },
+  {
+    up: migration_20261022_113331_cod_invoices.up,
+    down: migration_20261022_113331_cod_invoices.down,
+    name: '20261022_113331_cod_invoices'
   },
 ];

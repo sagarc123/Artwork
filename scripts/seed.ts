@@ -92,6 +92,13 @@ const products = [
   { slug: 'ganesh-sketch', title: 'Ganesh sketch print', type: 'print', cat: shopCats.drawings, medium: mediums.charcoal, festival: fest.ganesh, variants: [{ label: 'A4 print', price: 800, stock: 15 }] },
 ] as const
 
+// Sample GST classes: the CA must confirm codes and rates before going live.
+await payload.delete({ collection: 'tax-classes', where: { name: { like: '(sample' } } })
+const taxClass = async (name: string, hsn: string, rate: number) =>
+  (await payload.create({ collection: 'tax-classes', data: { name: `${name} (sample — confirm with CA)`, hsn, rate } })).id
+const taxClasses = { original: await taxClass('Original artwork', '9701', 12), print: await taxClass('Print', '4911', 12) }
+await payload.updateGlobal({ slug: 'commerce-settings', data: { tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print } } })
+
 const productIds: Record<string, number> = {}
 for (const p of products) {
   const doc = await payload.create({
@@ -110,6 +117,7 @@ for (const p of products) {
       heightCm: 40,
       year: 2026,
       variants: p.variants.map((v) => ({ ...v })),
+      taxClass: p.type === 'digital' ? undefined : taxClasses[p.type],
       framing: 'framing' in p ? [{ label: 'Black wood frame', extraPrice: 1800 }, { label: 'Natural teak frame', extraPrice: 2400 }] : [],
       featured: true,
       _status: 'published',

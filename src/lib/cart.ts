@@ -26,7 +26,8 @@ export type QuoteLine = {
   image: { url: string; alt: string } | null
 }
 
-export type Quote = { lines: QuoteLine[]; subtotal: number; shipping: number; total: number; ok: boolean }
+// cod and online are filled in by the checkout server (they depend on settings and payment keys).
+export type Quote = { lines: QuoteLine[]; subtotal: number; shipping: number; total: number; ok: boolean; cod?: CodOption; online?: boolean }
 
 export function priceCart(lines: CartLine[], products: Product[]): Quote {
   const bySlug = new Map(products.map((p) => [p.slug, p]))
@@ -67,3 +68,21 @@ export function priceCart(lines: CartLine[], products: Product[]): Quote {
   const shipping = physical && subtotal < FREE_SHIPPING_FROM ? SHIPPING_FEE : 0
   return { lines: out, subtotal, shipping, total: subtotal + shipping, ok: out.length > 0 && out.every((l) => l.available) }
 }
+
+/** Cash-on-delivery settings (owner-editable, in rupees). */
+export type CodRules = { enabled: boolean; maxTotal: number; fee: number; blockedPincodes: string[] }
+/** Why COD is not offered, in the order the buyer should hear it. */
+export type CodBlock = 'off' | 'type' | 'limit' | 'pincode' | 'open'
+export type CodOption = { fee: number; maxTotal: number; block: CodBlock | null }
+
+/** COD only for prints and originals, up to the limit (fee included), outside blocked pincodes, one open COD order per phone. */
+export function codBlock(rules: CodRules, lines: Pick<QuoteLine, 'type'>[], total: number, pincode = '', hasOpenCod = false): CodBlock | null {
+  if (!rules.enabled) return 'off'
+  if (!lines.length || lines.some((l) => l.type !== 'print' && l.type !== 'original')) return 'type'
+  if (total + rules.fee > rules.maxTotal) return 'limit'
+  if (pincode && rules.blockedPincodes.includes(pincode)) return 'pincode'
+  return hasOpenCod ? 'open' : null
+}
+
+/** Blocked pincodes as typed by the owner: any mix of commas, spaces and new lines. */
+export const parsePincodes = (text: string | null | undefined) => (text ?? '').match(/\b[1-9]\d{5}\b/g) ?? []

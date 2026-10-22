@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     orders: Order;
+    invoices: Invoice;
     enquiries: Enquiry;
     products: Product;
     artworks: Artwork;
@@ -78,6 +79,7 @@ export interface Config {
     media: Media;
     categories: Category;
     mediums: Medium;
+    'tax-classes': TaxClass;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,6 +89,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     orders: OrdersSelect<false> | OrdersSelect<true>;
+    invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     artworks: ArtworksSelect<false> | ArtworksSelect<true>;
@@ -97,6 +100,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     mediums: MediumsSelect<false> | MediumsSelect<true>;
+    'tax-classes': TaxClassesSelect<false> | TaxClassesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -109,9 +113,11 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'mr' | 'hi') | ('en' | 'mr' | 'hi')[];
   globals: {
     'site-settings': SiteSetting;
+    'commerce-settings': CommerceSetting;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'commerce-settings': CommerceSettingsSelect<false> | CommerceSettingsSelect<true>;
   };
   locale: 'en' | 'mr' | 'hi';
   widgets: {
@@ -142,7 +148,7 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Orders from the website. Change the status as you pack and ship.
+ * Orders from the website. Change the status as you pack and ship. Cash-on-delivery orders: confirm on WhatsApp first.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
@@ -150,7 +156,17 @@ export interface UserAuthOperations {
 export interface Order {
   id: number;
   orderNumber?: string | null;
-  status: 'pending_payment' | 'paid' | 'packed' | 'shipped' | 'delivered' | 'cancelled' | 'needs_refund' | 'refunded';
+  status:
+    | 'pending_payment'
+    | 'cod_pending_confirmation'
+    | 'cod_confirmed'
+    | 'paid'
+    | 'packed'
+    | 'shipped'
+    | 'delivered'
+    | 'cancelled'
+    | 'needs_refund'
+    | 'refunded';
   publicId?: string | null;
   items?:
     | {
@@ -168,11 +184,15 @@ export interface Order {
     | null;
   subtotal?: number | null;
   shipping?: number | null;
+  codFee?: number | null;
   total?: number | null;
+  paymentMode?: ('prepaid' | 'cod') | null;
   customer?: {
     name?: string | null;
     phone?: string | null;
     email?: string | null;
+    businessName?: string | null;
+    gstin?: string | null;
   };
   address?: {
     line1?: string | null;
@@ -271,6 +291,10 @@ export interface Product {
         id?: string | null;
       }[]
     | null;
+  /**
+   * GST rate and HSN code. Empty: the default in Commerce settings.
+   */
+  taxClass?: (number | null) | TaxClass;
   /**
    * Show on the home page
    */
@@ -388,6 +412,72 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * GST rates per kind of product. Ask your CA before changing these.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tax-classes".
+ */
+export interface TaxClass {
+  id: number;
+  name: string;
+  hsn: string;
+  rate: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Issued automatically when an order is paid online, or when a cash-on-delivery order is delivered.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: number;
+  number: string;
+  documentType: 'tax_invoice' | 'bill_of_supply';
+  issuedAt: string;
+  financialYear: string;
+  order?: (number | null) | Order;
+  orderPublicId?: string | null;
+  seller?: {
+    legalName?: string | null;
+    gstin?: string | null;
+    state?: string | null;
+    address?: string | null;
+  };
+  buyer?: {
+    name?: string | null;
+    phone?: string | null;
+    businessName?: string | null;
+    gstin?: string | null;
+    address?: string | null;
+    state?: string | null;
+  };
+  lines?:
+    | {
+        description?: string | null;
+        hsn?: string | null;
+        qty?: number | null;
+        rate?: number | null;
+        taxable?: number | null;
+        cgst?: number | null;
+        sgst?: number | null;
+        igst?: number | null;
+        total?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  totals?: {
+    taxable?: number | null;
+    cgst?: number | null;
+    sgst?: number | null;
+    igst?: number | null;
+    total?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * New requests from the website. Reply on WhatsApp, then update the status.
@@ -630,6 +720,10 @@ export interface PayloadLockedDocument {
         value: number | Order;
       } | null)
     | ({
+        relationTo: 'invoices';
+        value: number | Invoice;
+      } | null)
+    | ({
         relationTo: 'enquiries';
         value: number | Enquiry;
       } | null)
@@ -668,6 +762,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'mediums';
         value: number | Medium;
+      } | null)
+    | ({
+        relationTo: 'tax-classes';
+        value: number | TaxClass;
       } | null)
     | ({
         relationTo: 'users';
@@ -739,13 +837,17 @@ export interface OrdersSelect<T extends boolean = true> {
       };
   subtotal?: T;
   shipping?: T;
+  codFee?: T;
   total?: T;
+  paymentMode?: T;
   customer?:
     | T
     | {
         name?: T;
         phone?: T;
         email?: T;
+        businessName?: T;
+        gstin?: T;
       };
   address?:
     | T
@@ -762,6 +864,61 @@ export interface OrdersSelect<T extends boolean = true> {
   paidAt?: T;
   reservedUntil?: T;
   locale?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices_select".
+ */
+export interface InvoicesSelect<T extends boolean = true> {
+  number?: T;
+  documentType?: T;
+  issuedAt?: T;
+  financialYear?: T;
+  order?: T;
+  orderPublicId?: T;
+  seller?:
+    | T
+    | {
+        legalName?: T;
+        gstin?: T;
+        state?: T;
+        address?: T;
+      };
+  buyer?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        businessName?: T;
+        gstin?: T;
+        address?: T;
+        state?: T;
+      };
+  lines?:
+    | T
+    | {
+        description?: T;
+        hsn?: T;
+        qty?: T;
+        rate?: T;
+        taxable?: T;
+        cgst?: T;
+        sgst?: T;
+        igst?: T;
+        total?: T;
+        id?: T;
+      };
+  totals?:
+    | T
+    | {
+        taxable?: T;
+        cgst?: T;
+        sgst?: T;
+        igst?: T;
+        total?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -828,6 +985,7 @@ export interface ProductsSelect<T extends boolean = true> {
         extraPrice?: T;
         id?: T;
       };
+  taxClass?: T;
   featured?: T;
   seo?:
     | T
@@ -1035,6 +1193,17 @@ export interface MediumsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tax-classes_select".
+ */
+export interface TaxClassesSelect<T extends boolean = true> {
+  name?: T;
+  hsn?: T;
+  rate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1141,6 +1310,34 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "commerce-settings".
+ */
+export interface CommerceSetting {
+  id: number;
+  cod: {
+    enabled?: boolean | null;
+    maxTotal: number;
+    fee: number;
+    /**
+     * Pincodes where COD is not offered, separated by commas or new lines.
+     */
+    blockedPincodes?: string | null;
+  };
+  tax: {
+    /**
+     * Buyers in this state pay CGST + SGST; everyone else pays IGST.
+     */
+    sellerState: string;
+    /**
+     * Used for products without a tax class of their own.
+     */
+    defaultTaxClass?: (number | null) | TaxClass;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -1174,6 +1371,29 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         instagram?: T;
         youtube?: T;
         facebook?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "commerce-settings_select".
+ */
+export interface CommerceSettingsSelect<T extends boolean = true> {
+  cod?:
+    | T
+    | {
+        enabled?: T;
+        maxTotal?: T;
+        fee?: T;
+        blockedPincodes?: T;
+      };
+  tax?:
+    | T
+    | {
+        sellerState?: T;
+        defaultTaxClass?: T;
       };
   updatedAt?: T;
   createdAt?: T;

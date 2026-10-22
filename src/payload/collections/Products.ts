@@ -86,6 +86,12 @@ export const Products: CollectionConfig = {
       admin: { description: 'Optional. Leave empty if the piece is sold unframed only.' },
       fields: [{ name: 'label', type: 'text', required: true, localized: true }, rupeesField('extraPrice')],
     },
+    {
+      name: 'taxClass',
+      type: 'relationship',
+      relationTo: 'tax-classes',
+      admin: { position: 'sidebar', description: 'GST rate and HSN code. Empty: the default in Commerce settings.' },
+    },
     { name: 'featured', type: 'checkbox', admin: { position: 'sidebar', description: 'Show on the home page' } },
     seoFields,
   ],
