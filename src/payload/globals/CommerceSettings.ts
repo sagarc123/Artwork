@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, isOwner, staffOnlyField } from '../access'
+import { refreshGlobalOnChange } from '../hooks'
 
 /** Cash-on-delivery rules and the tax defaults the checkout and invoices use. */
 export const CommerceSettings: GlobalConfig = {
   slug: 'commerce-settings',
   label: 'Commerce settings',
+  hooks: refreshGlobalOnChange('commerce-settings'),
   admin: { group: 'Settings' },
   access: { read: anyone, update: isOwner },
   fields: [

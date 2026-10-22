@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/api', '/cms-api', ...['', '/mr', '/hi'].flatMap((l) => ['/account', '/cart', '/checkout', '/order'].map((p) => l + p))],
+      disallow: ['/admin', '/api', '/cms-api', ...['', '/mr', '/hi'].flatMap((l) => ['/account', '/cart', '/checkout', '/order', '/search', '/wishlist'].map((p) => l + p))],
     },
     host: new URL(site.url).host,
     // ponytail: sitemap.xml arrives with real content pages (milestone 15).

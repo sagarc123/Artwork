@@ -7,8 +7,10 @@ import type { Media } from '@/payload-types'
 import { formatPrice } from '@/lib/site'
 import { MediaImage } from './MediaImage'
 import type { Floor } from './PhotoPlaceholder'
+import { SaveButton } from './SaveButton'
 
 export type ShopItem = {
+  slug: string
   href: string
   title: string
   type: 'original' | 'print' | 'digital'
@@ -77,7 +79,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
       ) : (
         <ul className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
           {shown.map((item) => (
-            <li key={item.href}>
+            <li key={item.href} className="relative">
               <Link href={item.href} className="card grid gap-3">
                 <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
                   <MediaImage
@@ -99,6 +101,8 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                   {item.compareAt && item.compareAt > item.price && <s className="ml-2 font-normal text-muted">{formatPrice(item.compareAt)}</s>}
                 </span>
               </Link>
+              {/* Outside the link (a button can't sit inside one); over the photo's top-right corner. */}
+              <SaveButton slug={item.slug} title={item.title} labels={t} className="absolute top-3 right-3 lg:top-4 lg:right-4" />
             </li>
           ))}
         </ul>

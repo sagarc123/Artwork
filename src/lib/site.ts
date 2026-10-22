@@ -17,5 +17,5 @@ export const formatPrice = (rupees: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(rupees)
 
 /** wa.me link with a prefilled message. Without a number, WhatsApp asks which chat to use. */
-export const whatsappLink = (message: string) =>
-  `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`
+export const whatsappLink = (message: string, number = site.whatsappNumber) =>
+  `https://wa.me/${number.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`

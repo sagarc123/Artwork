@@ -3,7 +3,7 @@
 import { MessageCircle, Minus, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { CartLine, CodBlock, Quote, QuoteLine } from '@/lib/cart'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
@@ -11,12 +11,10 @@ import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
 import { cartActions, useCart } from './cart-store'
 import { MediaImage } from './MediaImage'
+import { useHydrated } from './local-store'
 
 type T = Pick<Dictionary, 'cart' | 'checkout' | 'forms' | 'shop'>
 
-const noop = () => () => {}
-/** False in the server HTML and during hydration, so the browser-only cart never flashes "empty". */
-const useHydrated = () => useSyncExternalStore(noop, () => true, () => false)
 
 /** Quotes the cart; with a pincode, cash on delivery is checked for it too. */
 function useQuote(locale: string, pincode = '') {

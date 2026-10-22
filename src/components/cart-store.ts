@@ -1,57 +1,16 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
 import type { CartLine } from '@/lib/cart'
+import { createListStore } from './local-store'
 
 // The cart lives in this browser (localStorage). Prices are always rechecked on the server.
-const KEY = 'cart'
-const EMPTY: CartLine[] = []
-let cachedRaw: string | null = null
-let cachedLines: CartLine[] = EMPTY
-// Storage blocked (private mode, strict settings): the cart lives in memory for this page instead.
-let memory: string | null = null
-
 const isLine = (l: unknown): l is CartLine => {
   const o = l as Record<string, unknown> | null
   return !!o && typeof o === 'object' && typeof o.slug === 'string' && typeof o.variantId === 'string' && typeof o.qty === 'number' && Number.isFinite(o.qty)
 }
 
-function read(): CartLine[] {
-  let raw: string | null
-  try {
-    raw = memory ?? localStorage.getItem(KEY)
-  } catch {
-    raw = memory
-  }
-  if (raw === cachedRaw) return cachedLines
-  cachedRaw = raw
-  try {
-    const parsed: unknown = JSON.parse(raw ?? '[]')
-    cachedLines = Array.isArray(parsed) ? parsed.filter(isLine) : EMPTY
-  } catch {
-    cachedLines = EMPTY
-  }
-  return cachedLines
-}
-
-function write(lines: CartLine[]) {
-  const raw = JSON.stringify(lines)
-  try {
-    localStorage.setItem(KEY, raw)
-  } catch {
-    memory = raw
-  }
-  window.dispatchEvent(new Event(KEY))
-}
-
-const subscribe = (onChange: () => void) => {
-  window.addEventListener(KEY, onChange)
-  window.addEventListener('storage', onChange)
-  return () => {
-    window.removeEventListener(KEY, onChange)
-    window.removeEventListener('storage', onChange)
-  }
-}
+const store = createListStore('cart', isLine)
+const { read, write } = store
 
 const same = (a: CartLine, b: CartLine) => a.slug === b.slug && a.variantId === b.variantId && (a.frameId ?? '') === (b.frameId ?? '')
 
@@ -68,10 +27,23 @@ export const cartActions = {
     write(read().filter((l) => !same(l, line)))
   },
   clear() {
-    write(EMPTY)
+    write(store.EMPTY)
   },
 }
 
-export function useCart() {
-  return useSyncExternalStore(subscribe, read, () => EMPTY)
+export const useCart = store.useList
+
+// Saved pieces ("wishlist"): product slugs, newest first, on this device.
+const saved = createListStore('saved', (s: unknown): s is string => typeof s === 'string' && s.length <= 200)
+
+export const savedActions = {
+  toggle(slug: string) {
+    const list = saved.read()
+    saved.write(list.includes(slug) ? list.filter((s) => s !== slug) : [slug, ...list])
+  },
+  remove(slug: string) {
+    saved.write(saved.read().filter((s) => s !== slug))
+  },
 }
+
+export const useSaved = saved.useList

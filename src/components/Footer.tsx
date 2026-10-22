@@ -30,6 +30,7 @@ export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
       title: t.footer.help,
       links: [
         { href: p('/help'), label: t.nav.help },
+        { href: p('/contact'), label: t.nav.contact },
         { href: p('/policies/shipping'), label: t.footer.shipping },
         { href: p('/policies/returns'), label: t.footer.returns },
         { href: p('/policies/privacy'), label: t.footer.privacy },

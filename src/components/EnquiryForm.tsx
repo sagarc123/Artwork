@@ -8,7 +8,7 @@ import { whatsappLink } from '@/lib/site'
 import { submitEnquiry, type EnquiryState } from '@/server/enquiry-action'
 
 type Labels = Dictionary['forms']
-type Props = { kind: 'event' | 'portrait'; locale: string; t: Labels; typeLabel: string }
+type Props = { kind: 'event' | 'portrait' | 'general'; locale: string; t: Labels; typeLabel: string }
 
 const input =
   'h-13 w-full rounded-ui border border-border bg-surface px-4 text-charcoal aria-invalid:border-kumkum aria-invalid:border-2'
@@ -60,6 +60,7 @@ function summarise(f: FormData, t: Labels, typeLabel: string) {
   }
   const lines: [string, string][] = [
     [t.name, pick('name')],
+    [t.email, pick('email')],
     [t.date, pick('eventDate')],
     [t.city, pick('city')],
     [t.venue, pick('venue', t.venues)],
@@ -162,7 +163,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
           <Chips legend={t.size} name="size" type="radio" options={t.sizes} />
           <Chips legend={t.styles} name="styles" type="checkbox" options={t.styleOptions} />
         </>
-      ) : (
+      ) : kind === 'portrait' ? (
         <>
           <Chips legend={t.medium} name="medium" type="radio" options={t.mediums} />
           <Chips legend={t.paperSize} name="paperSize" type="radio" options={{ A4: 'A4', A3: 'A3', A2: 'A2' }} />
@@ -181,7 +182,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
           </label>
           <p className="rounded-ui bg-placeholder p-4">{t.photoNote}</p>
         </>
-      )}
+      ) : null}
 
       <Field id="name" label={`${t.name} ${t.required}`} error={err('name')}>
         <input id="name" name="name" type="text" autoComplete="name" required className={input} aria-invalid={!!err('name')} aria-describedby={described('name', 'name')} />
@@ -202,7 +203,12 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
           />
         </div>
       </Field>
-      <Field id="message" label={`${t.message} ${t.optional}`}>
+      {kind === 'general' && (
+        <Field id="email" label={`${t.email} ${t.optional}`} error={err('email')}>
+          <input id="email" name="email" type="email" autoComplete="email" className={input} aria-invalid={!!err('email')} aria-describedby={described('email', 'email')} />
+        </Field>
+      )}
+      <Field id="message" label={`${kind === 'general' ? t.yourMessage : t.message} ${t.optional}`}>
         <textarea id="message" name="message" rows={4} className="w-full rounded-ui border border-border bg-surface p-4" />
       </Field>
       <label className="flex min-h-12 items-center gap-3">

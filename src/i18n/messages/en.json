@@ -232,7 +232,8 @@
       "body": "Tap below to send them on WhatsApp so we can talk. I reply within 4 hours.",
       "whatsapp": "Continue on WhatsApp"
     },
-    "waIntro": "Namaste! I just sent an enquiry on your website."
+    "waIntro": "Namaste! I just sent an enquiry on your website.",
+    "yourMessage": "Your message"
   },
   "eventsPage": {
     "metaTitle": "Book event rangoli",
@@ -359,7 +360,9 @@
     "returnsBody": "Prints can be returned within 7 days. Originals within 3 days if damaged in transit.",
     "related": "You may also like",
     "back": "Back to the shop",
-    "waOrder": "Namaste! I would like to order"
+    "waOrder": "Namaste! I would like to order",
+    "save": "Save",
+    "saved": "Saved"
   },
   "cart": {
     "title": "Your cart",
@@ -468,5 +471,446 @@
     "paidOnline": "Paid online",
     "codDue": "Cash on delivery · {amount} due on delivery",
     "invoice": "Download invoice (PDF)"
+  },
+  "ownerNote": "Note for the owner (only shown while developing): sample text — replace it in src/i18n/messages before launch.",
+  "missing": "to be filled in",
+  "about": {
+    "metaTitle": "About Siddesh Mokashi",
+    "metaDesc": "The story of Siddesh Mokashi — rangoli artist, portrait artist and teacher from Maharashtra.",
+    "kicker": "About me",
+    "title": "Hello, I'm Siddesh Mokashi",
+    "sub": "I draw people, paint moods and fill doorsteps with colour. This is how it all began.",
+    "photoAlt": "Siddesh Mokashi at work in the studio",
+    "storyTitle": "My story",
+    "story": [
+      {
+        "h": "Where it began",
+        "p": "As a child I watched my mother draw rangoli at our door every morning. One day she handed me the powder and said, “Your turn.” I have not stopped since."
+      },
+      {
+        "h": "What I learned",
+        "p": "From rangoli I moved to pencil and charcoal, then to paint. I learned slowly — from teachers, books and thousands of practice sheets — and I still learn something new with every piece."
+      },
+      {
+        "h": "Why rangoli still matters to me",
+        "p": "A rangoli lasts a day or two, and that is its beauty. It says “welcome” to everyone who comes to the door. I want my art to feel the same: warm, open and made for your home."
+      }
+    ],
+    "journeyTitle": "My journey",
+    "journey": [
+      {
+        "year": "2008",
+        "title": "First rangoli competition",
+        "text": "A school competition, a borrowed box of colours and a first prize."
+      },
+      {
+        "year": "2014",
+        "title": "First exhibition",
+        "text": "Twenty drawings on the walls of a small gallery."
+      },
+      {
+        "year": "2019",
+        "title": "State rangoli award",
+        "text": "A 12-foot Sanskar Bharti design for Gudi Padwa."
+      },
+      {
+        "year": "2023",
+        "title": "Teaching online",
+        "text": "Students from across Maharashtra learning from home."
+      }
+    ],
+    "makeTitle": "What I make",
+    "make": [
+      {
+        "title": "Art for your walls",
+        "text": "Original drawings, paintings and prints, packed and delivered across India.",
+        "link": "Visit the shop"
+      },
+      {
+        "title": "Rangoli for your celebration",
+        "text": "Weddings, festivals, housewarmings and office events.",
+        "link": "Book an event"
+      },
+      {
+        "title": "Portraits from your photo",
+        "text": "Pencil, charcoal or colour — drawn by hand.",
+        "link": "Start a portrait"
+      },
+      {
+        "title": "Lessons you can follow",
+        "text": "Short video lessons in Marathi, Hindi and English.",
+        "link": "See the courses"
+      }
+    ],
+    "quote": "Every doorstep deserves a little colour.",
+    "quoteBy": "Siddesh Mokashi",
+    "ctaTitle": "Have something in mind?",
+    "ctaBody": "A portrait, a rangoli for your event or just a question — I would love to hear from you.",
+    "cta": "Work with me"
+  },
+  "contactPage": {
+    "metaTitle": "Contact",
+    "metaDesc": "Message Siddesh Mokashi on WhatsApp, call or write. Replies within a few hours.",
+    "kicker": "Contact",
+    "title": "Let's talk",
+    "sub": "WhatsApp is the quickest way to reach me.",
+    "whatsapp": "Chat on WhatsApp",
+    "reply": "I reply within {hours} hours, 9 am to 8 pm.",
+    "detailsTitle": "Other ways to reach me",
+    "call": "Call",
+    "email": "Email",
+    "studio": "Studio",
+    "follow": "Follow my work",
+    "formTitle": "Or send a message here",
+    "formSub": "Leave your number and I will message you back.",
+    "typeLabel": "General question",
+    "grievanceTitle": "Grievance officer",
+    "grievanceBody": "Not happy with how a problem was handled? Write to the grievance officer. You will get a reply within 48 hours and a solution within one month.",
+    "name": "Name"
+  },
+  "helpPage": {
+    "metaTitle": "Help — how to order, pay and get delivery",
+    "metaDesc": "Simple answers for buying art online: how to order, pay with UPI or cash on delivery, delivery times, returns, portraits, event bookings and courses.",
+    "kicker": "Help",
+    "title": "Buying online, made simple",
+    "sub": "Tap a question to see the answer. Still stuck? Message me on WhatsApp — I am happy to help.",
+    "groups": [
+      {
+        "title": "Ordering",
+        "items": [
+          {
+            "q": "How do I order?",
+            "a": "Open a piece you like and tap “Add to cart”. Then open your cart and tap “Go to payment”. Fill in your name, mobile number and address, choose how to pay, and you are done. You will get a confirmation on WhatsApp."
+          },
+          {
+            "q": "Do I need to create an account?",
+            "a": "No. Your mobile number is enough. You can follow your order from the link on the order page."
+          },
+          {
+            "q": "Can I order on WhatsApp instead?",
+            "a": "Yes. Tap “Order on WhatsApp” on any piece, or send me a photo of what you like. I will confirm the price and delivery with you."
+          }
+        ]
+      },
+      {
+        "title": "Paying",
+        "items": [
+          {
+            "q": "How can I pay?",
+            "a": "UPI (Google Pay, PhonePe, Paytm and others), debit or credit card, net banking or wallets. Payments are handled safely by Razorpay — I never see your card or UPI PIN."
+          },
+          {
+            "q": "Can I pay cash on delivery?",
+            "a": "Yes, for prints and originals on orders up to {codMax}. A cash-on-delivery fee of {codFee} is added. I confirm every cash-on-delivery order with you on WhatsApp before packing it."
+          },
+          {
+            "q": "Money was taken but I did not get a confirmation. What now?",
+            "a": "Don't worry — this sometimes takes a few minutes. If you still have no confirmation after 30 minutes, message me on WhatsApp. If the order did not go through, the bank returns the money automatically within 5–7 working days."
+          }
+        ]
+      },
+      {
+        "title": "Delivery and returns",
+        "items": [
+          {
+            "q": "How long does delivery take?",
+            "a": "Most orders reach you in 5–8 days anywhere in India. Framed pieces take about 3 days more. You will get the tracking link on WhatsApp."
+          },
+          {
+            "q": "How much is delivery?",
+            "a": "{shipFee} for orders under {freeFrom}. Free for orders of {freeFrom} and above. Digital downloads have no delivery charge."
+          },
+          {
+            "q": "Can I return something?",
+            "a": "Prints can be returned within 7 days. Originals can be returned within 3 days only if they were damaged on the way. Digital downloads and approved custom work can't be returned. Refunds reach you in 5–7 working days."
+          }
+        ]
+      },
+      {
+        "title": "Portraits, events and courses",
+        "items": [
+          {
+            "q": "How does a custom portrait work?",
+            "a": "Fill in the short portrait form, then send your photos on WhatsApp. You pay an advance by a secure link, I send you a preview photo to approve, and then I ship it. It usually takes 10–14 days."
+          },
+          {
+            "q": "How do I book rangoli for an event?",
+            "a": "Send your date and place through the event form or on WhatsApp. Together we choose the design and colours, you pay an advance to keep the date, and on the day I draw it at your venue."
+          },
+          {
+            "q": "How do the online courses work?",
+            "a": "Courses are short video lessons you can watch on your phone, any time. Lessons are in Marathi or Hindi, or have subtitles. Online courses are opening soon — message me to hear first."
+          }
+        ]
+      },
+      {
+        "title": "Talking to me",
+        "items": [
+          {
+            "q": "How do I contact you?",
+            "a": "WhatsApp is the quickest — I reply within a few hours, 9 am to 8 pm. You can also call or email; all the details are on the Contact page."
+          }
+        ]
+      }
+    ],
+    "stillTitle": "Still have a question?",
+    "stillBody": "Send me a message — a real person (me!) will reply.",
+    "contact": "Contact page"
+  },
+  "searchPage": {
+    "metaTitle": "Search",
+    "title": "What are you looking for?",
+    "label": "Search art, rangoli and festivals",
+    "placeholder": "e.g. Diwali rangoli",
+    "button": "Search",
+    "results": "Results for “{q}”",
+    "found": "{n} found",
+    "shop": "Shop",
+    "artwork": "Artwork",
+    "festivals": "Festivals",
+    "none": "I couldn't find “{q}”.",
+    "try": "Try one of these:",
+    "suggestions": [
+      "Diwali",
+      "Rangoli",
+      "Ganesh",
+      "Charcoal",
+      "Paintings"
+    ],
+    "whatsapp": "Or describe it to me on WhatsApp",
+    "seeArtwork": "See in the gallery"
+  },
+  "savedPage": {
+    "metaTitle": "Saved pieces",
+    "title": "Pieces you loved",
+    "sub": "Saved on this phone or computer. Come back any time.",
+    "empty": "Nothing saved yet. Tap “Save” on any piece to keep it here.",
+    "browse": "Browse the shop",
+    "remove": "Remove",
+    "choose": "Choose a size",
+    "similar": "Ask for something similar",
+    "loading": "Loading your saved pieces…",
+    "count": "saved"
+  },
+  "policies": {
+    "draft": "Draft — have this reviewed by a lawyer before launch. (Only shown while developing.)",
+    "updated": "Last updated: 22 October 2026",
+    "inShort": "In short",
+    "contents": "On this page",
+    "questions": "Questions? Message me on WhatsApp",
+    "shipping": {
+      "title": "Shipping policy",
+      "metaDesc": "Delivery charges, times and cash on delivery for orders from Siddesh Mokashi.",
+      "summary": "Delivery across India in 5–8 days. {shipFee} delivery on orders under {freeFrom}; free from {freeFrom}.",
+      "sections": [
+        {
+          "h": "Where I deliver",
+          "p": [
+            "I ship to every pincode in India that my courier partners reach. I don't ship outside India yet — if you live abroad, message me on WhatsApp."
+          ]
+        },
+        {
+          "h": "Delivery charges",
+          "list": [
+            "Orders under {freeFrom}: {shipFee} delivery.",
+            "Orders of {freeFrom} and above: free delivery.",
+            "Digital downloads: no delivery charge — you get them by link."
+          ]
+        },
+        {
+          "h": "How long it takes",
+          "p": [
+            "Every order is packed by hand. Most orders reach you in 5–8 days; framed pieces take about 3 days more. Dates for portraits and event rangoli are agreed with you on WhatsApp."
+          ]
+        },
+        {
+          "h": "Packing and tracking",
+          "p": [
+            "Originals are packed flat between boards, protected from water and insured on the way. When your parcel ships, you get the tracking link on WhatsApp, and by email if you gave one."
+          ]
+        },
+        {
+          "h": "Cash on delivery",
+          "p": [
+            "Cash on delivery is available for prints and originals on orders up to {codMax} (fee included). A cash-on-delivery fee of {codFee} is added. I confirm every cash-on-delivery order with you on WhatsApp before packing it. It is not available for digital downloads or courses."
+          ]
+        },
+        {
+          "h": "Late or damaged parcels",
+          "p": [
+            "If your parcel is late, message me on WhatsApp with your order number and I will check with the courier. If it arrives damaged, please take photos or a short video while opening it and send them to me within 3 days — see the Returns policy."
+          ]
+        }
+      ]
+    },
+    "returns": {
+      "title": "Returns & refunds",
+      "metaDesc": "Returns for prints and originals, refunds and custom work at Siddesh Mokashi.",
+      "summary": "Prints: return within 7 days. Originals: only if damaged on the way, within 3 days. Digital files and approved custom work can't be refunded. Refunds reach you in 5–7 working days.",
+      "sections": [
+        {
+          "h": "Prints",
+          "p": [
+            "You can return a print within 7 days of delivery, as long as it is unused and in its original packing. Message me on WhatsApp with your order number and I will tell you how to send it back.",
+            "If the print arrived damaged or wrong, I pay for the return. Otherwise, the return shipping is yours."
+          ]
+        },
+        {
+          "h": "Original artworks",
+          "p": [
+            "Each original is one of a kind, so it can be returned only if it was damaged on the way. Tell me within 3 days of delivery and send photos or a short video of the parcel and the piece. I will arrange a pickup and refund you in full, including delivery."
+          ]
+        },
+        {
+          "h": "Digital downloads",
+          "p": [
+            "A file can't be given back once it is downloaded, so digital downloads are not refundable. If a file does not open or is the wrong one, message me and I will fix it or send it again."
+          ]
+        },
+        {
+          "h": "Custom portraits and commissions",
+          "p": [
+            "Custom work is made only for you. If you cancel before I start, your advance is refunded. Before you approve the preview photo, I make changes until you are happy. Once you approve it, the work can't be cancelled or refunded."
+          ]
+        },
+        {
+          "h": "Event bookings and courses",
+          "p": [
+            "Cancellation terms for event rangoli are written in your booking confirmation on WhatsApp. Courses can't be refunded once you have started watching the lessons."
+          ]
+        },
+        {
+          "h": "How refunds are paid",
+          "list": [
+            "Refunds go back to the way you paid — UPI, card, net banking or wallet — within 5–7 working days after I receive the return or confirm the damage.",
+            "For cash-on-delivery orders, I send the refund to your bank account or UPI ID; I will ask for it on WhatsApp.",
+            "Delivery charges and the cash-on-delivery fee are refunded only when the item arrived damaged or wrong."
+          ]
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "metaDesc": "What personal data this website collects, why, how long it is kept and how to see, correct or delete it.",
+      "summary": "I collect only what I need to deliver your order and reply to you. I never sell your data. You can ask to see, correct or delete it any time.",
+      "sections": [
+        {
+          "h": "Who looks after your data",
+          "p": [
+            "This website is run by {legalName} ({brand}), {address}. Under India's Digital Personal Data Protection Act, 2023, I am responsible (the “data fiduciary”) for the personal data you share here."
+          ]
+        },
+        {
+          "h": "What I collect",
+          "list": [
+            "Your name, mobile number and email.",
+            "Your delivery address and pincode.",
+            "What you order and how you paid. Payments are handled by Razorpay — I never see or keep your card details or UPI PIN.",
+            "Messages and enquiries you send me.",
+            "Your GSTIN and business name, if you ask for a GST invoice."
+          ]
+        },
+        {
+          "h": "Why I use it",
+          "list": [
+            "To deliver your order and send you updates on WhatsApp, SMS or email.",
+            "To reply to your questions and enquiries.",
+            "To make invoices and keep the tax records the law requires.",
+            "To send festival offers — only if you ticked the box. You can stop them any time."
+          ]
+        },
+        {
+          "h": "Who I share it with",
+          "p": [
+            "Only the people who help complete your order: the payment company (Razorpay), the courier, and the services that run this website and send messages. Each gets only what it needs. I never sell your data."
+          ]
+        },
+        {
+          "h": "How long I keep it",
+          "p": [
+            "Order and invoice records are kept for as long as tax law requires (currently up to 8 years). Enquiries are deleted 2 years after our last conversation. Permission for offers ends the moment you withdraw it."
+          ]
+        },
+        {
+          "h": "Your rights",
+          "p": [
+            "You can ask to see the data I hold about you, correct it, or delete it (except records the law makes me keep). You can withdraw your permission for messages at any time, and you can name someone to act for you. Message me on WhatsApp or write to {email}. I will reply quickly, and always within 30 days."
+          ]
+        },
+        {
+          "h": "Cookies and your device",
+          "p": [
+            "This site uses no advertising or tracking cookies. It keeps a few small things on your own device so the site works: your language choice (a cookie), your cart and saved pieces, and your animation setting (stored in your browser). You can clear them any time in your browser settings."
+          ]
+        },
+        {
+          "h": "Children",
+          "p": [
+            "Anyone under 18 should use this site with a parent or guardian. Courses for under-18 learners are bought by the parent, and they are not tracked or sent offers."
+          ]
+        },
+        {
+          "h": "Grievance officer",
+          "p": [
+            "For any complaint about your personal data, write to the grievance officer: {grievanceName}, {grievanceEmail}. You will get a reply within 48 hours. If you are still not satisfied, you can complain to the Data Protection Board of India."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms & conditions",
+      "metaDesc": "The terms for buying art, prints, portraits, event rangoli and courses from Siddesh Mokashi.",
+      "summary": "Prices are in rupees and include GST. Every piece is hand-made, so small differences from the photo are natural. Artworks and designs stay the artist's copyright.",
+      "sections": [
+        {
+          "h": "About these terms",
+          "p": [
+            "These terms apply when you use this website or buy from {brand}, run by {legalName}, {address}. GSTIN: {gstin}."
+          ]
+        },
+        {
+          "h": "Prices and payment",
+          "p": [
+            "All prices are in Indian rupees (₹) and include GST. Delivery and any cash-on-delivery fee are shown before you pay. Payments are handled securely by Razorpay. An order is confirmed only after the payment is verified or, for cash on delivery, after you confirm it on WhatsApp."
+          ]
+        },
+        {
+          "h": "Hand-made art",
+          "p": [
+            "Colours on a screen can look slightly different from the real piece, and hand-made work has small variations. These are part of its character, not defects."
+          ]
+        },
+        {
+          "h": "Originals",
+          "p": [
+            "Each original exists only once. If two people pay for the same original at the same moment, the second payment is refunded in full automatically."
+          ]
+        },
+        {
+          "h": "Custom work and events",
+          "p": [
+            "Price, date and details for portraits and event rangoli are agreed on WhatsApp before you pay an advance. See the Returns policy for cancellations."
+          ]
+        },
+        {
+          "h": "Copyright",
+          "p": [
+            "All artworks, photos and designs on this site belong to the artist. Buying a piece or print does not give the right to copy, print or sell it. Digital downloads are for your personal use only. Course videos must not be shared or recorded."
+          ]
+        },
+        {
+          "h": "Shipping, returns and privacy",
+          "p": [
+            "The Shipping, Returns and Privacy policies are part of these terms."
+          ]
+        },
+        {
+          "h": "Problems and disputes",
+          "p": [
+            "If something goes wrong, please message me first — most problems are solved in one conversation. If not, write to the grievance officer: {grievanceName}, {grievanceEmail}. These terms follow Indian law, and courts in {city}, Maharashtra have jurisdiction."
+          ]
+        }
+      ]
+    }
   }
 }

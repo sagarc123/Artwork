@@ -7,6 +7,7 @@ import { LanguageSwitcher } from './LanguagePicker'
 import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
+import { SavedCount } from './SavedCount'
 import { GenerativeRangoli } from './GenerativeRangoli'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
@@ -78,7 +79,8 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <Search aria-hidden="true" className="size-6" />
             {t.nav.search}
           </Link>
-          <Link href={p('/wishlist')} className={iconLink}>
+          <Link href={p('/wishlist')} className={`relative ${iconLink}`}>
+            <SavedCount label={t.savedPage.count} />
             <Heart aria-hidden="true" className="size-6" />
             {t.nav.saved}
           </Link>
@@ -100,7 +102,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           locale={locale}
           labels={{ ...t.nav, needHelp: t.menu.needHelp, call: t.menu.call }}
           featured={commissions}
-          links={[{ href: p('/'), label: t.nav.home }, ...sections, { href: p('/help'), label: t.nav.help }, { href: p('/contact'), label: t.nav.contact }]}
+          links={[{ href: p('/'), label: t.nav.home }, ...sections, { href: p('/wishlist'), label: t.nav.saved }, { href: p('/help'), label: t.nav.help }, { href: p('/contact'), label: t.nav.contact }]}
           whatsappHref={whatsappLink(t.whatsapp.message)}
           phone={site.phone}
         />

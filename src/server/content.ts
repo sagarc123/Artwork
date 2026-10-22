@@ -6,6 +6,8 @@ import type { Locale } from '@/i18n/config'
 import type { Artwork, Category, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
 import { hashString } from '@/lib/seed'
+import { FREE_SHIPPING_FROM, SHIPPING_FEE } from '@/lib/cart'
+import { formatPrice, site } from '@/lib/site'
 import type { GalleryItem } from '@/components/Gallery'
 import type { Floor } from '@/components/PhotoPlaceholder'
 import type { ShopItem } from '@/components/ShopGrid'
@@ -29,6 +31,7 @@ export function toShopItem(p: Product, locale: Locale): ShopItem {
   const prices = p.variants.map((v) => v.price)
   const size = p.widthCm && p.heightCm ? `${p.widthCm}×${p.heightCm} cm` : undefined
   return {
+    slug: p.slug,
     href: localePath(locale, `/shop/p/${p.slug}`),
     title: p.title,
     type: p.type,
@@ -118,4 +121,50 @@ export async function getSlugs(collection: 'products' | 'festivals') {
   const { docs } = await (await db()).find({ collection, where, limit: 1000, depth: 0, select: { slug: true } })
   const slugs = docs.map((d) => d.slug).filter(Boolean)
   return slugs.length ? slugs : ['_']
+}
+
+/** Business, contact and COD details for Contact, Help and the policies. Empty site-settings fields fall back to env (src/lib/site.ts). */
+export async function getBusiness() {
+  'use cache'
+  cacheLife('max')
+  cacheTag('site-settings', 'commerce-settings')
+  const payload = await db()
+  const [s, c] = await Promise.all([payload.findGlobal({ slug: 'site-settings', depth: 0 }), payload.findGlobal({ slug: 'commerce-settings', depth: 0 })])
+  const b = {
+    brandName: s.brandName || site.brandName,
+    legalName: s.business?.legalName || '',
+    gstin: s.business?.gstin || '',
+    address: s.business?.address || '',
+    city: s.business?.city || '',
+    whatsapp: s.contact?.whatsapp || site.whatsappNumber,
+    phone: s.contact?.phone || site.phone,
+    email: s.contact?.email || site.email,
+    replyHours: s.contact?.replyHours ?? 4,
+    grievanceName: s.grievanceOfficer?.name || '',
+    grievanceEmail: s.grievanceOfficer?.email || '',
+    social: [
+      { label: 'Instagram', href: s.social?.instagram || site.instagram },
+      { label: 'YouTube', href: s.social?.youtube || site.youtube },
+      { label: 'Facebook', href: s.social?.facebook || site.facebook },
+    ].filter((x) => x.href),
+    // Only the public COD numbers leave this function (blocked pincodes stay private).
+    cod: { enabled: c.cod?.enabled !== false, maxTotal: c.cod?.maxTotal ?? 5000, fee: c.cod?.fee ?? 49 },
+  }
+  // {slot} values for the help answers and policies (src/components/OwnerText.tsx).
+  const values = {
+    brand: b.brandName,
+    legalName: b.legalName,
+    address: b.address,
+    gstin: b.gstin,
+    city: b.city,
+    email: b.email,
+    phone: b.phone,
+    grievanceName: b.grievanceName,
+    grievanceEmail: b.grievanceEmail,
+    codMax: formatPrice(b.cod.maxTotal),
+    codFee: formatPrice(b.cod.fee),
+    shipFee: formatPrice(SHIPPING_FEE),
+    freeFrom: formatPrice(FREE_SHIPPING_FROM),
+  }
+  return { ...b, values }
 }

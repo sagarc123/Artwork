@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { MediaImage } from '@/components/MediaImage'
 import { ProductBuy } from '@/components/ProductBuy'
+import { SaveButton } from '@/components/SaveButton'
 import { ShopGrid } from '@/components/ShopGrid'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -99,7 +100,10 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
         </div>
 
         <div className="grid content-start gap-6 lg:sticky lg:top-32 lg:col-span-5">
-          <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
+            <SaveButton slug={product.slug} title={product.title} labels={s} />
+          </div>
           <h1 className="font-heading text-h1">{product.title}</h1>
           <ProductBuy
             slug={product.slug}
