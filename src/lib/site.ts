@@ -1,0 +1,17 @@
+// Business details. Values the owner hasn't supplied yet come from env and stay empty until then.
+export const site = {
+  artistName: 'Siddesh Mokashi',
+  // ponytail: brand name not given yet; the artist's name stands in until it is.
+  brandName: process.env.NEXT_PUBLIC_BRAND_NAME || 'Siddesh Mokashi',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '', // digits incl. country code, e.g. 919800000000
+  phone: process.env.NEXT_PUBLIC_PHONE || '',
+  email: process.env.NEXT_PUBLIC_EMAIL || '',
+  instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
+  youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL || '',
+  facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
+}
+
+/** wa.me link with a prefilled message. Without a number, WhatsApp asks which chat to use. */
+export const whatsappLink = (message: string) =>
+  `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`

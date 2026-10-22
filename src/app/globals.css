@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+/* Design tokens: docs/plan/full/05-components.md §0 and 00-decisions.md §9 (bigger text for every age). */
+@theme {
+  --color-paper: #faf6ef;
+  --color-surface: #ffffff;
+  --color-charcoal: #1e1b18;
+  --color-muted: #5f574f;
+  --color-border: #857b70;
+  --color-kumkum: #a6261d;
+  --color-peacock: #0b5e73;
+  --color-marigold: #e8890c; /* fill only, never text */
+  --color-turmeric: #f2b705; /* decoration only, never text */
+  --color-leaf: #2e6b3c;
+  --color-placeholder: #f1ebe1;
+
+  /* Headings scale smoothly from phone (390px) to desktop (1440px). Body stays 18px everywhere. */
+  --text-display: clamp(2.5rem, 1.943rem + 2.286vw, 4rem);
+  --text-display--line-height: 1.1;
+  --text-display-lg: 4rem;
+  --text-display-lg--line-height: 1.1;
+  --text-h1: clamp(2rem, 1.629rem + 1.524vw, 3rem);
+  --text-h1--line-height: 1.15;
+  --text-h1-lg: 3rem;
+  --text-h1-lg--line-height: 1.15;
+  --text-h2: clamp(1.625rem, 1.393rem + 0.952vw, 2.25rem);
+  --text-h2--line-height: 1.2;
+  --text-h2-sm: 1.625rem;
+  --text-h2-sm--line-height: 1.2;
+  --text-h3: clamp(1.25rem, 1.157rem + 0.381vw, 1.5rem);
+  --text-h3--line-height: 1.25;
+  --text-h3-sm: 1.25rem;
+  --text-h3-sm--line-height: 1.25;
+  --text-body: 1.125rem;
+  --text-body--line-height: 1.6;
+
+  --radius-ui: 6px;
+  --radius-sheet: 20px;
+  --shadow-frame: 0 12px 28px rgb(30 27 24 / 0.18), 0 2px 6px rgb(230 160 10 / 0.08);
+}
+
+@theme inline {
+  --font-heading: var(--font-tiro), "Martel", serif;
+  --font-body: var(--font-mukta), system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-padding-top: 7rem;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-charcoal);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+  h1, h2, h3 {
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  /* Devanagari needs more room for matras. */
+  :lang(mr), :lang(hi) {
+    line-height: 1.75;
+  }
+  :lang(mr) :is(h1, h2, h3), :lang(hi) :is(h1, h2, h3) {
+    line-height: 1.4;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-peacock);
+    outline-offset: 2px;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility wrap {
+  width: 100%;
+  max-width: calc(75rem + 2.5rem);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* Low-opacity kolam dot grid; never behind artwork. */
+@utility kolam {
+  background-image: radial-gradient(rgb(30 27 24 / 0.07) 1.5px, transparent 1.6px);
+  background-size: 24px 24px;
+}
+
+@utility footer-link {
+  color: #7fc3d3; /* peacock-light: 7+:1 on charcoal */
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+@utility skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-ui);
+  background: var(--color-charcoal);
+  color: var(--color-paper);
+  transform: translateY(-200%);
+  &:focus {
+    transform: none;
+  }
+}
+
+/* Mobile menu drawer slides in from the left. */
+dialog.drawer {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-out, overlay 0.3s allow-discrete, display 0.3s allow-discrete;
+}
+dialog.drawer[open] {
+  transform: none;
+}
+@starting-style {
+  dialog.drawer[open] {
+    transform: translateX(-100%);
+  }
+}
+
+/* Rangoli that draws itself in. */
+.rangoli-draw path,
+.rangoli-draw circle:not([stroke-dasharray]):not(.rangoli-dot) {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: rangoli-draw 1.6s ease-out forwards;
+}
+.rangoli-draw .rangoli-dot,
+.rangoli-draw circle[stroke-dasharray] {
+  opacity: 0;
+  animation: rangoli-fade 0.5s ease-out 1.2s forwards;
+}
+@keyframes rangoli-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rangoli-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Respect "reduce motion": everything jumps to its final state. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

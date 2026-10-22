@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "title": "Siddesh Mokashi — Rangoli, Drawings & Paintings",
+    "description": "Hand-made rangoli, pencil and charcoal drawings, paintings, custom portraits and art courses by Siddesh Mokashi, Maharashtra."
+  },
+  "nav": {
+    "home": "Home",
+    "shop": "Shop",
+    "artwork": "Artwork",
+    "courses": "Courses",
+    "about": "About",
+    "contact": "Contact",
+    "events": "Book an Event",
+    "portraits": "Custom Portraits",
+    "help": "Help",
+    "saved": "Saved",
+    "cart": "Cart",
+    "me": "Me",
+    "menu": "Menu",
+    "search": "Search",
+    "close": "Close",
+    "language": "Language",
+    "skip": "Skip to main content",
+    "mainNav": "Main menu"
+  },
+  "tabs": {
+    "home": "Home",
+    "shop": "Shop",
+    "learn": "Learn",
+    "cart": "Cart",
+    "me": "Me"
+  },
+  "header": {
+    "replyPromise": "I reply within 4 hours on WhatsApp"
+  },
+  "menu": {
+    "eventsSub": "Weddings, festivals, office events",
+    "portraitsSub": "From your photo, drawn by hand",
+    "needHelp": "Need help? WhatsApp me",
+    "call": "Call me"
+  },
+  "home": {
+    "hero": {
+      "title": "Art That Brings Colour to Every Celebration",
+      "sub": "Hand-made rangoli, portraits and paintings from my studio in Maharashtra — made slowly, with love, for your walls and your festivals.",
+      "ctaEvent": "Book Event Rangoli",
+      "ctaShop": "Shop Art",
+      "ctaLearn": "or learn with me →"
+    },
+    "events": {
+      "title": "Let me colour your celebration",
+      "sub": "Weddings, festivals, housewarmings and office events across Maharashtra. Tell me the date — I reply within 4 hours.",
+      "cta": "Plan my event rangoli"
+    },
+    "portraits": {
+      "title": "Your photo, drawn by hand",
+      "sub": "Pencil, charcoal or colour portraits — a gift people keep for life. Ready in 10–14 days.",
+      "cta": "Start my portrait"
+    },
+    "categories": {
+      "title": "Explore my work",
+      "drawings": "Drawings",
+      "paintings": "Paintings",
+      "rangoli": "Rangoli Designs",
+      "portraits": "Custom Portraits",
+      "courses": "Courses"
+    },
+    "featured": {
+      "title": "Fresh from the studio",
+      "seeAll": "See all art →",
+      "itemTitle": "Artwork name",
+      "priceSoon": "Price coming soon"
+    },
+    "artist": {
+      "title": "Hello, I'm Siddesh Mokashi",
+      "body": "Rangoli has been part of my mornings for as long as I can remember. Today I draw portraits, paint and teach — and every piece still starts with the same love for colour.",
+      "cta": "Read my story"
+    },
+    "course": {
+      "title": "Learn rangoli from home",
+      "name": "Rangoli for Beginners",
+      "meta": "Beginner · Short video lessons · मराठी / हिंदी / English",
+      "cta": "See the course"
+    },
+    "festivals": {
+      "title": "Rangoli through the festivals",
+      "diwali": "Diwali",
+      "ganesh": "Ganesh Chaturthi",
+      "gudi": "Gudi Padwa",
+      "weddings": "Weddings"
+    },
+    "help": {
+      "title": "New to buying online?",
+      "body": "Picture-by-picture guides show you how to order, pay with UPI and watch a lesson. Or just message me on WhatsApp.",
+      "cta": "See how it works"
+    }
+  },
+  "footer": {
+    "brandLine": "Hand-made in Maharashtra — art for your walls and your celebrations.",
+    "shop": "Shop",
+    "workWithMe": "Work with me",
+    "help": "Help",
+    "contact": "Contact",
+    "shipping": "Shipping",
+    "returns": "Returns & refunds",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "payments": "Pay safely with",
+    "paymentList": "UPI · Cards · Net banking · Wallets · Cash on delivery",
+    "call": "Call",
+    "whatsapp": "WhatsApp",
+    "email": "Email",
+    "follow": "Follow my work"
+  },
+  "whatsapp": {
+    "label": "WhatsApp",
+    "aria": "Chat with me on WhatsApp",
+    "message": "Namaste! I have a question about your art."
+  },
+  "comingSoon": {
+    "title": "This page is being prepared",
+    "body": "I'm still setting up this part of the website. Please check back soon, or message me on WhatsApp — I'm happy to help.",
+    "home": "Go to home"
+  },
+  "pages": {
+    "shop": "Shop",
+    "artwork": "Artwork",
+    "courses": "Courses",
+    "about": "About me",
+    "contact": "Contact",
+    "events": "Book an Event",
+    "custom-portraits": "Custom Portraits",
+    "help": "Help",
+    "wishlist": "Saved",
+    "cart": "Cart",
+    "account": "My account",
+    "festivals": "Festivals",
+    "search": "Search",
+    "policies/shipping": "Shipping",
+    "policies/returns": "Returns & refunds",
+    "policies/privacy": "Privacy",
+    "policies/terms": "Terms"
+  },
+  "notFound": {
+    "title": "This page wandered off the canvas",
+    "body": "The link may be old, or the page has moved.",
+    "home": "Back to home"
+  },
+  "photo": {
+    "soon": "Photo coming soon"
+  }
+}
