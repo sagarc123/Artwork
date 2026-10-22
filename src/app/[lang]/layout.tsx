@@ -48,12 +48,12 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         </a>
         <div aria-hidden="true" className="scroll-ink" />
         <Header locale={locale} t={t} />
-        <main id="main" className="flex-1">
+        <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <ViewTransition default="page">{children}</ViewTransition>
         </main>
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />
-        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} />
+        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
         <FirstVisitLanguagePicker current={locale} />
         <TapRipple />
       </body>

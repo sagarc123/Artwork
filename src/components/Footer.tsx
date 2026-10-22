@@ -44,7 +44,7 @@ export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   ].filter((s) => s.href)
 
   return (
-    <footer className="bg-charcoal pb-24 text-paper grain-dark xl:pb-0">
+    <footer className="bg-charcoal pb-40 text-paper grain-dark xl:pb-20">
       <div aria-hidden="true" className="paithani" />
       <div className="wrap grid gap-10 py-16 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
         <div className="grid content-start gap-4">

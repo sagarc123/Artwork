@@ -15,7 +15,7 @@ export default async function Cart() {
   return (
     <>
       <PageHero title={t.cart.title} />
-      <section className="bg-paper pb-20 lg:pb-28">
+      <section className="bg-paper pt-4 pb-20 lg:pt-8 lg:pb-28">
         <div className="wrap">
           <CartPage locale={locale} t={t} checkoutHref={localePath(locale, '/checkout')} shopHref={localePath(locale, '/shop')} />
         </div>

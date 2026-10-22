@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { hasRole, isOwner, isStaff, ownerOnlyField, ROLES } from '../access'
+import { hasRole, isOwner, ownerOnlyField, ROLES } from '../access'
 
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
@@ -12,9 +12,11 @@ export const Users: CollectionConfig = {
     cookies: { sameSite: 'Lax', secure: process.env.NODE_ENV === 'production' },
   },
   access: {
-    read: isStaff,
+    // Owner sees everyone; others only their own account.
+    read: ({ req }) => (!req.user ? false : hasRole(req.user, 'owner') || { id: { equals: req.user.id } }),
     create: isOwner,
-    update: ({ req, id }) => hasRole(req.user, 'owner') || req.user?.id === id,
+    // Must be signed in: anonymous bulk updates have no id, and undefined === undefined would otherwise pass.
+    update: ({ req, id }) => !!req.user && (hasRole(req.user, 'owner') || (id !== undefined && req.user.id === id)),
     delete: isOwner,
   },
   fields: [

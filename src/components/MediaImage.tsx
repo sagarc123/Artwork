@@ -21,11 +21,11 @@ export function MediaImage({ media, alt, ratio, seed, floor, sizes, priority, cl
     const src = media.url.includes('/cms-api/') ? media.url.replace(/^https?:\/\/[^/]+/, '') : media.url
     return (
       <div className={`relative overflow-hidden ${className}`} style={{ aspectRatio: ratio }}>
-        <Image src={src} alt={media.alt || alt} fill sizes={sizes} priority={priority} className="object-cover" />
+        <Image src={src} alt={alt === '' ? '' : media.alt || alt} fill sizes={sizes} priority={priority} className="object-cover" />
       </div>
     )
   }
-  return <PhotoPlaceholder ratio={ratio} seed={seed} floor={floor} alt={alt} slot={alt} className={className} />
+  return <PhotoPlaceholder ratio={ratio} seed={seed} floor={floor} alt={alt} slot={alt || seed} className={className} />
 }
 
 /** First image of a document's `images` field, if populated. */

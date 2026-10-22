@@ -3,9 +3,9 @@
 import { MessageCircle, Minus, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
-import type { Quote, QuoteLine } from '@/lib/cart'
+import type { CartLine, Quote, QuoteLine } from '@/lib/cart'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
@@ -14,17 +14,44 @@ import { MediaImage } from './MediaImage'
 
 type T = Pick<Dictionary, 'cart' | 'checkout' | 'forms' | 'shop'>
 
+const noop = () => () => {}
+/** False in the server HTML and during hydration, so the browser-only cart never flashes "empty". */
+const useHydrated = () => useSyncExternalStore(noop, () => true, () => false)
+
 function useQuote(locale: string) {
   const lines = useCart()
   const [quote, setQuote] = useState<Quote | null>(null)
+  const [quotedFor, setQuotedFor] = useState<CartLine[] | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [attempt, setAttempt] = useState(0)
   useEffect(() => {
     let live = true
-    getCartQuote(lines, locale).then((q) => live && setQuote(q))
+    getCartQuote(lines, locale)
+      .then((q) => {
+        if (!live) return
+        setQuote(q)
+        setQuotedFor(lines)
+        setFailed(false)
+      })
+      .catch(() => live && setFailed(true))
     return () => {
       live = false
     }
-  }, [lines, locale])
-  return { lines, quote }
+  }, [lines, locale, attempt])
+  // The old quote stays on screen while a new one loads; editing waits for it.
+  const pending = quotedFor !== lines
+  return { lines, quote, pending, failed, retry: () => setAttempt((n) => n + 1), hydrated: useHydrated() }
+}
+
+function QuoteError({ t, retry }: { t: T['checkout']['errors']; retry: () => void }) {
+  return (
+    <div role="alert" className="flex flex-wrap items-center gap-3 rounded-ui border-2 border-kumkum bg-surface p-4">
+      <p className="font-semibold">{t.quote}</p>
+      <button type="button" onClick={retry} className="min-h-11 rounded-ui border border-border px-4 font-semibold hover:bg-charcoal/5">
+        {t.retry}
+      </button>
+    </div>
+  )
 }
 
 const toLine = (l: QuoteLine) => ({ slug: l.slug, variantId: l.variantId, frameId: l.frameId, qty: l.qty })
@@ -45,13 +72,13 @@ function Totals({ quote, t }: { quote: Quote; t: T['cart'] }) {
   )
 }
 
-function Lines({ quote, t, editable }: { quote: Quote; t: T['cart']; editable: boolean }) {
+function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart']; editable: boolean; busy?: boolean }) {
   const btn = 'grid size-11 place-items-center rounded-ui border border-border hover:bg-charcoal/5 disabled:opacity-40'
   return (
     <ul className="grid gap-5">
       {quote.lines.map((l) => (
         <li key={l.key} className="grid grid-cols-[5rem_1fr] gap-4 sm:grid-cols-[6rem_1fr]">
-          <div className="bg-surface p-1.5 shadow-frame">
+          <div className="self-start bg-surface p-1.5 shadow-frame">
             <MediaImage media={l.image as Media | null} alt={l.title} ratio="4/5" seed={l.slug} floor="charcoal" sizes="96px" />
           </div>
           <div className="grid content-start gap-1">
@@ -63,16 +90,21 @@ function Lines({ quote, t, editable }: { quote: Quote; t: T['cart']; editable: b
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 {l.type === 'print' && (
                   <div role="group" aria-label={t.qty} className="flex items-center gap-2">
-                    <button type="button" aria-label={t.less} disabled={l.qty <= 1} onClick={() => cartActions.setQty(toLine(l), l.qty - 1)} className={btn}>
+                    <button type="button" aria-label={t.less} disabled={busy || l.qty <= 1} onClick={() => cartActions.setQty(toLine(l), l.qty - 1)} className={btn}>
                       <Minus aria-hidden="true" className="size-5" />
                     </button>
                     <span className="min-w-8 text-center font-semibold">{l.qty}</span>
-                    <button type="button" aria-label={t.more} disabled={l.qty >= l.maxQty} onClick={() => cartActions.setQty(toLine(l), l.qty + 1)} className={btn}>
+                    <button type="button" aria-label={t.more} disabled={busy || l.qty >= l.maxQty} onClick={() => cartActions.setQty(toLine(l), l.qty + 1)} className={btn}>
                       <Plus aria-hidden="true" className="size-5" />
                     </button>
                   </div>
                 )}
-                <button type="button" onClick={() => cartActions.remove(toLine(l))} className="ml-auto flex min-h-11 items-center gap-1 px-2 text-kumkum underline underline-offset-4">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => cartActions.remove(toLine(l))}
+                  className="ml-auto flex min-h-11 items-center gap-1 px-2 text-kumkum underline underline-offset-4 disabled:opacity-40"
+                >
                   <Trash2 aria-hidden="true" className="size-5" />
                   {t.remove}
                 </button>
@@ -87,7 +119,8 @@ function Lines({ quote, t, editable }: { quote: Quote; t: T['cart']; editable: b
 
 /** /cart */
 export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string; t: T; checkoutHref: string; shopHref: string }) {
-  const { lines, quote } = useQuote(locale)
+  const { lines, quote, pending, failed, retry, hydrated } = useQuote(locale)
+  if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
   if (lines.length === 0)
     return (
       <div className="grid justify-items-center gap-5 rounded-ui bg-surface p-10 text-center">
@@ -97,13 +130,15 @@ export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string
         </Link>
       </div>
     )
-  if (!quote) return <p className="text-muted">{t.cart.loading}</p>
+  if (!quote) return failed ? <QuoteError t={t.checkout.errors} retry={retry} /> : <p className="text-muted">{t.cart.loading}</p>
   return (
     <div className="grid gap-10 lg:grid-cols-12">
-      <div className="lg:col-span-7">
-        <Lines quote={quote} t={t.cart} editable />
+      <div className="grid content-start gap-5 lg:col-span-7">
+        {failed && pending && <QuoteError t={t.checkout.errors} retry={retry} />}
+        <Lines quote={quote} t={t.cart} editable busy={pending} />
       </div>
-      <div className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5">
+      <div className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
+        <h2 className="font-heading text-h2">{t.checkout.summary}</h2>
         <Totals quote={quote} t={t.cart} />
         {quote.ok ? (
           <Link href={checkoutHref} className="press inline-flex h-13 items-center justify-center rounded-ui bg-kumkum px-6 font-semibold text-white">
@@ -135,12 +170,26 @@ function loadRazorpay(): Promise<RazorpayCtor> {
 /** /checkout: details → address → Razorpay (UPI shown first). */
 export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: string; t: T; orderPath: string; cartHref: string }) {
   const router = useRouter()
-  const { lines, quote } = useQuote(locale)
+  const { lines, quote, pending, failed, retry, hydrated } = useQuote(locale)
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<CheckoutField[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [notReady, setNotReady] = useState<string | null>(null)
+  const formRef = useRef<HTMLFormElement>(null)
+  // Bumped after a failed attempt: focus the first invalid field, or else the error message.
+  const [problem, setProblem] = useState(0)
+  useEffect(() => {
+    if (!problem) return
+    const el = formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"], [data-problem]')
+    el?.scrollIntoView({ block: 'center' })
+    el?.focus({ preventScroll: true })
+  }, [problem])
+  const stop = () => {
+    setBusy(false)
+    setProblem((n) => n + 1)
+  }
 
+  if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
   if (lines.length === 0)
     return (
       <p className="rounded-ui bg-surface p-8 text-center">
@@ -163,18 +212,19 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
     }
     setBusy(true)
     setMessage(null)
-    const result = await placeOrder(input)
-    setErrors(result.status === 'invalid' ? result.errors : [])
-    if (result.status === 'not_ready' && quote) {
-      const items = quote.lines.map((l) => `• ${l.title} (${[l.variantLabel, l.frameLabel].filter(Boolean).join(', ')}) × ${l.qty} — ${formatPrice(l.lineTotal)}`)
-      const addr = [input.address.line1, input.address.line2, input.address.city, input.address.state, input.address.pincode].filter(Boolean).join(', ')
-      setNotReady([t.shop.waOrder, ...items, `${t.cart.total}: ${formatPrice(quote.total)}`, `${input.customer.name}, ${addr}`].join('\n'))
-    }
-    if (result.status === 'sold_out') setMessage(`${t.checkout.errors.soldOut} ${result.title}`)
-    if (result.status === 'unavailable' || result.status === 'failed') setMessage(t.checkout.errors[result.status])
-    if (result.status !== 'ok') return setBusy(false)
-
+    let opened = false // Once Razorpay is open, its callbacks end the busy state.
     try {
+      const result = await placeOrder(input)
+      setErrors(result.status === 'invalid' ? result.errors : [])
+      if (result.status === 'not_ready' && quote) {
+        const items = quote.lines.map((l) => `• ${l.title} (${[l.variantLabel, l.frameLabel].filter(Boolean).join(', ')}) × ${l.qty} — ${formatPrice(l.lineTotal)}`)
+        const addr = [input.address.line1, input.address.line2, input.address.city, input.address.state, input.address.pincode].filter(Boolean).join(', ')
+        setNotReady([t.shop.waOrder, ...items, `${t.cart.total}: ${formatPrice(quote.total)}`, `${input.customer.name}, ${addr}`].join('\n'))
+      }
+      if (result.status === 'sold_out') setMessage(`${t.checkout.errors.soldOut} ${result.title}`)
+      if (result.status === 'unavailable' || result.status === 'failed' || result.status === 'rate') setMessage(t.checkout.errors[result.status])
+      if (result.status !== 'ok') return
+
       const Razorpay = await loadRazorpay()
       new Razorpay({
         key: result.keyId,
@@ -188,25 +238,30 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
         // UPI first: what most buyers in India use.
         config: { display: { blocks: { upi: { name: 'UPI', instruments: [{ method: 'upi' }] } }, sequence: ['block.upi'], preferences: { show_default_blocks: true } } },
         handler: async (response: RazorpayResponse) => {
-          const confirmed = await confirmPayment(response)
-          if (confirmed.status === 'paid') {
-            cartActions.clear()
-            router.push(`${orderPath}/${confirmed.publicId}`)
-          } else {
-            setMessage(t.checkout.errors.verify)
-            setBusy(false)
+          try {
+            const confirmed = await confirmPayment(response)
+            if (confirmed.status === 'paid') {
+              cartActions.clear()
+              return router.push(`${orderPath}/${confirmed.publicId}`)
+            }
+          } catch {
+            // Shown as "could not confirm" below; the webhook still records the payment.
           }
+          setMessage(t.checkout.errors.verify)
+          stop()
         },
         modal: {
           ondismiss: () => {
             setMessage(t.checkout.errors.cancelled)
-            setBusy(false)
+            stop()
           },
         },
       }).open()
+      opened = true
     } catch {
       setMessage(t.checkout.errors.failed)
-      setBusy(false)
+    } finally {
+      if (!opened) stop()
     }
   }
 
@@ -228,7 +283,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
 
   return (
     <div className="grid gap-10 lg:grid-cols-12">
-      <form onSubmit={submit} noValidate className="grid content-start gap-8 lg:col-span-7">
+      <form ref={formRef} onSubmit={submit} noValidate className="grid content-start gap-8 lg:col-span-7">
         <fieldset className="grid gap-5">
           <legend className="mb-2 font-heading text-h2">{c.details}</legend>
           {field('name', `${t.forms.name} ${t.forms.required}`, { autoComplete: 'name', required: true })}
@@ -250,7 +305,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           <legend className="mb-2 font-heading text-h2">{c.payment}</legend>
           <p className="text-muted">{c.safe}</p>
           {message && (
-            <p role="alert" className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
+            <p role="alert" tabIndex={-1} data-problem className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
               {message}
             </p>
           )}
@@ -263,21 +318,22 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
               </a>
             </div>
           ) : (
-            <button type="submit" disabled={busy || !quote?.ok} className="press h-13 rounded-ui bg-kumkum px-6 font-semibold text-white disabled:opacity-60 sm:justify-self-start">
+            <button type="submit" disabled={busy || pending || !quote?.ok} className="press h-13 rounded-ui bg-kumkum px-6 font-semibold text-white disabled:opacity-60 sm:justify-self-start">
               {busy ? c.paying : `${c.pay} · ${quote ? formatPrice(quote.total) : ''}`}
             </button>
           )}
         </fieldset>
       </form>
-      <aside className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5">
+      <aside className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
         <h2 className="font-heading text-h2">{c.summary}</h2>
+        {failed && (pending || !quote) && <QuoteError t={c.errors} retry={retry} />}
         {quote ? (
           <>
             <Lines quote={quote} t={t.cart} editable={false} />
             <Totals quote={quote} t={t.cart} />
           </>
         ) : (
-          <p className="text-muted">{t.cart.loading}</p>
+          !failed && <p className="text-muted">{t.cart.loading}</p>
         )}
       </aside>
     </div>

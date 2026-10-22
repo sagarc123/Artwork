@@ -4,6 +4,9 @@ import { alternates } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { getCategories } from '@/server/content'
 
+// Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
+export const ensureStatic = 'navigation'
+
 export async function generateStaticParams() {
   const slugs = (await getCategories('en', 'shop')).map((c) => c.slug)
   return (slugs.length ? slugs : ['_']).map((category) => ({ category }))

@@ -8,19 +8,26 @@ const KEY = 'cart'
 const EMPTY: CartLine[] = []
 let cachedRaw: string | null = null
 let cachedLines: CartLine[] = EMPTY
+// Storage blocked (private mode, strict settings): the cart lives in memory for this page instead.
+let memory: string | null = null
+
+const isLine = (l: unknown): l is CartLine => {
+  const o = l as Record<string, unknown> | null
+  return !!o && typeof o === 'object' && typeof o.slug === 'string' && typeof o.variantId === 'string' && typeof o.qty === 'number' && Number.isFinite(o.qty)
+}
 
 function read(): CartLine[] {
-  let raw: string | null = null
+  let raw: string | null
   try {
-    raw = localStorage.getItem(KEY)
+    raw = memory ?? localStorage.getItem(KEY)
   } catch {
-    return EMPTY
+    raw = memory
   }
   if (raw === cachedRaw) return cachedLines
   cachedRaw = raw
   try {
-    const parsed = JSON.parse(raw ?? '[]')
-    cachedLines = Array.isArray(parsed) ? parsed : EMPTY
+    const parsed: unknown = JSON.parse(raw ?? '[]')
+    cachedLines = Array.isArray(parsed) ? parsed.filter(isLine) : EMPTY
   } catch {
     cachedLines = EMPTY
   }
@@ -28,10 +35,11 @@ function read(): CartLine[] {
 }
 
 function write(lines: CartLine[]) {
+  const raw = JSON.stringify(lines)
   try {
-    localStorage.setItem(KEY, JSON.stringify(lines))
+    localStorage.setItem(KEY, raw)
   } catch {
-    // Storage blocked (private mode): the cart lasts for this page only.
+    memory = raw
   }
   window.dispatchEvent(new Event(KEY))
 }

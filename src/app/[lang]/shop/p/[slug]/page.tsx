@@ -12,6 +12,9 @@ import type { Media } from '@/payload-types'
 import { site } from '@/lib/site'
 import { getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
 
+// Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
+export const ensureStatic = 'navigation'
+
 export async function generateStaticParams() {
   return (await getSlugs('products')).map((slug) => ({ slug }))
 }
@@ -29,11 +32,14 @@ const name = (rel: unknown) => (rel && typeof rel === 'object' && 'name' in rel 
 export async function generateMetadata({ params }: PageProps<'/[lang]/shop/p/[slug]'>): Promise<Metadata> {
   const { product, locale } = await load(params)
   const image = Array.isArray(product.images) && typeof product.images[0] === 'object' ? (product.images[0] as Media) : null
+  const title = product.seo?.title || product.title
+  const description = product.seo?.description || product.story?.slice(0, 155) || undefined
   return {
-    title: product.seo?.title || product.title,
-    description: product.seo?.description || product.story?.slice(0, 155) || undefined,
+    title,
+    description,
     alternates: alternates(locale, `/shop/p/${product.slug}`),
-    openGraph: image?.url ? { images: [{ url: image.url, alt: image.alt }] } : undefined,
+    // A page's openGraph replaces the layout's whole object, so repeat its defaults.
+    openGraph: { siteName: site.brandName, type: 'website', title, description, images: image?.url ? [{ url: image.url, alt: image.alt }] : undefined },
   }
 }
 
@@ -55,7 +61,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
     '@type': 'Product',
     name: product.title,
     description: product.story ?? undefined,
-    image: images.map((m) => new URL(m.url!, site.url).toString()),
+    image: images.flatMap((m) => (m.url ? [new URL(m.url, site.url).toString()] : [])),
     brand: { '@type': 'Brand', name: site.brandName },
     offers: {
       '@type': 'AggregateOffer',
@@ -147,14 +153,15 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
             {product.description && <RichText data={product.description} className="grid gap-4" />}
           </section>
         )}
-
-        {related.length > 0 && (
-          <section className="grid gap-8 lg:col-span-12">
-            <h2 className="reveal font-heading text-h1">{s.related}</h2>
-            <ShopGrid items={related} t={s} />
-          </section>
-        )}
       </div>
+
+      {/* Outside the grid above, so the sticky buy panel stops before it. */}
+      {related.length > 0 && (
+        <section className="wrap mt-20 grid gap-8 lg:mt-28">
+          <h2 className="reveal font-heading text-h1">{s.related}</h2>
+          <ShopGrid items={related} t={s} controls={false} />
+        </section>
+      )}
     </article>
   )
 }

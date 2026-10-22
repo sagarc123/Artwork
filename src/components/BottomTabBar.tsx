@@ -16,7 +16,7 @@ const TABS = [
 ] as const
 
 /** Phone/tablet bottom navigation: 5 labelled tabs. The colour bar slides to the active tab between pages. */
-export function BottomTabBar({ locale, labels, navLabel }: { locale: Locale; labels: Dictionary['tabs']; navLabel: string }) {
+export function BottomTabBar({ locale, labels, navLabel, itemsLabel }: { locale: Locale; labels: Dictionary['tabs']; navLabel: string; itemsLabel: string }) {
   const current = stripLocale(usePathname())
   const isActive = (href: string) => (href === '/' ? current === '/' : current === href || current.startsWith(`${href}/`))
 
@@ -45,7 +45,7 @@ export function BottomTabBar({ locale, labels, navLabel }: { locale: Locale; lab
                 )}
                 <span className="relative">
                   <Icon aria-hidden="true" className={`size-6 ${active ? 'tab-bloom' : ''}`} strokeWidth={1.75} />
-                  {key === 'cart' && <CartCount />}
+                  {key === 'cart' && <CartCount label={itemsLabel} />}
                 </span>
                 <span>{labels[key]}</span>
               </Link>

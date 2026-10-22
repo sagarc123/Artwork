@@ -42,27 +42,30 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
 
   return (
     <>
-      <div role="tablist" aria-label={t.all} className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+      {/* Filter buttons, not tabs: they filter one list rather than switching panels. */}
+      <div role="group" aria-label={t.filter} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
         {[['all', t.all] as const, ...categories].map(([slug, name]) => (
           <button
             key={slug}
-            role="tab"
             type="button"
-            aria-selected={tab === slug}
+            aria-pressed={tab === slug}
             onClick={() => setTab(slug)}
-            className="min-h-12 shrink-0 rounded-full border-[1.5px] border-charcoal px-5 aria-selected:bg-charcoal aria-selected:text-paper"
+            className="min-h-12 shrink-0 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
           >
             {name}
           </button>
         ))}
       </div>
+      <p aria-live="polite" className="mt-4 text-muted">
+        {shown.length} {t.count}
+      </p>
 
-      <ul className="mt-8 columns-2 gap-4 lg:columns-4 lg:gap-6">
+      <ul className="mt-6 columns-2 gap-4 lg:columns-4 lg:gap-6">
         {shown.map((item, i) => (
           <li key={item.id} className="mb-4 break-inside-avoid lg:mb-6">
             <button type="button" onClick={() => setOpen(i)} className="card reveal grid w-full gap-2 text-left">
               <span className="block bg-surface p-2 shadow-frame">
-                <MediaImage media={item.image} alt={item.title} ratio={item.ratio} seed={item.seed} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
+                <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
               </span>
               <span className="font-heading text-h3-sm">{item.title}</span>
               <span className={item.productHref ? 'font-semibold text-leaf' : 'text-muted'}>{item.productHref ? t.forSale : t.private}</span>

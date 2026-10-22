@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ButtonLink } from '@/components/ButtonLink'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
-import { localePath } from '@/i18n/config'
+import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale, type Dictionary } from '@/i18n/dictionaries'
 import { whatsappLink } from '@/lib/site'
 import en from '@/i18n/messages/en.json'
@@ -12,6 +12,9 @@ type PageKey = keyof Dictionary['pages']
 // Sections that now have real pages are left out.
 const BUILT = new Set(['shop', 'artwork', 'events', 'custom-portraits', 'festivals', 'cart'])
 const PAGES = (Object.keys(en.pages) as PageKey[]).filter((k) => !BUILT.has(k))
+
+// Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
+export const ensureStatic = 'navigation'
 
 export function generateStaticParams() {
   return PAGES.map((key) => ({ slug: key.split('/') }))
@@ -25,8 +28,9 @@ async function pageKey(params: PageProps<'/[lang]/[...slug]'>['params']): Promis
 
 export async function generateMetadata({ params }: PageProps<'/[lang]/[...slug]'>): Promise<Metadata> {
   const t = await getDictionary()
+  const key = await pageKey(params)
   // Not indexed until the real page exists.
-  return { title: t.pages[await pageKey(params)], robots: { index: false, follow: true } }
+  return { title: t.pages[key], robots: { index: false, follow: true }, alternates: alternates(await getLocale(), `/${key}`) }
 }
 
 export default async function ComingSoonPage({ params }: PageProps<'/[lang]/[...slug]'>) {

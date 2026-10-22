@@ -39,7 +39,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
     <header className="sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
       {/* Desktop utility row */}
       <div className="hidden border-b border-border/20 xl:block">
-        <div className="wrap flex h-11 items-center justify-between text-muted">
+        <div className="wrap flex h-12 items-center justify-between text-muted [&_button]:min-h-10">
           <LanguageSwitcher current={locale} label={t.nav.language} />
           <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="hover:text-leaf">
             {t.header.replyPromise}
@@ -87,7 +87,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             {t.nav.me}
           </Link>
           <Link href={p('/cart')} className={`relative ${iconLink}`}>
-            <CartCount />
+            <CartCount label={t.cart.items} />
             <ShoppingCart aria-hidden="true" className="size-6" />
             {t.nav.cart}
           </Link>

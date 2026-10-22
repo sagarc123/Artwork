@@ -8,6 +8,7 @@ import { priceCart, type CartLine, type Quote } from '@/lib/cart'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
 import { expireHolds, holdStock, HOLD_MINUTES, markPaid, releaseStock } from './order-service'
+import { allow } from './rate-limit'
 
 /** Accepts only well-formed cart lines from the browser. */
 function cleanLines(input: unknown): CartLine[] {
@@ -23,7 +24,7 @@ function cleanLines(input: unknown): CartLine[] {
 /** Current prices and stock for the browser's cart. */
 export async function getCartQuote(input: unknown, locale: string): Promise<Quote> {
   const lines = cleanLines(input)
-  if (!lines.length) return { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false }
+  if (!lines.length || !(await allow('quote', 60, 60_000))) return { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false }
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: 'products',
@@ -45,7 +46,7 @@ export type CheckoutInput = {
 export type CheckoutField = 'name' | 'phone' | 'email' | 'line1' | 'city' | 'state' | 'pincode'
 export type CheckoutResult =
   | { status: 'invalid'; errors: CheckoutField[] }
-  | { status: 'not_ready' | 'unavailable' | 'failed' }
+  | { status: 'not_ready' | 'unavailable' | 'failed' | 'rate' }
   | { status: 'sold_out'; title: string }
   | { status: 'ok'; keyId: string; razorpayOrderId: string; amount: number; orderNumber: string; publicId: string }
 
@@ -64,11 +65,13 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   if (a.state.length < 2) errors.push('state')
   if (!/^[1-9]\d{5}$/.test(a.pincode)) errors.push('pincode')
   if (errors.length) return { status: 'invalid', errors }
+  if (!(await allow('order', 5, 10 * 60_000))) return { status: 'rate' }
 
   const rzp = razorpayConfig()
   if (!rzp) return { status: 'not_ready' }
 
-  await expireHolds()
+  // Also cancels this phone's earlier open checkouts, so retries don't pile up held stock.
+  await expireHolds(c.phone!)
   const quote = await getCartQuote(input.lines, input.locale)
   if (!quote.ok) return { status: 'unavailable' }
   const soldOut = await holdStock(quote.lines)

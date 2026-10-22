@@ -107,6 +107,14 @@
   }
 }
 
+/* Swipeable chip rows: no scrollbar strip under the chips. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility skip-link {
   position: fixed;
   top: 0.5rem;
@@ -120,6 +128,11 @@
   &:focus {
     transform: none;
   }
+}
+
+/* The page behind an open menu or language dialog doesn't scroll. */
+html:has(dialog[open]) {
+  overflow: hidden;
 }
 
 /* Mobile menu drawer slides in from the left. */
@@ -222,25 +235,38 @@ dialog.drawer[open] {
   stroke: var(--color-paper);
   stroke-width: 2.5;
 }
-/* Masking tape on framed artworks. */
+/* Masking tape on framed artworks. Small and tucked in on phones so it never reaches neighbours or the screen edge. */
 .tape::before,
 .tape::after {
   content: '';
   position: absolute;
-  width: 56px;
-  height: 18px;
+  top: -4px;
+  width: 34px;
+  height: 12px;
   background: rgb(242 183 5 / 0.55);
   z-index: 1;
 }
 .tape::before {
-  top: -8px;
-  left: -14px;
+  left: -4px;
   rotate: -35deg;
 }
 .tape::after {
-  top: -8px;
-  right: -14px;
+  right: -4px;
   rotate: 35deg;
+}
+@media (min-width: 64rem) {
+  .tape::before,
+  .tape::after {
+    top: -8px;
+    width: 56px;
+    height: 18px;
+  }
+  .tape::before {
+    left: -14px;
+  }
+  .tape::after {
+    right: -14px;
+  }
 }
 .kolam-weave .kolam-dots circle {
   fill: var(--color-paper);
@@ -264,7 +290,9 @@ dialog.drawer[open] {
 
 /* Code-drawn rangoli colours. */
 .grangoli .g-dot {
-  fill: var(--color-charcoal);
+  fill: none;
+  stroke: var(--color-charcoal);
+  stroke-width: 2.2;
   opacity: 0.4;
 }
 .grangoli .g-line {
@@ -277,7 +305,7 @@ dialog.drawer[open] {
   opacity: 0.92;
 }
 .grangoli--dark .g-dot {
-  fill: var(--color-paper);
+  stroke: var(--color-paper);
   opacity: 0.55;
 }
 .grangoli--dark .g-line {

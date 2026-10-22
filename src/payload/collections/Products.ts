@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
-import { canEditContent, isOwner, publishedOrStaff } from '../access'
+import { canEditContent, isOwner, publishedOrStaff, staffOnlyField } from '../access'
 import { rupeesField, seoFields, slugField, validateVariants } from '../fields'
 
 /** Things for sale: originals, prints and digital downloads. */
@@ -71,9 +71,9 @@ export const Products: CollectionConfig = {
           fields: [
             rupeesField('price'),
             rupeesField('compareAtPrice', false),
-            { name: 'stock', type: 'number', required: true, defaultValue: 1, min: 0, admin: { step: 1 } },
+            { name: 'stock', type: 'number', required: true, defaultValue: 1, min: 0, access: { read: staffOnlyField }, admin: { step: 1 } },
             // Held for 15 minutes while someone pays; only checkout changes it.
-            { name: 'reserved', type: 'number', defaultValue: 0, min: 0, access: { update: () => false }, admin: { readOnly: true } },
+            { name: 'reserved', type: 'number', defaultValue: 0, min: 0, access: { read: staffOnlyField, update: () => false }, admin: { readOnly: true } },
           ],
         },
         { name: 'weightGrams', label: 'Packed weight (grams)', type: 'number', min: 0 },

@@ -36,7 +36,7 @@ export function MobileMenu({ locale, labels, featured, links, whatsappHref, phon
 
       <dialog
         ref={ref}
-        aria-label={labels.mainNav}
+        aria-label={labels.menu}
         // Tap on the dark backdrop closes the drawer.
         onClick={(e) => e.target === e.currentTarget && close()}
         className="drawer m-0 h-dvh max-h-dvh w-[88vw] max-w-sm bg-paper p-0 text-charcoal shadow-lg backdrop:bg-charcoal/40"

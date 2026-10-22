@@ -42,6 +42,9 @@ export function normalisePhone(raw: string | undefined): string | null {
   return /^[6-9]\d{9}$/.test(d) ? d : null
 }
 
+/** YYYY-MM-DD that exists on the calendar (Date rolls 2026-02-30 over to March, so round-trip it). */
+const realDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().slice(0, 10) === s
+
 /** Validates and cleans a submitted enquiry. `today` is YYYY-MM-DD (server date). */
 export function validateEnquiry(form: FormLike, today: string): { ok: true; data: EnquiryData } | { ok: false; errors: EnquiryField[] } {
   const errors: EnquiryField[] = []
@@ -54,7 +57,7 @@ export function validateEnquiry(form: FormLike, today: string): { ok: true; data
   const email = text(form, 'email', 120)
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('email')
   const eventDate = text(form, 'eventDate', 10)
-  if (eventDate && (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate) || eventDate < today)) errors.push('date')
+  if (eventDate && (!realDate(eventDate) || eventDate < today)) errors.push('date')
   if (errors.length) return { ok: false, errors }
 
   const faces = Number(text(form, 'faces', 3))

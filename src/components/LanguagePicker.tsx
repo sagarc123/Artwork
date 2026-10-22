@@ -14,7 +14,7 @@ function useSwitchLocale(current: Locale) {
   return (target: Locale) => {
     rememberLocale(target)
     // Full navigation: the proxy and <html lang> both depend on the locale.
-    if (target !== current) window.location.assign(localePath(target, stripLocale(pathname)))
+    if (target !== current) window.location.assign(localePath(target, stripLocale(pathname)) + location.search + location.hash)
   }
 }
 
@@ -43,6 +43,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
 /** One-time "Choose your language" screen on a visitor's first visit. */
 export function FirstVisitLanguagePicker({ current }: { current: Locale }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const chosen = useRef(false)
   const switchTo = useSwitchLocale(current)
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function FirstVisitLanguagePicker({ current }: { current: Locale }) {
       ref={ref}
       aria-labelledby="lang-title"
       // Closing without choosing (Esc) keeps the current language and doesn't ask again.
-      onClose={() => rememberLocale(current)}
+      onClose={() => chosen.current || rememberLocale(current)}
       className="m-auto w-[min(92vw,28rem)] rounded-sheet bg-surface p-6 text-charcoal shadow-lg backdrop:bg-charcoal/60"
     >
       <h2 id="lang-title" className="text-center font-heading text-h3">
@@ -69,6 +70,7 @@ export function FirstVisitLanguagePicker({ current }: { current: Locale }) {
             type="button"
             lang={l}
             onClick={() => {
+              chosen.current = true
               switchTo(l)
               ref.current?.close()
             }}

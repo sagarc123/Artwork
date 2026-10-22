@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle2, MessageCircle } from 'lucide-react'
-import { startTransition, useActionState, useState, type ReactNode } from 'react'
+import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { EnquiryField } from '@/lib/enquiry'
 import { whatsappLink } from '@/lib/site'
@@ -78,6 +78,16 @@ function summarise(f: FormData, t: Labels, typeLabel: string) {
 export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
   const [state, action, pending] = useActionState<EnquiryState, FormData>(submitEnquiry, { status: 'idle' })
   const [summary, setSummary] = useState('')
+  const formRef = useRef<HTMLFormElement>(null)
+  const doneRef = useRef<HTMLDivElement>(null)
+  // After sending, move focus to the result: the success box, or the first field to fix (else the error message).
+  useEffect(() => {
+    if (state.status === 'ok') doneRef.current?.focus()
+    else if (state.status !== 'idle') {
+      const form = formRef.current
+      ;(form?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form?.querySelector<HTMLElement>('[role="alert"]'))?.focus()
+    }
+  }, [state])
   const errors = state.status === 'error' ? state.errors : []
   const err = (f: EnquiryField) => (errors.includes(f) ? t.errors[f] : undefined)
   const described = (id: string, f?: EnquiryField, hint?: boolean) =>
@@ -85,7 +95,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
 
   if (state.status === 'ok') {
     return (
-      <div role="status" className="grid justify-items-start gap-4 rounded-ui border-2 border-leaf bg-surface p-6 lg:p-8">
+      <div ref={doneRef} tabIndex={-1} role="status" className="grid justify-items-start gap-4 rounded-ui border-2 border-leaf bg-surface p-6 lg:p-8">
         <CheckCircle2 aria-hidden="true" className="size-10 text-leaf" />
         <h3 className="font-heading text-h2">{t.success.title}</h3>
         <p className="text-muted">{t.success.body}</p>
@@ -104,6 +114,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
 
   return (
     <form
+      ref={formRef}
       // Submitted by hand (not the form `action` prop) so React does not clear what the visitor typed when there is an error.
       onSubmit={(e) => {
         e.preventDefault()
@@ -115,7 +126,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
       className="grid gap-6"
     >
       {errors.length > 0 && (
-        <div role="alert" className="rounded-ui border-2 border-kumkum bg-surface p-4">
+        <div role="alert" tabIndex={-1} className="rounded-ui border-2 border-kumkum bg-surface p-4">
           <p className="font-semibold">{t.errors.summary}</p>
           <ul className="mt-2 list-disc pl-6">
             {errors.map((e) => (
@@ -125,7 +136,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
         </div>
       )}
       {(state.status === 'rate' || state.status === 'failed') && (
-        <p role="alert" className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
+        <p role="alert" tabIndex={-1} className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
           {t.errors[state.status]}
         </p>
       )}

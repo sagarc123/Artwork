@@ -304,7 +304,9 @@
     "private": "Private collection",
     "buy": "See it in the shop",
     "enquire": "Commission something like this",
-    "story": "The story"
+    "story": "The story",
+    "count": "pieces",
+    "filter": "Category"
   },
   "festivalsPage": {
     "metaTitle": "Rangoli through the festivals",
@@ -411,7 +413,10 @@
       "soldOut": "Sorry — this was just bought by someone else:",
       "failed": "Something went wrong. Please try again, or order on WhatsApp.",
       "cancelled": "The payment was not completed. Your items are held for 15 minutes — you can try again.",
-      "verify": "We could not confirm the payment. If money was taken, message me on WhatsApp with your order number."
+      "verify": "We could not confirm the payment. If money was taken, message me on WhatsApp with your order number.",
+      "rate": "Too many tries in a short time. Please wait a few minutes, or order on WhatsApp.",
+      "quote": "Could not check prices. Please check your connection.",
+      "retry": "Try again"
     }
   },
   "order": {

@@ -27,8 +27,10 @@ type Props = {
 export function PhotoPlaceholder({ ratio, seed, floor = 'charcoal', alt, slot, className = '' }: Props) {
   return (
     <div
-      role="img"
-      aria-label={alt}
+      // alt="" = decorative (the visible title already names it).
+      role={alt ? 'img' : undefined}
+      aria-label={alt || undefined}
+      aria-hidden={alt ? undefined : true}
       data-photo-slot={slot}
       style={{ aspectRatio: ratio }}
       className={`relative grid w-full place-items-center overflow-hidden ${FLOORS[floor]} ${className}`}

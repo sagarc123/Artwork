@@ -36,3 +36,10 @@ test('bad input lists every problem', () => {
   const r = validateEnquiry(form({ type: 'party', name: 'A', phone: '123', email: 'no-at', eventDate: '2026-01-01' }), '2026-10-22')
   assert.deepEqual(r.ok ? [] : r.errors, ['type', 'name', 'phone', 'email', 'date'])
 })
+
+test('impossible dates are rejected', () => {
+  for (const eventDate of ['2026-13-45', '2026-02-30', '2026-11-31']) {
+    const r = validateEnquiry(form({ type: 'event', name: 'Priya', phone: '9876543210', eventDate }), '2026-10-22')
+    assert.deepEqual(r.ok ? [] : r.errors, ['date'], eventDate)
+  }
+})

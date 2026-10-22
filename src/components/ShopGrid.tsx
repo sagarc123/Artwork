@@ -25,8 +25,8 @@ export type ShopItem = {
 
 type Sort = 'newest' | 'low' | 'high'
 
-/** Product grid with type filter and sort. Runs in the browser: the whole catalogue is small. */
-export function ShopGrid({ items, t }: { items: ShopItem[]; t: Dictionary['shop'] }) {
+/** Product grid with type filter and sort (`controls={false}`: just the cards). Runs in the browser: the whole catalogue is small. */
+export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: Dictionary['shop']; controls?: boolean }) {
   const [type, setType] = useState<'all' | ShopItem['type']>('all')
   const [sort, setSort] = useState<Sort>('newest')
 
@@ -38,35 +38,39 @@ export function ShopGrid({ items, t }: { items: ShopItem[]; t: Dictionary['shop'
 
   return (
     <div className="grid gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div role="group" aria-label={t.type} className="flex flex-wrap gap-2">
-          {(['all', 'original', 'print', 'digital'] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              aria-pressed={type === v}
-              onClick={() => setType(v)}
-              className="min-h-12 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
-            >
-              {v === 'all' ? t.all : t.types[v]}
-            </button>
-          ))}
-        </div>
-        <label className="flex items-center gap-3">
-          <span className="font-semibold">{t.sort}</span>
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-12 rounded-ui border border-border bg-surface px-3">
-            {(Object.keys(t.sorts) as Sort[]).map((s) => (
-              <option key={s} value={s}>
-                {t.sorts[s]}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      {controls && (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div role="group" aria-label={t.type} className="flex flex-wrap gap-2">
+              {(['all', 'original', 'print', 'digital'] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  aria-pressed={type === v}
+                  onClick={() => setType(v)}
+                  className="min-h-12 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
+                >
+                  {v === 'all' ? t.all : t.types[v]}
+                </button>
+              ))}
+            </div>
+            <label className="flex items-center gap-3">
+              <span className="font-semibold">{t.sort}</span>
+              <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-12 rounded-ui border border-border bg-surface px-3">
+                {(Object.keys(t.sorts) as Sort[]).map((s) => (
+                  <option key={s} value={s}>
+                    {t.sorts[s]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
-      <p aria-live="polite" className="text-muted">
-        {shown.length} {t.count}
-      </p>
+          <p aria-live="polite" className="text-muted">
+            {shown.length} {t.count}
+          </p>
+        </>
+      )}
 
       {shown.length === 0 ? (
         <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.emptyFilter}</p>

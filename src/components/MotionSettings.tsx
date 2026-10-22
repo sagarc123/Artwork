@@ -58,7 +58,7 @@ export function MotionToggle({ stopLabel, startLabel }: { stopLabel: string; sta
 
   const Icon = motion === 'on' ? Pause : Play
   return (
-    <button type="button" onClick={toggle} aria-pressed={motion === 'off'} className="inline-flex min-h-11 items-center gap-2 text-paper/85 underline underline-offset-4 hover:text-paper">
+    <button type="button" onClick={toggle} className="inline-flex min-h-11 items-center gap-2 text-paper/85 underline underline-offset-4 hover:text-paper">
       <Icon aria-hidden="true" className="size-5" />
       {motion === 'on' ? stopLabel : startLabel}
     </button>

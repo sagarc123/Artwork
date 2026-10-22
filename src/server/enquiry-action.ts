@@ -3,6 +3,7 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { validateEnquiry, type EnquiryField } from '@/lib/enquiry'
+import { allow } from './rate-limit'
 
 export type EnquiryState =
   | { status: 'idle' }
@@ -20,6 +21,7 @@ export async function submitEnquiry(_prev: EnquiryState, form: FormData): Promis
 
   const result = validateEnquiry(form, new Date().toISOString().slice(0, 10))
   if (!result.ok) return { status: 'error', errors: result.errors }
+  if (!(await allow('enquiry', 5, 10 * 60_000))) return { status: 'rate' }
 
   try {
     const payload = await getPayload({ config })

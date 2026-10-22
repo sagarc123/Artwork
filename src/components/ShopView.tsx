@@ -22,7 +22,7 @@ export async function ShopView({ locale, t, categorySlug }: { locale: Locale; t:
       <PageHero title={current?.name ?? t.shop.title} sub={t.shop.intro} word="दुकान" />
       <section className="bg-paper pb-20 lg:pb-28">
         <div className="wrap grid gap-8">
-          <nav aria-label={t.shop.type} className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+          <nav aria-label={t.shop.type} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
             {tabs.map((tab) => (
               <Link
                 key={tab.href}

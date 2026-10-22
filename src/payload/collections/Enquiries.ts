@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isOwner, isStaff } from '../access'
+import { isOrderStaff, isOwner, isStaff } from '../access'
 
 /** Messages from the Book an Event, Custom Portraits and Contact forms. The website saves them on the server. */
 export const Enquiries: CollectionConfig = {
@@ -10,7 +10,7 @@ export const Enquiries: CollectionConfig = {
     defaultColumns: ['name', 'type', 'eventDate', 'city', 'status', 'createdAt'],
     description: 'New requests from the website. Reply on WhatsApp, then update the status.',
   },
-  access: { read: isStaff, create: isStaff, update: isStaff, delete: isOwner },
+  access: { read: isOrderStaff, create: isStaff, update: isOrderStaff, delete: isOwner },
   defaultSort: '-createdAt',
   fields: [
     {

@@ -9,6 +9,9 @@ import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { festivalLook, getArtworks, getFestivals, getProducts, getSlugs, toGalleryItem, toShopItem } from '@/server/content'
 
+// Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
+export const ensureStatic = 'navigation'
+
 export async function generateStaticParams() {
   return (await getSlugs('festivals')).map((slug) => ({ slug }))
 }
@@ -25,7 +28,8 @@ async function load(params: PageProps<'/[lang]/festivals/[slug]'>['params']) {
 
 export async function generateMetadata({ params }: PageProps<'/[lang]/festivals/[slug]'>): Promise<Metadata> {
   const { festival, locale } = await load(params)
-  return { title: festival.name, description: festival.intro ?? undefined, alternates: alternates(locale, `/festivals/${festival.slug}`) }
+  const t = await getDictionary()
+  return { title: festival.name, description: festival.intro || t.festivalsPage.metaDesc, alternates: alternates(locale, `/festivals/${festival.slug}`) }
 }
 
 export default async function FestivalPage({ params }: PageProps<'/[lang]/festivals/[slug]'>) {

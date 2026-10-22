@@ -15,7 +15,7 @@ export default async function Checkout() {
   return (
     <>
       <PageHero title={t.checkout.title} />
-      <section className="bg-paper pb-20 lg:pb-28">
+      <section className="bg-paper pt-4 pb-20 lg:pt-8 lg:pb-28">
         <div className="wrap">
           <CheckoutForm locale={locale} t={t} orderPath={localePath(locale, '/order')} cartHref={localePath(locale, '/cart')} />
         </div>
