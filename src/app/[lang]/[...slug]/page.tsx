@@ -10,7 +10,7 @@ import en from '@/i18n/messages/en.json'
 // ponytail: one "coming soon" page for every section not built yet; each milestone replaces its slug with a real route.
 type PageKey = keyof Dictionary['pages']
 // Sections that now have real pages are left out.
-const BUILT = new Set(['shop', 'artwork', 'events', 'custom-portraits', 'festivals'])
+const BUILT = new Set(['shop', 'artwork', 'events', 'custom-portraits', 'festivals', 'cart'])
 const PAGES = (Object.keys(en.pages) as PageKey[]).filter((k) => !BUILT.has(k))
 
 export function generateStaticParams() {

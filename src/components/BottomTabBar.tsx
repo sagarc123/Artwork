@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { localePath, stripLocale, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
+import { CartCount } from './CartCount'
 
 const TABS = [
   { href: '/', key: 'home', Icon: Home },
@@ -42,7 +43,10 @@ export function BottomTabBar({ locale, labels, navLabel }: { locale: Locale; lab
                     style={{ viewTransitionName: 'tab-ink' }}
                   />
                 )}
-                <Icon aria-hidden="true" className={`size-6 ${active ? 'tab-bloom' : ''}`} strokeWidth={1.75} />
+                <span className="relative">
+                  <Icon aria-hidden="true" className={`size-6 ${active ? 'tab-bloom' : ''}`} strokeWidth={1.75} />
+                  {key === 'cart' && <CartCount />}
+                </span>
                 <span>{labels[key]}</span>
               </Link>
             </li>

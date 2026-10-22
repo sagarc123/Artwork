@@ -94,10 +94,13 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
           <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
           <h1 className="font-heading text-h1">{product.title}</h1>
           <ProductBuy
+            slug={product.slug}
             title={product.title}
-            variants={product.variants.map((v) => ({ label: v.label, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock - (v.reserved ?? 0) }))}
-            framing={(product.framing ?? []).map((f) => ({ label: f.label, extraPrice: f.extraPrice }))}
+            variants={product.variants.map((v) => ({ id: v.id!, label: v.label, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock - (v.reserved ?? 0) }))}
+            framing={(product.framing ?? []).map((f) => ({ id: f.id!, label: f.label, extraPrice: f.extraPrice }))}
             t={s}
+            cart={t.cart}
+            cartHref={localePath(locale, '/cart')}
           />
           <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 border-t border-border/30 pt-6">
             {name(product.medium) && (

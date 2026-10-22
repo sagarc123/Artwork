@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    orders: Order;
     enquiries: Enquiry;
     products: Product;
     artworks: Artwork;
@@ -85,6 +86,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     artworks: ArtworksSelect<false> | ArtworksSelect<true>;
@@ -140,32 +142,51 @@ export interface UserAuthOperations {
   };
 }
 /**
- * New requests from the website. Reply on WhatsApp, then update the status.
+ * Orders from the website. Change the status as you pack and ship.
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "enquiries".
+ * via the `definition` "orders".
  */
-export interface Enquiry {
+export interface Order {
   id: number;
-  type: 'event' | 'portrait' | 'workshop' | 'general';
-  status?: ('new' | 'replied' | 'quoted' | 'advance_paid' | 'done' | 'lost') | null;
-  name: string;
-  phone: string;
-  email?: string | null;
-  city?: string | null;
-  eventDate?: string | null;
-  venue?: string | null;
-  size?: string | null;
-  styles?: string[] | null;
-  medium?: string | null;
-  paperSize?: string | null;
-  faces?: number | null;
-  framing?: boolean | null;
-  occasion?: string | null;
-  message?: string | null;
-  wantsOffers?: boolean | null;
+  orderNumber?: string | null;
+  status: 'pending_payment' | 'paid' | 'packed' | 'shipped' | 'delivered' | 'cancelled' | 'needs_refund' | 'refunded';
+  publicId?: string | null;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        title?: string | null;
+        variantId?: string | null;
+        variantLabel?: string | null;
+        frameLabel?: string | null;
+        type?: string | null;
+        unitPrice?: number | null;
+        qty?: number | null;
+        lineTotal?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  subtotal?: number | null;
+  shipping?: number | null;
+  total?: number | null;
+  customer?: {
+    name?: string | null;
+    phone?: string | null;
+    email?: string | null;
+  };
+  address?: {
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    pincode?: string | null;
+  };
+  note?: string | null;
+  razorpayOrderId?: string | null;
+  razorpayPaymentId?: string | null;
+  paidAt?: string | null;
+  reservedUntil?: string | null;
   locale?: string | null;
-  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -367,6 +388,36 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * New requests from the website. Reply on WhatsApp, then update the status.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enquiries".
+ */
+export interface Enquiry {
+  id: number;
+  type: 'event' | 'portrait' | 'workshop' | 'general';
+  status?: ('new' | 'replied' | 'quoted' | 'advance_paid' | 'done' | 'lost') | null;
+  name: string;
+  phone: string;
+  email?: string | null;
+  city?: string | null;
+  eventDate?: string | null;
+  venue?: string | null;
+  size?: string | null;
+  styles?: string[] | null;
+  medium?: string | null;
+  paperSize?: string | null;
+  faces?: number | null;
+  framing?: boolean | null;
+  occasion?: string | null;
+  message?: string | null;
+  wantsOffers?: boolean | null;
+  locale?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -575,6 +626,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
         relationTo: 'enquiries';
         value: number | Enquiry;
       } | null)
@@ -659,6 +714,56 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  status?: T;
+  publicId?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        title?: T;
+        variantId?: T;
+        variantLabel?: T;
+        frameLabel?: T;
+        type?: T;
+        unitPrice?: T;
+        qty?: T;
+        lineTotal?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  shipping?: T;
+  total?: T;
+  customer?:
+    | T
+    | {
+        name?: T;
+        phone?: T;
+        email?: T;
+      };
+  address?:
+    | T
+    | {
+        line1?: T;
+        line2?: T;
+        city?: T;
+        state?: T;
+        pincode?: T;
+      };
+  note?: T;
+  razorpayOrderId?: T;
+  razorpayPaymentId?: T;
+  paidAt?: T;
+  reservedUntil?: T;
+  locale?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

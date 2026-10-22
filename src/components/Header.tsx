@@ -6,6 +6,7 @@ import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
+import { CartCount } from './CartCount'
 import { GenerativeRangoli } from './GenerativeRangoli'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
@@ -85,7 +86,8 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <User aria-hidden="true" className="size-6" />
             {t.nav.me}
           </Link>
-          <Link href={p('/cart')} className={iconLink}>
+          <Link href={p('/cart')} className={`relative ${iconLink}`}>
+            <CartCount />
             <ShoppingCart aria-hidden="true" className="size-6" />
             {t.nav.cart}
           </Link>
