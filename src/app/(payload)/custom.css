@@ -1,0 +1,4 @@
+/* Admin panel tweaks: larger base text so the artist can read comfortably on a phone. */
+html {
+  font-size: 17px;
+}

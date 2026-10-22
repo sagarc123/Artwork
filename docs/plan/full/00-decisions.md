@@ -35,7 +35,20 @@ The stack in `03-architecture.md` §1 is final:
 
 **Build notes (22 Oct 2026, milestones 1–2 done):**
 - **Languages:** use Next.js 16's built-in dictionaries and `next/root-params` instead of `next-intl`, which saves a dependency. The proxy is at `src/proxy.ts` and the logic, with tests, is in `src/i18n/config.ts`.
-- **Payload and the database:** installation moves to milestone 3. This machine has no Postgres or Docker, so the database will be a Supabase project.
+- **Payload and the database:** installation moves to milestone 3.
+
+**Build notes (22 Oct 2026, milestone 3 core done):**
+- **Database:** local PostgreSQL 18, database `siddesh_art`, Payload tables in the `payload` schema.
+- **Migrations:** schema changes only go through migrations (`npm run migrate:create <name>`, then `npm run migrate`).
+  - Production runs `npm run migrate` before each deploy.
+  - `push` is turned off everywhere.
+- **Payload's command-line tool:** runs with `--use-swc` (the `npm run payload` script). Its default loader loads `undici` twice in this setup and crashes. `package.json` is `"type": "module"`, as Payload expects.
+- **Collections done:** Users (owner/staff/editor), Media, Categories, Mediums, Festivals, Products (variants with stock and reserved, plus framing), Artworks, Courses, Lessons, Testimonials, and the SiteSettings global. Text fields are stored in en/mr/hi.
+- **Still to do for milestone 3** (done when the pages that use them are built):
+  - Cloud storage plus watermarking for media. Uploads go to `/media` on disk for now.
+  - Search index, audit log, redirects and the remaining globals (Home, Commerce settings).
+  - An email adapter (Resend).
+- **Before going public:** create the owner account first, because `/admin/create-first-user` is open until an owner exists.
 
 ## 2. Who owns which data
 
