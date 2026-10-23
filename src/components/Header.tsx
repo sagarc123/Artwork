@@ -8,14 +8,14 @@ import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
 import { SavedCount } from './SavedCount'
-import { KolamMark } from './Art'
+import { BrandMark } from './Art'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
 function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
-      <KolamMark className="size-9 shrink-0" />
+      <BrandMark className="size-9 shrink-0" />
       <span className="font-heading text-[1.375rem] leading-none whitespace-nowrap xl:text-[1.625rem]">{brand}</span>
     </Link>
   )

@@ -1,10 +1,10 @@
-import { KolamMark } from '../../components/Art'
+import { BrandMark } from '../../components/Art'
 
 /** Login page: the site's kolam knot with the artist's name in English and Marathi. */
 export function Logo() {
   return (
     <div className="brand-logo">
-      <KolamMark className="brand-logo__mark" />
+      <BrandMark className="brand-logo__mark" />
       <div>
         <p className="brand-logo__name">Siddesh Mokashi</p>
         <p className="brand-logo__mr" lang="mr">
@@ -17,5 +17,5 @@ export function Logo() {
 
 /** Small mark in the top bar and menu. */
 export function Icon() {
-  return <KolamMark className="brand-icon" />
+  return <BrandMark className="brand-icon" />
 }

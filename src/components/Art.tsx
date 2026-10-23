@@ -117,25 +117,18 @@ export function KolamWeave({ className = '' }: { className?: string }) {
   )
 }
 
-// Brand seal: an eight-petal flower rangoli (white powder petals, marigold between) on a kumkum disc,
-// ringed with turmeric dots. Fixed paths so it reads the same everywhere, down to 32px.
-const SEAL_PETALS =
-  'M0,-3Q-3.77,-7.74 0,-13.2Q3.77,-7.74 0,-3ZM2.12,-2.12Q2.8,-8.14 9.33,-9.33Q8.14,-2.8 2.12,-2.12ZM3,0Q7.74,-3.77 13.2,0Q7.74,3.77 3,0ZM2.12,2.12Q8.14,2.8 9.33,9.33Q2.8,8.14 2.12,2.12ZM0,3Q3.77,7.74 0,13.2Q-3.77,7.74 0,3ZM-2.12,2.12Q-2.8,8.14 -9.33,9.33Q-8.14,2.8 -2.12,2.12ZM-3,0Q-7.74,3.77 -13.2,0Q-7.74,-3.77 -3,0ZM-2.12,-2.12Q-8.14,-2.8 -9.33,-9.33Q-2.8,-8.14 -2.12,-2.12Z'
-const SEAL_INNER =
-  'M1.91,-4.62Q0.07,-8.3 4.21,-10.16Q5.82,-5.92 1.91,-4.62ZM4.62,-1.91Q5.92,-5.82 10.16,-4.21Q8.3,-0.07 4.62,-1.91ZM4.62,1.91Q8.3,0.07 10.16,4.21Q5.92,5.82 4.62,1.91ZM1.91,4.62Q5.82,5.92 4.21,10.16Q0.07,8.3 1.91,4.62ZM-1.91,4.62Q-0.07,8.3 -4.21,10.16Q-5.82,5.92 -1.91,4.62ZM-4.62,1.91Q-5.92,5.82 -10.16,4.21Q-8.3,0.07 -4.62,1.91ZM-4.62,-1.91Q-8.3,-0.07 -10.16,-4.21Q-5.92,-5.82 -4.62,-1.91ZM-1.91,-4.62Q-5.82,-5.92 -4.21,-10.16Q-0.07,-8.3 -1.91,-4.62Z'
-const SEAL_DOTS =
-  'M3.12,-15.69h0M8.89,-13.3h0M13.3,-8.89h0M15.69,-3.12h0M15.69,3.12h0M13.3,8.89h0M8.89,13.3h0M3.12,15.69h0M-3.12,15.69h0M-8.89,13.3h0M-13.3,8.89h0M-15.69,3.12h0M-15.69,-3.12h0M-13.3,-8.89h0M-8.89,-13.3h0M-3.12,-15.69h0'
+// Brand mark "Bindu": one hand-drawn powder stroke (thick in the middle, thin at the ends) left open,
+// with the kumkum dot every rangoli starts from sitting in the gap. Abstract: dot → line.
+// Same shape as the app icons in scripts/make-icons.mjs.
+const BINDU_STROKE =
+  'M13.01,-2.77L13.72,-1.04L13.97,0.82L13.92,2.71L13.58,4.6L12.96,6.43L12.08,8.16L10.96,9.77L9.61,11.21L8.07,12.46L6.36,13.48L4.52,14.26L2.58,14.78L0.58,15.03L-1.43,15L-3.43,14.69L-5.36,14.11L-7.2,13.27L-8.9,12.19L-10.44,10.88L-11.79,9.38L-12.91,7.71L-13.8,5.9L-14.42,3.99L-14.78,2.02L-14.87,0.03L-14.68,-1.95L-14.23,-3.87L-13.53,-5.71L-12.58,-7.43L-11.41,-9L-10.05,-10.38L-8.52,-11.56L-6.85,-12.51L-5.09,-13.22L-3.25,-13.67L-1.38,-13.87L0.48,-13.81L2.29,-13.49L4.03,-12.91L5.62,-12.05L5.54,-11.87L3.83,-12.29L2.13,-12.54L0.43,-12.58L-1.24,-12.4L-2.86,-12.01L-4.4,-11.42L-5.83,-10.64L-7.15,-9.69L-8.32,-8.59L-9.32,-7.35L-10.15,-6L-10.79,-4.56L-11.24,-3.06L-11.49,-1.52L-11.53,0.03L-11.37,1.56L-11.02,3.05L-10.48,4.48L-9.76,5.82L-8.87,7.06L-7.84,8.17L-6.67,9.13L-5.39,9.93L-4.01,10.57L-2.57,11.02L-1.08,11.28L0.44,11.35L1.96,11.22L3.45,10.9L4.9,10.39L6.28,9.7L7.57,8.83L8.75,7.8L9.79,6.62L10.69,5.3L11.43,3.87L11.99,2.34L12.38,0.72L12.6,-0.95L12.81,-2.72Z'
 
-/** Header and admin mark: the rangoli seal. Decorative (the name beside it is the link text). */
-// Colours have fallbacks because the admin panel doesn't define every site colour variable.
-export function KolamMark({ className = '' }: { className?: string }) {
+/** Header and admin mark. The stroke takes the text colour (works on light and dark); the dot stays kumkum. Decorative. */
+export function BrandMark({ className = '' }: { className?: string }) {
   return (
-    <svg aria-hidden="true" focusable="false" viewBox="-20 -20 40 40" className={className}>
-      <circle r="19.4" fill="var(--color-kumkum, #A6261D)" />
-      <path d={SEAL_INNER} fill="var(--color-marigold, #E8890C)" />
-      <path d={SEAL_PETALS} fill="var(--color-paper, #FAF6EF)" />
-      <path d={SEAL_DOTS} stroke="var(--color-turmeric, #F2B705)" strokeWidth="2" strokeLinecap="round" />
-      <circle r="3" fill="var(--color-turmeric, #F2B705)" />
+    <svg aria-hidden="true" focusable="false" viewBox="-17 -17 34 34" className={className}>
+      <path d={BINDU_STROKE} fill="currentColor" />
+      <circle cx="10.4" cy="-8.13" r="2.8" fill="var(--color-kumkum, #A6261D)" />
     </svg>
   )
 }
