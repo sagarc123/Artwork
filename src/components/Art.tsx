@@ -1,6 +1,6 @@
 // Hand-made-looking art pieces drawn in code (no image files). All decorative: aria-hidden.
 import type { CSSProperties, ReactNode } from 'react'
-import { cubic, kolam, taperedPath, type Pt, type RangoliStyle } from '@/lib/art'
+import { cubic, taperedPath, type Pt, type RangoliStyle } from '@/lib/art'
 import { GenerativeRangoli } from './GenerativeRangoli'
 import { PhotoStandIn, SketchStandIn } from './StandIns'
 
@@ -117,13 +117,25 @@ export function KolamWeave({ className = '' }: { className?: string }) {
   )
 }
 
-const KNOT = kolam(2, 3, 4)
-/** Header mark: a small fixed kolam knot, one line round six dots. */
+// Brand seal: an eight-petal flower rangoli (white powder petals, marigold between) on a kumkum disc,
+// ringed with turmeric dots. Fixed paths so it reads the same everywhere, down to 32px.
+const SEAL_PETALS =
+  'M0,-3Q-3.77,-7.74 0,-13.2Q3.77,-7.74 0,-3ZM2.12,-2.12Q2.8,-8.14 9.33,-9.33Q8.14,-2.8 2.12,-2.12ZM3,0Q7.74,-3.77 13.2,0Q7.74,3.77 3,0ZM2.12,2.12Q8.14,2.8 9.33,9.33Q2.8,8.14 2.12,2.12ZM0,3Q3.77,7.74 0,13.2Q-3.77,7.74 0,3ZM-2.12,2.12Q-2.8,8.14 -9.33,9.33Q-8.14,2.8 -2.12,2.12ZM-3,0Q-7.74,3.77 -13.2,0Q-7.74,-3.77 -3,0ZM-2.12,-2.12Q-8.14,-2.8 -9.33,-9.33Q-2.8,-8.14 -2.12,-2.12Z'
+const SEAL_INNER =
+  'M1.91,-4.62Q0.07,-8.3 4.21,-10.16Q5.82,-5.92 1.91,-4.62ZM4.62,-1.91Q5.92,-5.82 10.16,-4.21Q8.3,-0.07 4.62,-1.91ZM4.62,1.91Q8.3,0.07 10.16,4.21Q5.92,5.82 4.62,1.91ZM1.91,4.62Q5.82,5.92 4.21,10.16Q0.07,8.3 1.91,4.62ZM-1.91,4.62Q-0.07,8.3 -4.21,10.16Q-5.82,5.92 -1.91,4.62ZM-4.62,1.91Q-5.92,5.82 -10.16,4.21Q-8.3,0.07 -4.62,1.91ZM-4.62,-1.91Q-8.3,-0.07 -10.16,-4.21Q-5.92,-5.82 -4.62,-1.91ZM-1.91,-4.62Q-5.82,-5.92 -4.21,-10.16Q-0.07,-8.3 -1.91,-4.62Z'
+const SEAL_DOTS =
+  'M3.12,-15.69h0M8.89,-13.3h0M13.3,-8.89h0M15.69,-3.12h0M15.69,3.12h0M13.3,8.89h0M8.89,13.3h0M3.12,15.69h0M-3.12,15.69h0M-8.89,13.3h0M-13.3,8.89h0M-15.69,3.12h0M-15.69,-3.12h0M-13.3,-8.89h0M-8.89,-13.3h0M-3.12,-15.69h0'
+
+/** Header and admin mark: the rangoli seal. Decorative (the name beside it is the link text). */
+// Colours have fallbacks because the admin panel doesn't define every site colour variable.
 export function KolamMark({ className = '' }: { className?: string }) {
   return (
-    <svg aria-hidden="true" focusable="false" viewBox="-17 -17 34 34" className={className}>
-      <path d={KNOT.d} fill="none" stroke="var(--color-kumkum)" strokeWidth="2.2" strokeLinejoin="round" />
-      <path d={KNOT.dots.map(([x, y]) => `M${x},${y}h0`).join('')} stroke="var(--color-charcoal)" strokeWidth="3.2" strokeLinecap="round" />
+    <svg aria-hidden="true" focusable="false" viewBox="-20 -20 40 40" className={className}>
+      <circle r="19.4" fill="var(--color-kumkum, #A6261D)" />
+      <path d={SEAL_INNER} fill="var(--color-marigold, #E8890C)" />
+      <path d={SEAL_PETALS} fill="var(--color-paper, #FAF6EF)" />
+      <path d={SEAL_DOTS} stroke="var(--color-turmeric, #F2B705)" strokeWidth="2" strokeLinecap="round" />
+      <circle r="3" fill="var(--color-turmeric, #F2B705)" />
     </svg>
   )
 }
