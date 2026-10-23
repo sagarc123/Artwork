@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation'
 import { stripLocale } from '@/i18n/config'
 import { whatsappLink } from '@/lib/site'
 
-// Pages with their own bottom actions (pay, add to cart) where the floating button would cover them.
-const HIDDEN = /^\/(cart|checkout|order|shop\/p)(\/|$)/
+// Pages with their own bottom actions (pay, add to cart) or their own WhatsApp button, where the floating one would cover or repeat them.
+const HIDDEN = /^\/(cart|checkout|order|shop\/p|contact)(\/|$)/
 
 /** Floating help button. Sits above the mobile tab bar. Leaf green keeps white text readable (6.4:1). */
 export function WhatsAppButton({ label, aria, message }: { label: string; aria: string; message: string }) {

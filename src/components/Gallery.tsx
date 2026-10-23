@@ -57,7 +57,7 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
         ))}
       </div>
       <p aria-live="polite" className="mt-4 text-muted">
-        {shown.length} {t.count}
+        {shown.length} {shown.length === 1 ? t.countOne : t.count}
       </p>
 
       <ul className="mt-6 columns-2 gap-4 lg:columns-4 lg:gap-6">

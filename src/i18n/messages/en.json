@@ -307,6 +307,7 @@
     "enquire": "Commission something like this",
     "story": "The story",
     "count": "pieces",
+    "countOne": "piece",
     "filter": "Category"
   },
   "festivalsPage": {
@@ -340,6 +341,7 @@
       "high": "Price: high to low"
     },
     "count": "pieces",
+    "countOne": "piece",
     "empty": "New pieces are on their way. Message me on WhatsApp to ask what is available.",
     "emptyFilter": "Nothing matches. Try another type.",
     "from": "from",

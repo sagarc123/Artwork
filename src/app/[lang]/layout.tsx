@@ -41,7 +41,11 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
   const t = await getDictionary()
 
   return (
-    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`}>
+    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Apply a saved "Stop animations" before first paint so the hero doesn't start drawing and then jump. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem("motion")==="off")document.documentElement.dataset.motion="off"}catch(e){}` }} />
+      </head>
       <body className="flex min-h-dvh flex-col">
         <a href="#main" className="skip-link">
           {t.nav.skip}
@@ -49,7 +53,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         <div aria-hidden="true" className="scroll-ink" />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
-          <ViewTransition default="page">{children}</ViewTransition>
+          <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>
         </main>
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />

@@ -1,7 +1,7 @@
 'use client'
 
 import { CheckCircle2, MessageCircle } from 'lucide-react'
-import { startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
+import { addTransitionType, startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { EnquiryField } from '@/lib/enquiry'
 import { whatsappLink } from '@/lib/site'
@@ -121,7 +121,11 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
         e.preventDefault()
         const data = new FormData(e.currentTarget)
         setSummary(summarise(data, t, typeLabel))
-        startTransition(() => action(data))
+        // Tagged so the page cross-fade in the layout skips it (only navigations fade).
+        startTransition(() => {
+          addTransitionType('form')
+          action(data)
+        })
       }}
       noValidate
       className="grid gap-6"

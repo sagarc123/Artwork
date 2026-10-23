@@ -58,8 +58,14 @@ export default async function PolicyPage({ params }: PageProps<'/[lang]/policies
         <div className="wrap grid gap-10 lg:grid-cols-12">
           {/* Phones: a closed "On this page" list, so the summary comes first. Desktop: an always-open sticky list. */}
           <nav aria-label={t.policies.contents} className="lg:col-span-3">
-            <details className="rounded-ui bg-surface p-5 shadow-frame lg:hidden">
-              <summary className="flex min-h-11 cursor-pointer items-center font-semibold">{t.policies.contents}</summary>
+            <details className="group rounded-ui bg-surface p-5 shadow-frame lg:hidden">
+              {/* Same "+" as the Help FAQ, so it reads as something to tap. */}
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-semibold [&::-webkit-details-marker]:hidden">
+                {t.policies.contents}
+                <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full border-[1.5px] border-charcoal text-xl leading-none transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
               {toc}
             </details>
             <div className="hidden rounded-ui bg-surface p-5 shadow-frame lg:sticky lg:top-32 lg:block">

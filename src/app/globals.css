@@ -55,6 +55,8 @@
   html {
     scroll-padding-top: 7rem;
     -webkit-text-size-adjust: 100%;
+    /* Keeps the page from jumping sideways when a dialog locks scrolling. */
+    scrollbar-gutter: stable;
   }
   body {
     background: var(--color-paper);

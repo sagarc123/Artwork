@@ -69,7 +69,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
           </div>
 
           <p aria-live="polite" className="text-muted">
-            {shown.length} {t.count}
+            {shown.length} {shown.length === 1 ? t.countOne : t.count}
           </p>
         </>
       )}
