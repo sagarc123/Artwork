@@ -5,12 +5,13 @@ import { anyone, canEditContent, isOwner } from '../access'
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   hooks: refreshOnChange('testimonials'),
-  admin: { useAsTitle: 'name', group: 'Content', defaultColumns: ['name', 'context', 'rating', 'featured'] },
+  admin: { useAsTitle: 'name', group: 'Gallery & Festivals', defaultColumns: ['name', 'context', 'rating', 'featured'] },
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [
     { name: 'name', type: 'text', required: true, admin: { description: 'First name and city, e.g. "Priya, Nashik"' } },
-    { name: 'context', type: 'text', localized: true, admin: { description: 'e.g. "Wedding rangoli" or "Student"' } },
-    { name: 'quote', type: 'textarea', required: true, localized: true },
+    // One language per review: the customer's own words, as they wrote them.
+    { name: 'context', type: 'text', admin: { description: 'e.g. "Wedding rangoli" or "Student"' } },
+    { name: 'quote', type: 'textarea', required: true },
     { name: 'rating', type: 'number', min: 1, max: 5, defaultValue: 5 },
     { name: 'photo', type: 'upload', relationTo: 'media' },
     { name: 'featured', type: 'checkbox', admin: { position: 'sidebar' } },

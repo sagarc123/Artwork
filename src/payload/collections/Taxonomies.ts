@@ -17,9 +17,12 @@ export const Categories: CollectionConfig = {
       name: 'scope',
       type: 'select',
       required: true,
+      defaultValue: 'both',
+      admin: { description: 'Where this category is used. "Shop and gallery" keeps one list for both.' },
       options: [
-        { label: 'Shop', value: 'shop' },
-        { label: 'Artwork gallery', value: 'artwork' },
+        { label: 'Shop and gallery', value: 'both' },
+        { label: 'Shop only', value: 'shop' },
+        { label: 'Gallery only', value: 'artwork' },
         { label: 'Courses', value: 'course' },
       ],
     },
@@ -38,14 +41,14 @@ export const Mediums: CollectionConfig = {
 export const Festivals: CollectionConfig = {
   slug: 'festivals',
   hooks: refreshOnChange('festivals'),
-  admin: { useAsTitle: 'name', group: 'Content', defaultColumns: ['name', 'nextDate', 'order'] },
+  admin: { useAsTitle: 'name', group: 'Gallery & Festivals', defaultColumns: ['name', 'nextDate', 'order'] },
   access,
   fields: [
     { name: 'name', type: 'text', required: true, localized: true },
     slugField('name'),
     { name: 'intro', type: 'textarea', localized: true },
     { name: 'heroImage', type: 'upload', relationTo: 'media' },
-    { name: 'nextDate', type: 'date', admin: { description: 'Next festival date, shown as a booking deadline.' } },
+    { name: 'nextDate', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' }, description: 'Next festival date, shown as a booking deadline. Update it every year (Today reminds you).' } },
     { name: 'order', type: 'number', defaultValue: 0, admin: { position: 'sidebar' } },
   ],
 }

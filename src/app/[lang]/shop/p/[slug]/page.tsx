@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PageProps<'/[lang]/shop/p/[sl
     description,
     alternates: alternates(locale, `/shop/p/${product.slug}`),
     // A page's openGraph replaces the layout's whole object, so repeat its defaults.
-    openGraph: { siteName: site.brandName, type: 'website', title, description, images: image?.url ? [{ url: image.url, alt: image.alt }] : undefined },
+    openGraph: { siteName: site.brandName, type: 'website', title, description, images: image?.url ? [{ url: image.url, alt: image.alt || title }] : undefined },
   }
 }
 
@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
             <ul className="grid grid-cols-3 gap-3">
               {images.slice(1).map((m) => (
                 <li key={m.id} className="bg-surface p-2 shadow-frame">
-                  <MediaImage media={m} alt={m.alt} ratio="1/1" seed={`${product.slug}-${m.id}`} medium={medium} sizes="20vw" />
+                  <MediaImage media={m} alt={m.alt || product.title} ratio="1/1" seed={`${product.slug}-${m.id}`} medium={medium} sizes="20vw" />
                 </li>
               ))}
             </ul>

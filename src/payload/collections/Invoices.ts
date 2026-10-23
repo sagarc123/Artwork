@@ -11,7 +11,7 @@ export const Invoices: CollectionConfig = {
   slug: 'invoices',
   admin: {
     useAsTitle: 'number',
-    group: 'Shop',
+    group: 'Orders',
     defaultColumns: ['number', 'issuedAt', 'documentType', 'order'],
     description: 'Issued automatically when an order is paid online, or when a cash-on-delivery order is delivered.',
     preview: (doc) => (doc.orderPublicId ? `/api/invoices/${doc.orderPublicId}` : null),

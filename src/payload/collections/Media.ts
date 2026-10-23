@@ -7,7 +7,7 @@ import { anyone, canEditContent, isOwner } from '../access'
 export const Media: CollectionConfig = {
   slug: 'media',
   hooks: refreshOnChange('media'),
-  admin: { group: 'Content', description: 'Upload photos here. Always describe what the photo shows.' },
+  admin: { group: 'Gallery & Festivals', description: 'Photos for paintings, the gallery and festivals.' },
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   upload: {
     // ponytail: local disk for development; production moves to cloud storage (Supabase/S3) before launch.
@@ -25,10 +25,10 @@ export const Media: CollectionConfig = {
   fields: [
     {
       name: 'alt',
+      label: 'What the photo shows',
       type: 'text',
-      required: true,
-      localized: true,
-      admin: { description: 'Describe the photo as you would to a friend on the phone, e.g. "Peacock rangoli in blue and orange, dot style".' },
+      // Optional: left empty, it becomes the painting's title when the photo is used on a product or gallery piece.
+      admin: { description: 'Optional. Describe the photo as you would to a friend on the phone, e.g. "Peacock rangoli in blue and orange, dot style".' },
     },
   ],
 }

@@ -98,7 +98,7 @@ await payload.delete({ collection: 'tax-classes', where: { name: { like: '(sampl
 const taxClass = async (name: string, hsn: string, rate: number) =>
   (await payload.create({ collection: 'tax-classes', data: { name: `${name} (sample — confirm with CA)`, hsn, rate } })).id
 const taxClasses = { original: await taxClass('Original artwork', '9701', 12), print: await taxClass('Print', '4911', 12) }
-await payload.updateGlobal({ slug: 'commerce-settings', data: { giftWrapFee: 49, tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print } } })
+await payload.updateGlobal({ slug: 'commerce-settings', data: { giftWrapFee: 49, tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print, defaultTaxClassOriginal: taxClasses.original, defaultTaxClassPrint: taxClasses.print } } })
 
 // SAMPLE starting prices — the owner confirms or replaces them in Admin → Settings → Service prices.
 const round100 = (n: number) => Math.round(n / 100) * 100
@@ -161,9 +161,9 @@ const reviews = [
     },
   },
 ] as const
+// Reviews keep one language (the customer's own words): English samples here.
 for (const r of reviews) {
-  const doc = await payload.create({ collection: 'testimonials', locale: 'en', data: { name: r.name, rating: r.rating, featured: r.featured, permission: true, context: r.context.en, quote: r.quote.en } })
-  for (const locale of ['mr', 'hi'] as const) await payload.update({ collection: 'testimonials', id: doc.id, locale, data: { context: r.context[locale], quote: r.quote[locale] } })
+  await payload.create({ collection: 'testimonials', data: { name: r.name, rating: r.rating, featured: r.featured, permission: true, context: r.context.en, quote: r.quote.en } })
 }
 
 const productIds: Record<string, number> = {}
@@ -187,6 +187,8 @@ for (const p of products) {
       taxClass: p.type === 'digital' ? undefined : taxClasses[p.type],
       framing: 'framing' in p ? [{ label: 'Black wood frame', extraPrice: 1800 }, { label: 'Natural teak frame', extraPrice: 2400 }] : [],
       featured: true,
+      // The sample gallery below is seeded by hand, so no automatic gallery copies.
+      showInGallery: false,
       _status: 'published',
     },
   })

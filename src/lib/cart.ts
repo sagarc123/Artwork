@@ -19,6 +19,8 @@ export type QuoteLine = {
   frameLabel?: string
   type: Product['type']
   unitPrice: number
+  /** Line total before a sale or "was" price, shown crossed out. */
+  wasTotal?: number
   qty: number
   lineTotal: number
   maxQty: number
@@ -66,15 +68,70 @@ export function priceCart(lines: CartLine[], products: Product[]): Quote {
       unitPrice,
       qty,
       lineTotal: unitPrice * qty,
+      wasTotal: v.compareAtPrice && v.compareAtPrice > v.price ? (v.compareAtPrice + (frame?.extraPrice ?? 0)) * qty : undefined,
       maxQty,
       available: p.type === 'digital' || left >= qty,
-      image: img?.url ? { url: img.url, alt: img.alt } : null,
+      image: img?.url ? { url: img.url, alt: img.alt || p.title } : null,
     })
   }
   const subtotal = out.reduce((sum, l) => sum + l.lineTotal, 0)
   const physical = out.some((l) => l.type !== 'digital')
   const shipping = physical && subtotal < FREE_SHIPPING_FROM ? SHIPPING_FEE : 0
   return { lines: out, subtotal, shipping, total: subtotal + shipping, ok: out.length > 0 && out.every((l) => l.available) }
+}
+
+/** The owner's festival sale (Commerce settings). Empty categories = everything in the shop. */
+export type FestivalSale = {
+  enabled?: boolean | null
+  percent?: number | null
+  categories?: (number | { id: number })[] | null
+  startsAt?: string | null
+  endsAt?: string | null
+}
+
+const DAY = 86_400_000
+/** Start of the Indian (IST) calendar day a stored date falls on: the owner picks days, not times. */
+const istDayStart = (iso: string) => {
+  const day = new Date(Date.parse(iso) + 330 * 60_000).toISOString().slice(0, 10)
+  return Date.parse(`${day}T00:00:00+05:30`)
+}
+
+/** Sale window in ms: from the start of the first day to the end of the last day (IST), either side open if empty. */
+function saleWindow(sale: FestivalSale | null | undefined): [number, number] | null {
+  if (!sale?.enabled || !sale.percent || sale.percent < 1 || sale.percent > 50) return null
+  return [sale.startsAt ? istDayStart(sale.startsAt) : -Infinity, sale.endsAt ? istDayStart(sale.endsAt) + DAY : Infinity]
+}
+
+export const saleIsOn = (sale: FestivalSale | null | undefined, now: Date) => {
+  const w = saleWindow(sale)
+  return !!w && now.getTime() >= w[0] && now.getTime() < w[1]
+}
+
+/** Milliseconds until the sale starts or ends (for cache lifetimes), or null if nothing changes. */
+export function nextSaleChange(sale: FestivalSale | null | undefined, now: Date): number | null {
+  const w = saleWindow(sale)
+  const next = w?.find((t) => Number.isFinite(t) && t > now.getTime())
+  return next === undefined ? null : next - now.getTime()
+}
+
+/** Whole rupees, rounded to the nearest rupee. */
+export const salePrice = (price: number, percent: number) => Math.round((price * (100 - percent)) / 100)
+
+const idOf = (v: unknown) => (v && typeof v === 'object' ? (v as { id: unknown }).id : v)
+
+/**
+ * Products with the sale applied: the price drops and the old price becomes the struck-through "was" price.
+ * Used for both the shop pages and the checkout, so the buyer pays what they saw.
+ */
+// ponytail: applies to every product type (digital too) and to the size price only; frames stay full price.
+export function applySale<P extends Pick<Product, 'category' | 'variants'>>(products: P[], sale: FestivalSale | null | undefined, now: Date): P[] {
+  if (!saleIsOn(sale, now)) return products
+  const only = (sale!.categories ?? []).map(idOf)
+  return products.map((p) =>
+    only.length && !only.includes(idOf(p.category))
+      ? p
+      : { ...p, variants: p.variants.map((v) => ({ ...v, price: salePrice(v.price, sale!.percent!), compareAtPrice: Math.max(v.compareAtPrice ?? 0, v.price) })) },
+  )
 }
 
 /** Cash-on-delivery settings (owner-editable, in rupees). */

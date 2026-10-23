@@ -27,15 +27,20 @@ export async function issueInvoice(orderId: number, req?: PayloadRequest) {
   const { docs: products } = await payload.find({
     collection: 'products',
     where: { id: { in: productIds } },
-    select: { taxClass: true },
+    select: { taxClass: true, type: true },
     depth: 1,
     limit: productIds.length || 1,
   })
+  // The product's own tax class, else the default for its type (original / print), else the general default.
   const fallback = taxClass(commerce.tax?.defaultTaxClass)
-  const classOf = (id: unknown) => taxClass(products.find((p) => p.id === id)?.taxClass) ?? fallback
+  const byType: Record<string, TaxClass | null> = { original: taxClass(commerce.tax?.defaultTaxClassOriginal), print: taxClass(commerce.tax?.defaultTaxClassPrint) }
+  const classOf = (id: unknown, type?: string | null) => {
+    const p = products.find((x) => x.id === id)
+    return taxClass(p?.taxClass) ?? byType[p?.type ?? type ?? ''] ?? fallback
+  }
 
   const items: InvoiceItem[] = (order.items ?? []).map((it) => {
-    const tc = classOf(it.product)
+    const tc = classOf(it.product, it.type)
     if (!tc) console.error(`Invoice for order ${orderId}: no tax class for "${it.title}", using 0%`)
     return {
       description: [it.title, it.variantLabel, it.frameLabel].filter(Boolean).join(' — '),

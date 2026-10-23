@@ -72,11 +72,11 @@ export interface Config {
     enquiries: Enquiry;
     products: Product;
     artworks: Artwork;
-    courses: Course;
-    lessons: Lesson;
     festivals: Festival;
     testimonials: Testimonial;
     media: Media;
+    courses: Course;
+    lessons: Lesson;
     categories: Category;
     mediums: Medium;
     'tax-classes': TaxClass;
@@ -93,11 +93,11 @@ export interface Config {
     enquiries: EnquiriesSelect<false> | EnquiriesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     artworks: ArtworksSelect<false> | ArtworksSelect<true>;
-    courses: CoursesSelect<false> | CoursesSelect<true>;
-    lessons: LessonsSelect<false> | LessonsSelect<true>;
     festivals: FestivalsSelect<false> | FestivalsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    courses: CoursesSelect<false> | CoursesSelect<true>;
+    lessons: LessonsSelect<false> | LessonsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     mediums: MediumsSelect<false> | MediumsSelect<true>;
     'tax-classes': TaxClassesSelect<false> | TaxClassesSelect<true>;
@@ -150,7 +150,7 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Orders from the website. Change the status as you pack and ship. Cash-on-delivery orders: confirm on WhatsApp first.
+ * Orders from the website. Use the big buttons on an order as you confirm, pack and ship it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
@@ -169,6 +169,11 @@ export interface Order {
     | 'cancelled'
     | 'needs_refund'
     | 'refunded';
+  /**
+   * e.g. India Post, DTDC, Delhivery
+   */
+  courier?: string | null;
+  trackingNumber?: string | null;
   publicId?: string | null;
   items?:
     | {
@@ -215,7 +220,7 @@ export interface Order {
   createdAt: string;
 }
 /**
- * Add a painting, drawing, print or download for sale.
+ * Add a painting, drawing, print or download. It also appears in the gallery (untick "Show in gallery" to keep it shop-only).
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
@@ -223,20 +228,43 @@ export interface Order {
 export interface Product {
   id: number;
   title: string;
-  /**
-   * Web address. Filled from the English title if left empty.
-   */
-  slug: string;
   type: 'original' | 'print' | 'digital';
-  category: number | Category;
-  medium?: (number | null) | Medium;
-  festival?: (number | null) | Festival;
   /**
    * First photo is the main one. Add a close-up and a photo on a wall if you can.
    */
   images: (number | Media)[];
   /**
-   * The story behind this piece, in your own words.
+   * In ₹ (rupees), including GST.
+   */
+  originalPrice?: number | null;
+  /**
+   * Tick when it has found a home. The page stays up with a "Sold" badge.
+   */
+  sold?: boolean | null;
+  /**
+   * One row per size you sell, e.g. "A4 print".
+   */
+  variants: {
+    /**
+     * e.g. "A4 print"
+     */
+    label: string;
+    /**
+     * In ₹ (rupees), including GST.
+     */
+    price: number;
+    /**
+     * How many you have
+     */
+    stock: number;
+    compareAtPrice?: number | null;
+    sku?: string | null;
+    reserved?: number | null;
+    weightGrams?: number | null;
+    id?: string | null;
+  }[];
+  /**
+   * The story behind this piece, in your own words. Shown on the shop page and in the gallery.
    */
   story?: string | null;
   description?: {
@@ -254,34 +282,12 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
+  category: number | Category;
+  medium?: (number | null) | Medium;
   widthCm?: number | null;
   heightCm?: number | null;
   year?: number | null;
-  /**
-   * One row per size you sell. An original has one row with stock 1.
-   */
-  variants: {
-    /**
-     * e.g. "Original", "A4 print"
-     */
-    label: string;
-    /**
-     * Optional stock code
-     */
-    sku?: string | null;
-    /**
-     * In ₹ (rupees), including GST.
-     */
-    price: number;
-    /**
-     * In ₹ (rupees), including GST.
-     */
-    compareAtPrice?: number | null;
-    stock: number;
-    reserved?: number | null;
-    weightGrams?: number | null;
-    id?: string | null;
-  }[];
+  festival?: (number | null) | Festival;
   /**
    * Optional. Leave empty if the piece is sold unframed only.
    */
@@ -296,13 +302,21 @@ export interface Product {
       }[]
     | null;
   /**
-   * GST rate and HSN code. Empty: the default in Commerce settings.
+   * Also shows this piece on the Artwork gallery page.
    */
-  taxClass?: (number | null) | TaxClass;
+  showInGallery?: boolean | null;
   /**
    * Show on the home page
    */
   featured?: boolean | null;
+  /**
+   * Web address. Made from the English title; change it only if you need to.
+   */
+  slug: string;
+  /**
+   * Leave empty: GST is set from the product type (Commerce settings → Tax).
+   */
+  taxClass?: (number | null) | TaxClass;
   /**
    * Optional. Shown in Google results; filled from the title if empty.
    */
@@ -315,60 +329,7 @@ export interface Product {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  name: string;
-  /**
-   * Web address. Filled from the English title if left empty.
-   */
-  slug: string;
-  scope: 'shop' | 'artwork' | 'course';
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Pencil, charcoal, acrylic, watercolour, rangoli colours…
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "mediums".
- */
-export interface Medium {
-  id: number;
-  name: string;
-  /**
-   * Web address. Filled from the English title if left empty.
-   */
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "festivals".
- */
-export interface Festival {
-  id: number;
-  name: string;
-  /**
-   * Web address. Filled from the English title if left empty.
-   */
-  slug: string;
-  intro?: string | null;
-  heroImage?: (number | null) | Media;
-  /**
-   * Next festival date, shown as a booking deadline.
-   */
-  nextDate?: string | null;
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Upload photos here. Always describe what the photo shows.
+ * Photos for paintings, the gallery and festivals.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -376,9 +337,9 @@ export interface Festival {
 export interface Media {
   id: number;
   /**
-   * Describe the photo as you would to a friend on the phone, e.g. "Peacock rangoli in blue and orange, dot style".
+   * Optional. Describe the photo as you would to a friend on the phone, e.g. "Peacock rangoli in blue and orange, dot style".
    */
-  alt: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -416,6 +377,62 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  /**
+   * Web address. Filled from the English title if left empty.
+   */
+  slug: string;
+  /**
+   * Where this category is used. "Shop and gallery" keeps one list for both.
+   */
+  scope: 'both' | 'shop' | 'artwork' | 'course';
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Pencil, charcoal, acrylic, watercolour, rangoli colours…
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mediums".
+ */
+export interface Medium {
+  id: number;
+  name: string;
+  /**
+   * Web address. Filled from the English title if left empty.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "festivals".
+ */
+export interface Festival {
+  id: number;
+  name: string;
+  /**
+   * Web address. Filled from the English title if left empty.
+   */
+  slug: string;
+  intro?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * Next festival date, shown as a booking deadline. Update it every year (Today reminds you).
+   */
+  nextDate?: string | null;
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * GST rates per kind of product. Ask your CA before changing these.
@@ -484,18 +501,18 @@ export interface Invoice {
   createdAt: string;
 }
 /**
- * New requests from the website. Reply on WhatsApp, then update the status.
+ * New requests from the website. Tap "Reply on WhatsApp"; it marks the enquiry as replied.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "enquiries".
  */
 export interface Enquiry {
   id: number;
-  type: 'event' | 'portrait' | 'workshop' | 'general';
   status?: ('new' | 'replied' | 'quoted' | 'advance_paid' | 'done' | 'lost') | null;
   name: string;
   phone: string;
   email?: string | null;
+  type: 'event' | 'portrait' | 'workshop' | 'general';
   city?: string | null;
   eventDate?: string | null;
   venue?: string | null;
@@ -507,13 +524,15 @@ export interface Enquiry {
   framing?: boolean | null;
   occasion?: string | null;
   message?: string | null;
+  notes?: string | null;
   wantsOffers?: boolean | null;
   locale?: string | null;
-  notes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Pieces shown on the Artwork page. Paintings added under Shop → Products appear here by themselves; add only pieces that are not for sale.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "artworks".
  */
@@ -549,6 +568,28 @@ export interface Artwork {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  /**
+   * First name and city, e.g. "Priya, Nashik"
+   */
+  name: string;
+  /**
+   * e.g. "Wedding rangoli" or "Student"
+   */
+  context?: string | null;
+  quote: string;
+  rating?: number | null;
+  photo?: (number | null) | Media;
+  featured?: boolean | null;
+  permission: boolean;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -647,28 +688,6 @@ export interface Lesson {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "testimonials".
- */
-export interface Testimonial {
-  id: number;
-  /**
-   * First name and city, e.g. "Priya, Nashik"
-   */
-  name: string;
-  /**
-   * e.g. "Wedding rangoli" or "Student"
-   */
-  context?: string | null;
-  quote: string;
-  rating?: number | null;
-  photo?: (number | null) | Media;
-  featured?: boolean | null;
-  permission: boolean;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -740,14 +759,6 @@ export interface PayloadLockedDocument {
         value: number | Artwork;
       } | null)
     | ({
-        relationTo: 'courses';
-        value: number | Course;
-      } | null)
-    | ({
-        relationTo: 'lessons';
-        value: number | Lesson;
-      } | null)
-    | ({
         relationTo: 'festivals';
         value: number | Festival;
       } | null)
@@ -758,6 +769,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'courses';
+        value: number | Course;
+      } | null)
+    | ({
+        relationTo: 'lessons';
+        value: number | Lesson;
       } | null)
     | ({
         relationTo: 'categories';
@@ -824,6 +843,8 @@ export interface PayloadMigration {
 export interface OrdersSelect<T extends boolean = true> {
   orderNumber?: T;
   status?: T;
+  courier?: T;
+  trackingNumber?: T;
   publicId?: T;
   items?:
     | T
@@ -933,11 +954,11 @@ export interface InvoicesSelect<T extends boolean = true> {
  * via the `definition` "enquiries_select".
  */
 export interface EnquiriesSelect<T extends boolean = true> {
-  type?: T;
   status?: T;
   name?: T;
   phone?: T;
   email?: T;
+  type?: T;
   city?: T;
   eventDate?: T;
   venue?: T;
@@ -949,9 +970,9 @@ export interface EnquiriesSelect<T extends boolean = true> {
   framing?: T;
   occasion?: T;
   message?: T;
+  notes?: T;
   wantsOffers?: T;
   locale?: T;
-  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -961,29 +982,30 @@ export interface EnquiriesSelect<T extends boolean = true> {
  */
 export interface ProductsSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   type?: T;
-  category?: T;
-  medium?: T;
-  festival?: T;
   images?: T;
-  story?: T;
-  description?: T;
-  widthCm?: T;
-  heightCm?: T;
-  year?: T;
+  originalPrice?: T;
+  sold?: T;
   variants?:
     | T
     | {
         label?: T;
-        sku?: T;
         price?: T;
-        compareAtPrice?: T;
         stock?: T;
+        compareAtPrice?: T;
+        sku?: T;
         reserved?: T;
         weightGrams?: T;
         id?: T;
       };
+  story?: T;
+  description?: T;
+  category?: T;
+  medium?: T;
+  widthCm?: T;
+  heightCm?: T;
+  year?: T;
+  festival?: T;
   framing?:
     | T
     | {
@@ -991,8 +1013,10 @@ export interface ProductsSelect<T extends boolean = true> {
         extraPrice?: T;
         id?: T;
       };
-  taxClass?: T;
+  showInGallery?: T;
   featured?: T;
+  slug?: T;
+  taxClass?: T;
   seo?:
     | T
     | {
@@ -1028,71 +1052,6 @@ export interface ArtworksSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "courses_select".
- */
-export interface CoursesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  subtitle?: T;
-  category?: T;
-  level?: T;
-  languages?: T;
-  price?: T;
-  salePrice?: T;
-  thumbnail?: T;
-  introVideoId?: T;
-  outcomes?:
-    | T
-    | {
-        text?: T;
-        id?: T;
-      };
-  materials?:
-    | T
-    | {
-        text?: T;
-        product?: T;
-        id?: T;
-      };
-  faq?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        id?: T;
-      };
-  audience?: T;
-  qaEnabled?: T;
-  certificateEnabled?: T;
-  featured?: T;
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lessons_select".
- */
-export interface LessonsSelect<T extends boolean = true> {
-  title?: T;
-  course?: T;
-  section?: T;
-  order?: T;
-  bunnyVideoId?: T;
-  durationSeconds?: T;
-  isFreePreview?: T;
-  transcript?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1174,6 +1133,71 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses_select".
+ */
+export interface CoursesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  subtitle?: T;
+  category?: T;
+  level?: T;
+  languages?: T;
+  price?: T;
+  salePrice?: T;
+  thumbnail?: T;
+  introVideoId?: T;
+  outcomes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  materials?:
+    | T
+    | {
+        text?: T;
+        product?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  audience?: T;
+  qaEnabled?: T;
+  certificateEnabled?: T;
+  featured?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lessons_select".
+ */
+export interface LessonsSelect<T extends boolean = true> {
+  title?: T;
+  course?: T;
+  section?: T;
+  order?: T;
+  bunnyVideoId?: T;
+  durationSeconds?: T;
+  isFreePreview?: T;
+  transcript?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1338,10 +1362,31 @@ export interface CommerceSetting {
      * Buyers in this state pay CGST + SGST; everyone else pays IGST.
      */
     sellerState: string;
+    defaultTaxClassOriginal?: (number | null) | TaxClass;
+    defaultTaxClassPrint?: (number | null) | TaxClass;
     /**
-     * Used for products without a tax class of their own.
+     * Products take their GST from their type. A tax class set on a product (under Advanced) overrides these.
      */
     defaultTaxClass?: (number | null) | TaxClass;
+  };
+  /**
+   * Takes a percentage off shop prices for a few days. The old price shows crossed out. Products are not changed.
+   */
+  festivalSale?: {
+    enabled?: boolean | null;
+    percent?: number | null;
+    /**
+     * Empty: from now
+     */
+    startsAt?: string | null;
+    /**
+     * Empty: until you switch it off
+     */
+    endsAt?: string | null;
+    /**
+     * Leave empty for the whole shop.
+     */
+    categories?: (number | Category)[] | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1497,7 +1542,18 @@ export interface CommerceSettingsSelect<T extends boolean = true> {
     | T
     | {
         sellerState?: T;
+        defaultTaxClassOriginal?: T;
+        defaultTaxClassPrint?: T;
         defaultTaxClass?: T;
+      };
+  festivalSale?:
+    | T
+    | {
+        enabled?: T;
+        percent?: T;
+        startsAt?: T;
+        endsAt?: T;
+        categories?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -96,7 +96,10 @@ function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart'
           <div className="grid content-start gap-1">
             <p className="font-heading text-h3-sm">{l.title}</p>
             <p className="text-muted">{[l.variantLabel, l.frameLabel].filter(Boolean).join(' · ')}</p>
-            <p className="font-semibold">{formatPrice(l.lineTotal)}</p>
+            <p className="font-semibold">
+              {formatPrice(l.lineTotal)}
+              {l.wasTotal && <s className="ml-2 font-normal text-muted">{formatPrice(l.wasTotal)}</s>}
+            </p>
             {!l.available && <p className="font-semibold text-kumkum">{t.unavailable}</p>}
             {editable && (
               <div className="mt-1 flex flex-wrap items-center gap-2">

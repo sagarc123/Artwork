@@ -63,3 +63,39 @@ test('gift wrap: once per order, only with something physical, added to the tota
   assert.equal(orderTotal({ total: 999 }, 49, 49), 1097)
   assert.equal(orderTotal({ total: 999 }), 999)
 })
+
+test('festival sale: whole IST days, inclusive of the last day, off when disabled or out of range', () => {
+  const { saleIsOn, nextSaleChange } = cart
+  // Owner picked 1 Nov to 3 Nov (stored at noon UTC, as the date picker does).
+  const sale = { enabled: true, percent: 20, startsAt: '2026-11-01T12:00:00.000Z', endsAt: '2026-11-03T12:00:00.000Z' }
+  assert.equal(saleIsOn(sale, new Date('2026-10-31T18:29:59Z')), false) // 23:59 IST on 31 Oct
+  assert.equal(saleIsOn(sale, new Date('2026-10-31T18:30:00Z')), true) // midnight IST, 1 Nov
+  assert.equal(saleIsOn(sale, new Date('2026-11-03T18:29:59Z')), true) // last minute of 3 Nov IST
+  assert.equal(saleIsOn(sale, new Date('2026-11-03T18:30:00Z')), false)
+  assert.equal(saleIsOn({ ...sale, enabled: false }, new Date('2026-11-02T00:00:00Z')), false)
+  assert.equal(saleIsOn({ ...sale, percent: 60 }, new Date('2026-11-02T00:00:00Z')), false)
+  assert.equal(saleIsOn({ enabled: true, percent: 10 }, new Date()), true) // no dates: on until switched off
+  assert.equal(nextSaleChange(sale, new Date('2026-10-31T18:00:00Z')), 30 * 60_000)
+  assert.equal(nextSaleChange({ enabled: true, percent: 10 }, new Date()), null)
+})
+
+test('festival sale: rounds to whole rupees, strikes the old price, only chosen categories, checkout charges the sale price', () => {
+  const { applySale, salePrice } = cart
+  assert.equal(salePrice(999, 15), 849) // 849.15
+  assert.equal(salePrice(6500, 10), 5850)
+  assert.equal(salePrice(899, 50), 450) // 449.5 rounds up
+  const now = new Date('2026-11-02T06:00:00Z')
+  const withCats = products.map((p, i) => ({ ...p, category: i === 1 ? 7 : { id: 3 } })) as Product[]
+  const sale = { enabled: true, percent: 10, categories: [{ id: 3 }] }
+  const sold = applySale(withCats, sale, now)
+  assert.equal(sold[0].variants[0].price, 5850)
+  assert.equal(sold[0].variants[0].compareAtPrice, 6500)
+  assert.equal(sold[1].variants[0].price, 900) // category 7 not in the sale
+  assert.equal(applySale(withCats, { ...sale, categories: [] }, now)[1].variants[0].price, 810) // empty = all
+  assert.equal(applySale(withCats, { ...sale, enabled: false }, now), withCats)
+  // The cart and checkout price from the sale products.
+  const q = priceCart([{ slug: 'original', variantId: 'v1', qty: 1 }], sold)
+  assert.equal(q.lines[0].unitPrice, 5850)
+  assert.equal(q.lines[0].wasTotal, 6500) // crossed out in the cart
+  assert.equal(q.total, 5850)
+})

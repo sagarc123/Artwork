@@ -7,7 +7,7 @@ import type { Artwork, Category, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
 import { pickMedium } from '@/lib/art'
 import { hashString } from '@/lib/seed'
-import { FREE_SHIPPING_FROM, SHIPPING_FEE } from '@/lib/cart'
+import { applySale, FREE_SHIPPING_FROM, nextSaleChange, SHIPPING_FEE } from '@/lib/cart'
 import { formatPrice, site } from '@/lib/site'
 import type { GalleryItem } from '@/components/Gallery'
 import type { Floor } from '@/components/PhotoPlaceholder'
@@ -79,11 +79,12 @@ export function toGalleryItem(a: Artwork, locale: Locale): GalleryItem {
 const db = () => getPayload({ config })
 const published = { _status: { equals: 'published' } } as const
 
-export async function getCategories(locale: Locale, scope: Category['scope']) {
+export async function getCategories(locale: Locale, scope: Exclude<Category['scope'], 'both'>) {
   'use cache'
   cacheLife('max')
   cacheTag('categories')
-  const { docs } = await (await db()).find({ collection: 'categories', locale, where: { scope: { equals: scope } }, sort: 'order', limit: 50, depth: 0 })
+  // "Shop and gallery" categories belong to both lists.
+  const { docs } = await (await db()).find({ collection: 'categories', locale, where: { scope: { in: [scope, 'both'] } }, sort: 'order', limit: 50, depth: 0 })
   return docs
 }
 
@@ -95,20 +96,37 @@ export async function getArtworks(locale: Locale) {
   return docs
 }
 
+/** The festival sale as of now, and how long that stays true (so cached pages switch prices when it starts or ends). */
+async function saleNow() {
+  const { festivalSale } = await (await db()).findGlobal({ slug: 'commerce-settings', depth: 0 })
+  const now = new Date()
+  const wait = nextSaleChange(festivalSale, now)
+  return { sale: festivalSale, now, seconds: wait === null ? null : Math.max(60, Math.ceil(wait / 1000)) }
+}
+
+/** Published products, with any festival sale already in the prices (the old price becomes the crossed-out one). */
 export async function getProducts(locale: Locale) {
   'use cache'
-  cacheLife('max')
-  cacheTag('products', 'categories', 'mediums', 'media', 'festivals')
-  const { docs } = await (await db()).find({ collection: 'products', locale, where: published, sort: '-createdAt', limit: 500, depth: 1 })
-  return docs
+  cacheTag('products', 'categories', 'mediums', 'media', 'festivals', 'commerce-settings')
+  const [{ docs }, { sale, now, seconds }] = await Promise.all([
+    (await db()).find({ collection: 'products', locale, where: published, sort: '-createdAt', limit: 500, depth: 1 }),
+    saleNow(),
+  ])
+  if (seconds) cacheLife({ revalidate: seconds })
+  else cacheLife('max')
+  return applySale(docs, sale, now)
 }
 
 export async function getProduct(locale: Locale, slug: string) {
   'use cache'
-  cacheLife('max')
-  cacheTag('products', 'categories', 'mediums', 'media', 'festivals')
-  const { docs } = await (await db()).find({ collection: 'products', locale, where: { and: [published, { slug: { equals: slug } }] }, limit: 1, depth: 1 })
-  return docs[0] ?? null
+  cacheTag('products', 'categories', 'mediums', 'media', 'festivals', 'commerce-settings')
+  const [{ docs }, { sale, now, seconds }] = await Promise.all([
+    (await db()).find({ collection: 'products', locale, where: { and: [published, { slug: { equals: slug } }] }, limit: 1, depth: 1 }),
+    saleNow(),
+  ])
+  if (seconds) cacheLife({ revalidate: seconds })
+  else cacheLife('max')
+  return applySale(docs, sale, now)[0] ?? null
 }
 
 export async function getFestivals(locale: Locale) {

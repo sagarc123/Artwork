@@ -34,8 +34,15 @@ export default buildConfig({
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
     meta: { titleSuffix: ' — Siddesh Mokashi admin' },
+    components: {
+      // "Today": what needs doing, above the usual collection cards.
+      beforeDashboard: ['/payload/admin/Today#Today'],
+      beforeNavLinks: ['/payload/admin/Today#TodayNavLink'],
+    },
+    // ponytail: the admin itself stays in English; Payload has no Marathi or Hindi admin translations yet.
   },
-  collections: [Orders, Invoices, Enquiries, Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, TaxClasses, Users],
+  // Menu groups follow this order: Orders, Enquiries, Shop, Gallery & Festivals, (Courses, hidden), Settings.
+  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users],
   globals: [SiteSettings, CommerceSettings, ServicePrices],
   localization: {
     locales: [

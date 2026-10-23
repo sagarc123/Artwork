@@ -1,6 +1,7 @@
 import type { CollectionConfig, Field } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isOrderStaff, isOwner } from '../access'
+import { notifyOwner } from '../hooks'
 
 const locked = { update: () => false }
 
@@ -18,9 +19,9 @@ export const Orders: CollectionConfig = {
   slug: 'orders',
   admin: {
     useAsTitle: 'orderNumber',
-    group: 'Shop',
-    defaultColumns: ['orderNumber', 'status', 'total', 'createdAt'],
-    description: 'Orders from the website. Change the status as you pack and ship. Cash-on-delivery orders: confirm on WhatsApp first.',
+    group: 'Orders',
+    defaultColumns: ['orderNumber', 'status', 'total', 'paymentMode', 'createdAt'],
+    description: 'Orders from the website. Use the big buttons on an order as you confirm, pack and ship it.',
     // Opens the invoice PDF once one is issued, otherwise the customer's order page.
     preview: async (doc, { req }) => {
       if (!doc.publicId) return null
@@ -41,6 +42,8 @@ export const Orders: CollectionConfig = {
         if (OWNER_ONLY_STATUSES.includes(to) && !hasRole(req.user, 'owner')) throw refuse('Only the owner can set this status.', 403)
         if (to === 'pending_payment' || to === 'cod_pending_confirmation') throw refuse('An order cannot go back to waiting.')
         if (to === 'cod_confirmed' && from !== 'cod_pending_confirmation') throw refuse('Only a cash-on-delivery order waiting for confirmation can be confirmed.')
+        if (to === 'shipped' && !((data.courier ?? originalDoc.courier) && (data.trackingNumber ?? originalDoc.trackingNumber)))
+          throw refuse('Add the courier and tracking number first.')
         const svc = await import('@/server/order-service')
         const items = originalDoc.items ?? []
         if (from === 'pending_payment' || from === 'cod_pending_confirmation') {
@@ -55,6 +58,7 @@ export const Orders: CollectionConfig = {
       },
     ],
     afterChange: [
+      notifyOwner('order'),
       async ({ doc, previousDoc, req }) => {
         // Prepaid orders get their invoice when paid; COD orders on delivery (this also retries a missed one).
         if (doc.status === 'delivered' && previousDoc?.status !== 'delivered') {
@@ -66,6 +70,7 @@ export const Orders: CollectionConfig = {
     ],
   },
   fields: [
+    { name: 'actions', type: 'ui', admin: { components: { Field: '/payload/admin/OrderActions#OrderActions' } } },
     {
       type: 'row',
       fields: [
@@ -88,6 +93,14 @@ export const Orders: CollectionConfig = {
             { label: 'Refunded', value: 'refunded' },
           ],
         },
+      ],
+    },
+    // Staff fill these in when the parcel leaves; "Mark shipped" needs both.
+    {
+      type: 'row',
+      fields: [
+        { name: 'courier', type: 'text', admin: { description: 'e.g. India Post, DTDC, Delhivery' } },
+        { name: 'trackingNumber', type: 'text' },
       ],
     },
     ...lock([

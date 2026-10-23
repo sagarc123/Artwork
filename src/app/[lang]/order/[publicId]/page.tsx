@@ -77,6 +77,9 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             <p>
               {o.number}: <strong>{order.orderNumber}</strong> · {o.status[order.status]}
             </p>
+            {order.status === 'shipped' && order.courier && order.trackingNumber && (
+              <p>{o.tracking.replace('{courier}', order.courier).replace('{number}', order.trackingNumber)}</p>
+            )}
             {paid && <p className="text-muted">{o.note}</p>}
           </div>
           <div className="grid gap-4">

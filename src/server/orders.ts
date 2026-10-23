@@ -5,7 +5,7 @@ import config from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 import { isLocale } from '@/i18n/config'
 import { isPincode } from '@/lib/pincode'
-import { codBlock, GIFT_NOTE_MAX, giftWrapCharge, orderTotal, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type Quote } from '@/lib/cart'
+import { applySale, codBlock, GIFT_NOTE_MAX, giftWrapCharge, orderTotal, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type FestivalSale, type Quote } from '@/lib/cart'
 import { isValidGstin } from '@/lib/gst'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
@@ -23,12 +23,13 @@ function cleanLines(input: unknown): CartLine[] {
   })
 }
 
-async function settings(payload: Payload): Promise<{ cod: CodRules; giftWrapFee: number }> {
-  const { cod, giftWrapFee } = await payload.findGlobal({ slug: 'commerce-settings', depth: 0 })
+async function settings(payload: Payload): Promise<{ cod: CodRules; giftWrapFee: number; sale: FestivalSale | null | undefined }> {
+  const { cod, giftWrapFee, festivalSale } = await payload.findGlobal({ slug: 'commerce-settings', depth: 0 })
   // Fallbacks match the field defaults, for before the owner first saves the settings.
   return {
     cod: { enabled: cod?.enabled ?? true, maxTotal: cod?.maxTotal ?? 5000, fee: cod?.fee ?? 49, blockedPincodes: parsePincodes(cod?.blockedPincodes) },
     giftWrapFee: giftWrapFee ?? 49,
+    sale: festivalSale,
   }
 }
 
@@ -44,8 +45,9 @@ export async function getCartQuote(input: unknown, locale: string, pincode?: str
     depth: 1,
     limit: 30,
   })
-  const quote = priceCart(lines, docs)
-  const { cod: rules, giftWrapFee } = await settings(payload)
+  const { cod: rules, giftWrapFee, sale } = await settings(payload)
+  // Festival sale prices, checked against the clock now: the order is charged what the quote shows.
+  const quote = priceCart(lines, applySale(docs, sale, new Date()))
   const cod = { fee: rules.fee, maxTotal: rules.maxTotal, block: codBlock(rules, quote.lines, quote.total, isPincode(pincode) ? pincode : '') }
   return { ...quote, cod, online: razorpayConfig() !== null, giftWrapFee }
 }

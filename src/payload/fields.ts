@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field, TextFieldSingleValidation, Where } from 'payload'
 
 /** ASCII URL slug: "Monsoon Evening!" -> "monsoon-evening". Devanagari is dropped, so slugs come from the English title. */
 export const slugify = (text: string) =>
@@ -9,16 +9,30 @@ export const slugify = (text: string) =>
     .trim()
     .replace(/[\s-]+/g, '-')
 
-export const slugField = (from = 'title'): Field => ({
+export const slugField = (from = 'title', description = 'Web address. Filled from the English title if left empty.', position: 'sidebar' | undefined = 'sidebar'): Field => ({
   name: 'slug',
   type: 'text',
   required: true,
   unique: true,
   index: true,
-  admin: { position: 'sidebar', description: 'Web address. Filled from the English title if left empty.' },
+  admin: { position, description },
+  // Always filled by the hook below (before validation on the server), so an empty box in the form is fine.
+  validate: (() => true) as TextFieldSingleValidation,
   hooks: {
     beforeValidate: [
-      ({ value, data }) => (value ? slugify(String(value)) : typeof data?.[from] === 'string' ? slugify(data[from]) : value),
+      async ({ value, data, originalDoc, collection, req }) => {
+        // A partial update that doesn't send the slug keeps the saved one.
+        if (!value && originalDoc?.slug) return originalDoc.slug
+        const base = (value ? slugify(String(value)) : typeof data?.[from] === 'string' ? slugify(data[from]) : '') || `item-${Date.now().toString(36)}`
+        if (!collection) return base
+        // Taken by another document (same title, a duplicate, a shop and gallery category of the same name): add -2, -3…
+        for (let n = 1; ; n++) {
+          const slug = n === 1 ? base : `${base}-${n}`
+          const where: Where = { and: [{ slug: { equals: slug } }, ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : [])] }
+          const { totalDocs } = await req.payload.count({ collection: collection.slug as 'products', where, req })
+          if (!totalDocs) return slug
+        }
+      },
     ],
   },
 })

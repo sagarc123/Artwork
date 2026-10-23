@@ -52,10 +52,51 @@ export const CommerceSettings: GlobalConfig = {
           admin: { description: 'Buyers in this state pay CGST + SGST; everyone else pays IGST.' },
         },
         {
+          type: 'row',
+          fields: [
+            { name: 'defaultTaxClassOriginal', label: 'GST for originals', type: 'relationship', relationTo: 'tax-classes' },
+            { name: 'defaultTaxClassPrint', label: 'GST for prints', type: 'relationship', relationTo: 'tax-classes' },
+          ],
+        },
+        {
           name: 'defaultTaxClass',
+          label: 'GST for everything else',
           type: 'relationship',
           relationTo: 'tax-classes',
-          admin: { description: 'Used for products without a tax class of their own.' },
+          admin: { description: 'Products take their GST from their type. A tax class set on a product (under Advanced) overrides these.' },
+        },
+      ],
+    },
+    {
+      name: 'festivalSale',
+      label: 'Festival sale',
+      type: 'group',
+      admin: { description: 'Takes a percentage off shop prices for a few days. The old price shows crossed out. Products are not changed.' },
+      fields: [
+        { name: 'enabled', label: 'Sale is on', type: 'checkbox' },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'percent',
+              label: 'Percent off',
+              type: 'number',
+              admin: { step: 1, condition: (_, s) => Boolean(s?.enabled) },
+              validate: (value: unknown, { siblingData }: { siblingData: Partial<{ enabled: boolean }> }) =>
+                !siblingData?.enabled && value == null ? true : Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 50 ? true : 'Enter a whole number from 1 to 50.',
+            },
+            { name: 'startsAt', label: 'First day', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' }, condition: (_, s) => Boolean(s?.enabled), description: 'Empty: from now' } },
+            { name: 'endsAt', label: 'Last day', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' }, condition: (_, s) => Boolean(s?.enabled), description: 'Empty: until you switch it off' } },
+          ],
+        },
+        {
+          name: 'categories',
+          label: 'Only these categories',
+          type: 'relationship',
+          relationTo: 'categories',
+          hasMany: true,
+          filterOptions: { scope: { in: ['shop', 'both'] } },
+          admin: { condition: (_, s) => Boolean(s?.enabled), description: 'Leave empty for the whole shop.' },
         },
       ],
     },

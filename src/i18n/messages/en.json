@@ -519,6 +519,7 @@
     "codPlaced": "Order placed! I will confirm it with you on WhatsApp.",
     "codPlacedBody": "Please send the confirmation message below. Once you confirm, I pack your order — you pay when it arrives.",
     "codConfirm": "Confirm on WhatsApp",
+    "tracking": "Sent by {courier}. Tracking number: {number}",
     "codConfirmMessage": "Hello! Please confirm my cash-on-delivery order {number} for {amount}.",
     "payment": "Payment",
     "paidOnline": "Paid online",

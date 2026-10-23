@@ -2,3 +2,234 @@
 html {
   font-size: 17px;
 }
+
+/* Bigger tap targets for buttons, menu links and checkboxes. */
+.btn,
+.nav__link,
+.choice-buttons__btn,
+.one-tap__btn {
+  min-height: 44px;
+}
+.nav__link {
+  display: flex;
+  align-items: center;
+}
+.checkbox-input__input {
+  transform: scale(1.25);
+}
+
+
+/* Today page */
+.today {
+  margin-bottom: 2rem;
+}
+.today__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.today__top h1 {
+  margin: 0;
+}
+.today__add {
+  display: inline-flex;
+  align-items: center;
+  min-height: 52px;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  background: var(--theme-success-500);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.today__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+.today-card {
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--theme-elevation-0);
+}
+.today-card.is-alert {
+  border: 2px solid var(--theme-error-500);
+}
+.today-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+.today-card__head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.today-card__count {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.today-card ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+.today-card li a {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  min-height: 44px;
+  align-items: center;
+  border-top: 1px solid var(--theme-elevation-100);
+  color: inherit;
+  text-decoration: none;
+}
+.today-card small {
+  color: var(--theme-elevation-600);
+}
+.today-card small.is-late,
+.today-card__warn {
+  color: var(--theme-error-600);
+  font-weight: 600;
+}
+.today-card__empty {
+  color: var(--theme-elevation-600);
+  margin: 0.5rem 0 0;
+}
+.today-card__big {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0;
+}
+.today-card__more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.today-nav {
+  font-weight: 700;
+}
+
+/* One-tap buttons on orders, enquiries and the products list */
+.one-tap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.one-tap__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.one-tap__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.25rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 999px;
+  background: var(--theme-elevation-50);
+  color: var(--theme-text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.one-tap__btn.is-primary {
+  background: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+}
+.one-tap__btn.is-whatsapp {
+  background: #1f7a3a;
+  border-color: #1f7a3a;
+  color: #fff;
+}
+.one-tap__btn.is-small {
+  min-height: 36px;
+  padding: 0 0.9rem;
+  font-size: 0.9rem;
+}
+.one-tap__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.one-tap__note {
+  margin: 0;
+  color: var(--theme-elevation-600);
+}
+.sold-chip {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--theme-error-100);
+  color: var(--theme-error-750);
+  font-weight: 600;
+}
+
+/* Status as tap buttons */
+.choice-buttons__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.choice-buttons__btn {
+  padding: 0 1rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 999px;
+  background: var(--theme-elevation-0);
+  color: var(--theme-text);
+  font: inherit;
+  cursor: pointer;
+}
+.choice-buttons__btn.is-on {
+  background: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+  font-weight: 600;
+}
+
+/* Phones: the save buttons sit fixed along the bottom; the dates row is hidden so nothing scrolls sideways. */
+@media (max-width: 768px) {
+  .doc-controls__value-wrap {
+    display: none;
+  }
+  /* Long titles in the breadcrumb shrink instead of pushing the language and account buttons off screen. */
+  .app-header__step-nav-wrapper {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .app-header__step-nav {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .doc-controls__controls-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    padding: 0.5rem 1rem;
+    background: var(--theme-bg);
+    border-top: 1px solid var(--theme-elevation-150);
+  }
+  .doc-controls .btn {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+  body {
+    padding-bottom: 5rem;
+  }
+}

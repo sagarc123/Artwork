@@ -4,7 +4,13 @@ import { hasRole, isOwner, ownerOnlyField, ROLES } from '../access'
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
   slug: 'users',
-  admin: { useAsTitle: 'email', group: 'Settings', defaultColumns: ['name', 'email', 'roles'] },
+  admin: {
+    useAsTitle: 'email',
+    group: 'Settings',
+    defaultColumns: ['name', 'email', 'roles'],
+    // Only the owner manages accounts; a helper still reaches their own via Account.
+    hidden: ({ user }) => !hasRole(user, 'owner'),
+  },
   auth: {
     tokenExpiration: 60 * 60 * 12, // 12 hours
     maxLoginAttempts: 5,
@@ -31,9 +37,12 @@ export const Users: CollectionConfig = {
       defaultValue: ['owner'],
       options: [
         { label: 'Owner — everything, including refunds and staff', value: ROLES[0] },
-        { label: 'Staff — orders, shipping and enquiries', value: ROLES[1] },
-        { label: 'Editor — products, artworks and courses', value: ROLES[2] },
+        { label: 'Helper — orders, shipping and enquiries', value: ROLES[1] },
+        { label: 'Editor — products and gallery (old role)', value: ROLES[2] },
       ],
+      // Two roles to choose from. "Editor" stays valid for accounts that already have it (it can edit content, like the owner).
+      filterOptions: ({ options, data }) =>
+        (data?.roles as string[] | undefined)?.includes(ROLES[2]) ? options : options.filter((o) => (typeof o === 'string' ? o : o.value) !== ROLES[2]),
       access: { create: ownerOnlyField, update: ownerOnlyField },
     },
   ],
