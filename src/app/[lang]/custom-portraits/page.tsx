@@ -31,11 +31,11 @@ export default async function CustomPortraitsPage() {
       <section className="bg-paper py-16 lg:py-24">
         <div className="wrap grid gap-12 lg:grid-cols-2">
           <div className="grid content-start gap-6">
-            <h2 className="reveal font-heading text-h1">{p.stepsTitle}</h2>
+            <h2 className="font-heading text-h1">{p.stepsTitle}</h2>
             <StepList steps={p.steps} />
           </div>
           <div className="grid content-start gap-6">
-            <h2 className="reveal font-heading text-h1">{p.tipsTitle}</h2>
+            <h2 className="font-heading text-h1">{p.tipsTitle}</h2>
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="rounded-ui border-2 border-leaf bg-surface p-5">
                 <p className="mb-3 font-semibold text-leaf">{p.good}</p>

@@ -3,6 +3,7 @@
     "title": "Siddesh Mokashi — Rangoli, Drawings & Paintings",
     "description": "Hand-made rangoli, pencil and charcoal drawings, paintings, custom portraits and art courses by Siddesh Mokashi, Maharashtra."
   },
+  "brand": "Siddesh Mokashi",
   "nav": {
     "home": "Home",
     "shop": "Shop",
@@ -42,7 +43,7 @@
   "home": {
     "hero": {
       "title": "Art That Brings Colour to Every Celebration",
-      "sub": "Hand-made rangoli, portraits and paintings from my studio in Maharashtra — made slowly, with love, for your walls and your festivals.",
+      "sub": "Hi, I'm Siddesh. I draw rangoli at doorsteps across Maharashtra — and portraits and paintings for your walls.",
       "ctaEvent": "Book Event Rangoli",
       "ctaShop": "Shop Art",
       "ctaLearn": "Learn with me"
@@ -167,7 +168,9 @@
     "home": "Back to home"
   },
   "photo": {
-    "soon": "Photo coming soon"
+    "soon": "Photo coming soon",
+    "artist": "Siddesh's photo coming soon",
+    "studio": "A photo from the studio is coming soon"
   },
   "forms": {
     "required": "(required)",

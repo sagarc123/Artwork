@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import type { Locale } from '@/i18n/config'
 import type { Artwork, Category, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
+import { pickMedium } from '@/lib/art'
 import { hashString } from '@/lib/seed'
 import { FREE_SHIPPING_FROM, SHIPPING_FEE } from '@/lib/cart'
 import { formatPrice, site } from '@/lib/site'
@@ -17,6 +18,10 @@ const RATIOS = ['4/5', '1/1', '3/4', '4/5', '4/3']
 /** Stable stand-in floor colour and shape per item until real photos exist. */
 const pickBy = <T,>(list: T[], seed: string) => list[hashString(seed) % list.length]
 const relName = (rel: unknown) => (rel && typeof rel === 'object' && 'name' in rel ? String((rel as { name: unknown }).name) : undefined)
+const relSlug = (rel: unknown) => (rel && typeof rel === 'object' && 'slug' in rel ? String((rel as { slug: unknown }).slug) : undefined)
+/** Which stand-in (rangoli, sketch, wash) suits a piece, from its category, medium, festival and title. */
+const mediumOf = (d: { slug: string; title: string; category?: unknown; medium?: unknown; festival?: unknown }) =>
+  pickMedium([relSlug(d.category), relName(d.category), relSlug(d.medium), relName(d.medium), d.festival ? 'festival' : null, d.title, d.slug], d.slug)
 const firstMedia = (images: unknown) => (Array.isArray(images) && images[0] && typeof images[0] === 'object' ? (images[0] as Media) : null)
 
 /** Colour and symbol for a festival, from its slug. */
@@ -42,6 +47,7 @@ export function toShopItem(p: Product, locale: Locale): ShopItem {
     meta: [relName(p.medium), size].filter(Boolean).join(' · '),
     image: firstMedia(p.images),
     seed: p.slug,
+    medium: mediumOf(p),
     floor: pickBy(FLOORS, p.slug),
     createdAt: p.createdAt,
   }
@@ -58,6 +64,7 @@ export function toGalleryItem(a: Artwork, locale: Locale): GalleryItem {
     category: cat ? { slug: cat.slug, name: cat.name } : undefined,
     image: firstMedia(a.images),
     seed: a.slug,
+    medium: mediumOf(a),
     floor: pickBy(FLOORS, a.slug),
     // Real photos keep their own shape; stand-ins vary so the wall looks hand-hung.
     ratio: (() => {

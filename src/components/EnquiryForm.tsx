@@ -6,6 +6,7 @@ import type { Dictionary } from '@/i18n/dictionaries'
 import type { EnquiryField } from '@/lib/enquiry'
 import { whatsappLink } from '@/lib/site'
 import { submitEnquiry, type EnquiryState } from '@/server/enquiry-action'
+import { pinch } from './pinch'
 
 type Labels = Dictionary['forms']
 type Props = { kind: 'event' | 'portrait' | 'general'; locale: string; t: Labels; typeLabel: string }
@@ -120,6 +121,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
       onSubmit={(e) => {
         e.preventDefault()
         const data = new FormData(e.currentTarget)
+        pinch((e.nativeEvent as SubmitEvent).submitter ?? e.currentTarget)
         setSummary(summarise(data, t, typeLabel))
         // Tagged so the page cross-fade in the layout skips it (only navigations fade).
         startTransition(() => {

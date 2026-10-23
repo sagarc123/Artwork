@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { formatPrice, whatsappLink } from '@/lib/site'
 import { cartActions } from './cart-store'
+import { pinch } from './pinch'
 
 type Variant = { id: string; label: string; price: number; compareAtPrice?: number | null; stock: number }
 type Frame = { id: string; label: string; extraPrice: number }
@@ -67,8 +68,9 @@ export function ProductBuy({ slug, title, variants, framing, t, cart, cartHref }
         <div className="grid gap-3">
           <button
             type="button"
-            onClick={() => {
+            onClick={(e) => {
               cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
+              pinch(e.currentTarget, 'cart')
               setAdded(true)
             }}
             className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90"

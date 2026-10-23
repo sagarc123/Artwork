@@ -10,6 +10,7 @@ import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
 import { cartActions, useCart } from './cart-store'
+import { pickMedium } from '@/lib/art'
 import { MediaImage } from './MediaImage'
 import { useHydrated } from './local-store'
 
@@ -84,7 +85,7 @@ function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart'
       {quote.lines.map((l) => (
         <li key={l.key} className="grid grid-cols-[5rem_1fr] gap-4 sm:grid-cols-[6rem_1fr]">
           <div className="self-start bg-surface p-1.5 shadow-frame">
-            <MediaImage media={l.image as Media | null} alt={l.title} ratio="4/5" seed={l.slug} floor="charcoal" sizes="96px" />
+            <MediaImage media={l.image as Media | null} alt={l.title} ratio="4/5" seed={l.slug} medium={pickMedium([l.title], l.slug)} floor="charcoal" sizes="96px" />
           </div>
           <div className="grid content-start gap-1">
             <p className="font-heading text-h3-sm">{l.title}</p>

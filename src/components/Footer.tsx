@@ -4,6 +4,7 @@ import type { Dictionary } from '@/i18n/dictionaries'
 import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MotionToggle } from './MotionSettings'
+import { Signature } from './Signature'
 
 export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   const p = (path: string) => localePath(locale, path)
@@ -49,8 +50,9 @@ export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
       <div aria-hidden="true" className="paithani" />
       <div className="wrap grid gap-10 py-16 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
         <div className="grid content-start gap-4">
-          <p className="font-heading text-h2-sm">{site.brandName}</p>
+          <p className="font-heading text-h2-sm">{t.brand}</p>
           <p className="max-w-[40ch] text-paper/85">{t.footer.brandLine}</p>
+          <Signature draw="scroll" className="text-marigold" />
           <ul className="grid gap-2">
             <li>
               <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 items-center">
@@ -103,7 +105,7 @@ export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
             <LanguageSwitcher current={locale} label={t.nav.language} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 lg:col-span-2">
-            <p className="text-paper/70">© {site.brandName}</p>
+            <p className="text-paper/70">© {t.brand}</p>
             <MotionToggle stopLabel={t.footer.motionStop} startLabel={t.footer.motionStart} />
           </div>
         </div>

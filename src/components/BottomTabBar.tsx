@@ -43,7 +43,7 @@ export function BottomTabBar({ locale, labels, navLabel, itemsLabel }: { locale:
                     style={{ viewTransitionName: 'tab-ink' }}
                   />
                 )}
-                <span className="relative">
+                <span className="relative" data-pinch={key === 'cart' ? 'cart' : undefined}>
                   <Icon aria-hidden="true" className={`size-6 ${active ? 'tab-bloom' : ''}`} strokeWidth={1.75} />
                   {key === 'cart' && <CartCount label={itemsLabel} />}
                 </span>

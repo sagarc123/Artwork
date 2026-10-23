@@ -41,7 +41,7 @@
   /* Motion: a patient, sure hand. */
   --ease-pour: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-settle: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-settle: cubic-bezier(0.25, 1, 0.5, 1); /* no overshoot: powder doesn't bounce */
   --ease-lift: cubic-bezier(0.4, 0, 1, 1);
 }
 
@@ -276,9 +276,13 @@ dialog.drawer[open] {
 }
 .kolam-weave path {
   fill: none;
-  stroke: var(--color-turmeric);
-  stroke-width: 2.4;
+  stroke: var(--color-paper);
+  stroke-width: 2.2;
   stroke-linecap: round;
+}
+.kolam-weave .kolam-halo {
+  stroke-width: 5;
+  opacity: 0.25;
 }
 .lined-paper {
   background:
@@ -290,29 +294,16 @@ dialog.drawer[open] {
   clip-path: polygon(0 3%, 6% 0, 13% 2%, 21% 0, 30% 3%, 38% 1%, 47% 3%, 55% 0, 63% 2%, 72% 0, 80% 3%, 88% 1%, 95% 3%, 100% 0, 100% 97%, 94% 100%, 86% 97%, 78% 100%, 69% 98%, 60% 100%, 51% 97%, 43% 100%, 34% 98%, 25% 100%, 17% 97%, 9% 100%, 0 98%);
 }
 
-/* Code-drawn rangoli colours. */
-.grangoli .g-dot {
-  fill: none;
-  stroke: var(--color-charcoal);
-  stroke-width: 2.2;
-  opacity: 0.4;
+/* Code-drawn rangoli: lines take the powder colour of the floor (white on dark, charcoal on paper). */
+.grangoli {
+  color: var(--color-charcoal);
 }
-.grangoli .g-line {
-  fill: none;
-  stroke: var(--color-charcoal);
-  stroke-width: 1.1;
+.grangoli--dark {
+  color: var(--color-paper);
 }
-.grangoli .g-fill {
-  fill: var(--fill);
-  opacity: 0.92;
-}
-.grangoli--dark .g-dot {
-  stroke: var(--color-paper);
-  opacity: 0.55;
-}
-.grangoli--dark .g-line {
-  stroke: var(--color-paper);
-  stroke-width: 1.4;
+/* Watercolour washes mix like pigment, not like stickers. */
+.wash .fx > * {
+  mix-blend-mode: multiply;
 }
 
 /* Hand-drawn wavy underline that inks in on hover/focus. Uses currentColor, so it works on any floor. */
@@ -346,31 +337,30 @@ dialog.drawer[open] {
 .press:active {
   transform: scale(0.97);
 }
+/* Card hover/focus (mouse devices): dots pressed one by one round the border. Tap keeps the small press. */
 .card {
   position: relative;
-  transition: transform 240ms var(--ease-pour);
-}
-.card::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border: 2px dotted var(--color-marigold);
-  border-radius: var(--radius-ui);
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 420ms var(--ease-draw);
-  pointer-events: none;
-}
-@media (hover: hover) {
-  .card:hover {
-    transform: translateY(-4px);
-  }
-  .card:hover::after,
-  .card:focus-within::after {
-    clip-path: inset(0);
-  }
+  transition: transform 120ms var(--ease-pour);
 }
 .card:active {
   transform: scale(0.98);
+}
+@media (hover: hover) {
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2.5px dotted var(--color-marigold);
+    border-radius: var(--radius-ui);
+    pointer-events: none;
+    --sweep: 0deg;
+    -webkit-mask: conic-gradient(#000 var(--sweep), #0000 0);
+    mask: conic-gradient(#000 var(--sweep), #0000 0);
+    transition: --sweep 300ms steps(14, end);
+  }
+  .card:is(:hover, :focus-within)::after {
+    --sweep: 360deg;
+  }
 }
 
 /* ─────────────── Motion: bindu → rekha → rang (dot → line → colour) ─────────────── */
@@ -390,37 +380,46 @@ dialog.drawer[open] {
     stroke-dashoffset: 1;
   }
 }
-@keyframes dot-in {
+/* One hand going round: a sweep that uncovers a ring wedge by wedge (see .g-sweep). */
+@property --sweep {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 360deg;
+}
+@property --pour {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 72%;
+}
+@keyframes sweep {
   from {
-    opacity: 0;
-    transform: scale(0);
+    --sweep: 0deg;
   }
 }
-@keyframes powder {
+@keyframes pour {
   from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-  60% {
-    opacity: 0.9;
+    --pour: 0%;
   }
 }
-@keyframes drift {
-  from {
-    transform: translateY(-24px) rotate(-4deg);
-  }
-  to {
-    transform: translateY(24px) rotate(4deg);
-  }
-}
-@keyframes grow-x {
-  from {
-    transform: scaleX(0);
-  }
-}
+/* A fingertip press: in, settle, no bounce. */
 @keyframes bloom {
+  from {
+    transform: scale(0.92);
+  }
+}
+@keyframes dot-press {
+  from {
+    transform: scale(0.9);
+  }
+}
+@keyframes flame {
+  from {
+    scale: 0;
+  }
+}
+@keyframes glow {
   50% {
-    transform: scale(1.12);
+    box-shadow: 0 0 26px 10px rgb(242 183 5 / 0.7);
   }
 }
 @keyframes wa-nudge {
@@ -447,23 +446,43 @@ dialog.drawer[open] {
     animation: rise 520ms var(--ease-pour) both;
     animation-delay: calc(200ms + var(--n, 0) * 100ms);
   }
-  .grangoli--draw .g-dot,
-  .grangoli--draw .g-fill {
-    transform-box: fill-box;
-    transform-origin: center;
+  /* Rangoli drawing in (≤ 3.6s): dots pressed one by one, lines poured as one hand goes round each ring, then colour poured by colour. */
+  :root:not([data-motion='off'], [data-fx='lite']) .grangoli--draw .g-sweep {
+    clip-path: polygon(
+        50% 50%,
+        50% -100%,
+        calc(50% + 150% * sin(var(--sweep) * 0.125)) calc(50% - 150% * cos(var(--sweep) * 0.125)),
+        calc(50% + 150% * sin(var(--sweep) * 0.25)) calc(50% - 150% * cos(var(--sweep) * 0.25)),
+        calc(50% + 150% * sin(var(--sweep) * 0.375)) calc(50% - 150% * cos(var(--sweep) * 0.375)),
+        calc(50% + 150% * sin(var(--sweep) * 0.5)) calc(50% - 150% * cos(var(--sweep) * 0.5)),
+        calc(50% + 150% * sin(var(--sweep) * 0.625)) calc(50% - 150% * cos(var(--sweep) * 0.625)),
+        calc(50% + 150% * sin(var(--sweep) * 0.75)) calc(50% - 150% * cos(var(--sweep) * 0.75)),
+        calc(50% + 150% * sin(var(--sweep) * 0.875)) calc(50% - 150% * cos(var(--sweep) * 0.875)),
+        calc(50% + 150% * sin(var(--sweep))) calc(50% - 150% * cos(var(--sweep)))
+      )
+      fill-box;
+    animation: sweep var(--d) var(--ease-hand, linear) var(--t) both;
   }
-  .grangoli--draw .g-dot {
-    animation: dot-in 320ms var(--ease-settle) both;
-    animation-delay: calc(var(--i) * 110ms);
+  .grangoli--draw .g-steps {
+    animation-timing-function: steps(var(--n), end);
   }
-  .grangoli--draw .g-line {
+  :root:not([data-motion='off'], [data-fx='lite']) .grangoli--draw .g-pour {
+    clip-path: circle(var(--pour) at 50% 50%) fill-box;
+    animation: pour var(--d) var(--ease-pour) var(--t) both;
+  }
+  .grangoli--draw .g-trace path {
     stroke-dasharray: 1;
-    animation: draw 900ms var(--ease-draw) both;
-    animation-delay: calc(450ms + var(--j) * 140ms + var(--w) * 45ms);
+    animation: draw var(--d) linear var(--t) both;
   }
-  .grangoli--draw .g-fill {
-    animation: powder 700ms var(--ease-pour) both;
-    animation-delay: calc(1200ms + var(--j) * 90ms + var(--w) * 30ms);
+  /* Finale: the diya's flame grows from a dot and glows once, then he signs. */
+  .hero-diya::before {
+    transform-origin: 50% 100%;
+    animation:
+      flame 500ms var(--ease-pour) 3.3s both,
+      glow 600ms ease-in-out 3.8s;
+  }
+  .sig--load {
+    animation: sign 1.2s var(--ease-draw) 3.7s both;
   }
   .brush--draw path {
     stroke-dasharray: 1;
@@ -477,33 +496,43 @@ dialog.drawer[open] {
   }
 }
 
-/* Thin colour bar showing how far down the page you are (driven by scrolling, so not autoplay). */
-.scroll-ink {
-  position: fixed;
-  inset: 0 0 auto;
-  height: 3px;
-  z-index: 50;
-  pointer-events: none;
-  transform-origin: 0 50%;
-  transform: scaleX(0);
-  background: linear-gradient(90deg, var(--color-kumkum), var(--color-marigold), var(--color-turmeric), var(--color-peacock));
+/* Sign-off: his name, slanted like handwriting, with a pen flourish under it. */
+.sig {
+  display: inline-grid;
+  justify-items: start;
+  line-height: 1;
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
 }
-@supports (animation-timeline: view()) {
-  .scroll-ink {
-    transform: none;
-    animation: grow-x linear both;
-    animation-timeline: scroll(root);
+.sig-name {
+  font-family: var(--font-display);
+  transform: skewX(-10deg) rotate(-4deg);
+}
+.sig-flourish {
+  width: 3.4em;
+  height: auto;
+  margin-top: -0.1em;
+}
+@keyframes sign {
+  from {
+    clip-path: inset(-20% 100% -20% 0);
   }
+  to {
+    clip-path: inset(-20% 0 -20% 0);
+  }
+}
+
+@supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: rise var(--ease-pour) both;
+    .sig--scroll {
+      animation: sign linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 55%;
+      animation-range: entry 20% cover 45%;
     }
-    .drift {
-      animation: drift linear both;
+    /* Step numerals press in like a dot as they arrive (no fade, no bounce). Headings just appear. */
+    .reveal {
+      animation: dot-press var(--ease-pour) both;
       animation-timeline: view();
-      animation-range: cover;
+      animation-range: entry 0% entry 60%;
     }
     .scroll-draw path,
     .scroll-draw .sketch-line {
@@ -551,60 +580,59 @@ dialog.drawer[open] {
   }
 }
 
-/* Tap burst of powder. */
-.tap-burst {
+/* Pinch of powder (src/components/pinch.ts): grains fall from the button, a short trail drifts to the cart/saved icon. */
+.pinch {
   position: fixed;
   z-index: 60;
   width: 0;
   height: 0;
   pointer-events: none;
 }
-.tap-burst::before {
-  content: '';
+.pinch i {
   position: absolute;
-  inset: -18px;
-  border-radius: 50%;
-  border: 2px solid var(--color-marigold);
-  animation: tap-ring 500ms var(--ease-pour) forwards;
-}
-.tap-burst i {
-  position: absolute;
-  left: -3px;
-  top: -3px;
-  width: 6px;
-  height: 6px;
+  left: -2px;
+  top: -2px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--c);
-  animation: tap-dot 600ms var(--ease-pour) forwards;
+  animation: pinch-fall 460ms var(--ease-pour) both;
 }
-@keyframes tap-ring {
+.pinch .pinch-trail {
+  width: 3px;
+  height: 3px;
+  animation: pinch-trail 480ms var(--ease-draw) both;
+}
+@keyframes pinch-fall {
   from {
-    transform: scale(0.3);
-    opacity: 0.8;
+    transform: translate(calc(var(--x) * 0.3), 0);
   }
   to {
-    transform: scale(1.4);
+    transform: translate(var(--x), var(--y));
     opacity: 0;
   }
 }
-@keyframes tap-dot {
-  from {
-    transform: rotate(var(--a)) translateY(0);
-  }
+@keyframes pinch-trail {
   to {
-    transform: rotate(var(--a)) translateY(-28px) scale(0.4);
-    opacity: 0;
+    transform: translate(var(--x), var(--y)) scale(0.6);
+    opacity: 0.2;
   }
 }
 
 /* Calm mode: the footer switch (data-motion="off") and slow phones (data-fx="lite") get the final, still state. */
-:root:is([data-motion='off'], [data-fx='lite']) :is(*, *::before, *::after) {
+/* (:is() can't hold pseudo-elements, so ::before/::after are listed on their own.) */
+:root:is([data-motion='off'], [data-fx='lite']) *,
+:root:is([data-motion='off'], [data-fx='lite']) *::before,
+:root:is([data-motion='off'], [data-fx='lite']) *::after {
   animation: none !important;
   transition-duration: 0.01ms !important;
 }
-:root:is([data-motion='off'], [data-fx='lite']) .scroll-ink,
-:root:is([data-motion='off'], [data-fx='lite']) .tap-burst {
+:root:is([data-motion='off'], [data-fx='lite']) .pinch {
   display: none;
+}
+/* Slow phones: no SVG filters (powder grain, smudge, wash edges); the shapes stay. */
+:root[data-fx='lite'] .fx {
+  filter: none;
 }
 html:is([data-motion='off'], [data-fx='lite'])::view-transition-group(*),
 html:is([data-motion='off'], [data-fx='lite'])::view-transition-old(*),

@@ -8,6 +8,7 @@ import { formatPrice } from '@/lib/site'
 import { cartActions, savedActions, useSaved } from './cart-store'
 import { useHydrated } from './local-store'
 import { MediaImage } from './MediaImage'
+import { pinch } from './pinch'
 import type { ShopItem } from './ShopGrid'
 
 /** A saved product. `variantId` is set when it can go straight into the cart (one size, in stock). */
@@ -52,6 +53,7 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
                   alt={item.title}
                   ratio="4/5"
                   seed={item.seed}
+                  medium={item.medium}
                   floor={item.floor}
                   sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                   className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
@@ -71,8 +73,9 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
             ) : item.variantId ? (
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
                   cartActions.add({ slug: item.slug, variantId: item.variantId!, qty: 1 })
+                  pinch(e.currentTarget, 'cart')
                   setAdded(item.slug)
                 }}
                 className={`${btn} border-[1.5px] border-charcoal hover:bg-charcoal hover:text-paper`}

@@ -145,7 +145,7 @@ async function Results({ searchParams, locale, t }: { searchParams: Promise<Reco
                   <li key={a.id}>
                     <Link href={a.productHref ?? localePath(locale, '/artwork')} className="card grid gap-3">
                       <span className="block bg-surface p-2 shadow-frame">
-                        <MediaImage media={a.image} alt={a.title} ratio="4/5" seed={a.seed} floor={a.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
+                        <MediaImage media={a.image} alt={a.title} ratio="4/5" seed={a.seed} medium={a.medium} floor={a.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
                       </span>
                       <span className="font-heading text-h3-sm">{a.title}</span>
                       <span className="font-semibold text-peacock">{a.productHref ? t.gallery.buy : s.seeArtwork} →</span>

@@ -59,7 +59,7 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
       <Threshold />
       <section className="bg-paper py-16 lg:py-24">
         <div className="wrap grid gap-8">
-          <h2 className="reveal font-heading text-h1">{t.festivalsPage.gallery}</h2>
+          <h2 className="font-heading text-h1">{t.festivalsPage.gallery}</h2>
           {gallery.length ? (
             <Gallery items={gallery} t={t.gallery} enquiryMessage={`${t.forms.waIntro} ${t.gallery.enquire}:`} />
           ) : (
@@ -70,7 +70,7 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
       {shop.length > 0 && (
         <section className="bg-paper grain py-16 lg:py-24">
           <div className="wrap grid gap-8">
-            <h2 className="reveal font-heading text-h1">{t.festivalsPage.shop}</h2>
+            <h2 className="font-heading text-h1">{t.festivalsPage.shop}</h2>
             <ShopGrid items={shop} t={t.shop} />
           </div>
         </section>

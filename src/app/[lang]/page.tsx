@@ -1,12 +1,14 @@
 import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BrushUnderline, DisplayWord, DoorstepScene, FestivalMotif, KolamWeave, PortraitPair, PowderHeap, Threshold } from '@/components/Art'
+import { BrushUnderline, DisplayWord, DoorstepScene, FestivalMotif, KolamWeave, PortraitPair, PowderHeap, StepList, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { PhotoPlaceholder, type Floor } from '@/components/PhotoPlaceholder'
+import { Signature } from '@/components/Signature'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
+import type { Medium, RangoliStyle } from '@/lib/art'
 import { whatsappLink } from '@/lib/site'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const n = (i: number) => ({ '--n': i }) as CSSProperties
-const DEVA_DIGITS = ['१', '२', '३']
 
 export default async function HomePage() {
   const locale = await getLocale()
@@ -29,12 +30,13 @@ export default async function HomePage() {
     { href: p('/custom-portraits'), label: h.categories.portraits, color: 'var(--color-turmeric)' },
     { href: p('/courses'), label: h.categories.courses, color: '#5aa16a' },
   ]
-  const featured: { label: string; floor: Floor; seed: string }[] = [
-    { label: h.categories.rangoli, floor: 'charcoal', seed: 'featured-rangoli' },
-    { label: h.categories.paintings, floor: 'peacock', seed: 'featured-painting' },
-    { label: h.categories.drawings, floor: 'paper', seed: 'featured-drawing' },
-    { label: h.categories.portraits, floor: 'kumkum', seed: 'featured-portrait' },
-    { label: h.categories.rangoli, floor: 'leaf', seed: 'featured-rangoli-2' },
+  // Each stand-in in its own medium; the two rangoli in different styles from each other and from the hero.
+  const featured: { label: string; floor: Floor; seed: string; medium: Medium; style?: RangoliStyle }[] = [
+    { label: h.categories.rangoli, floor: 'charcoal', seed: 'featured-rangoli', medium: 'rangoli', style: 'phool' },
+    { label: h.categories.paintings, floor: 'paper', seed: 'featured-painting', medium: 'painting' },
+    { label: h.categories.drawings, floor: 'paper', seed: 'featured-drawing', medium: 'drawing' },
+    { label: h.categories.portraits, floor: 'paper', seed: 'featured-portrait', medium: 'portrait' },
+    { label: h.categories.rangoli, floor: 'leaf', seed: 'featured-rangoli-2', medium: 'rangoli', style: 'kolam' },
   ]
   // ponytail: fixed order with the next festival first; comes from the Festivals collection's dates later.
   const festivals = [
@@ -48,9 +50,12 @@ export default async function HomePage() {
     <>
       {/* 1 · The doorstep: headline on paper, a rangoli drawing itself on the charcoal floor. */}
       <section className="relative overflow-hidden bg-paper grain">
-        <div className="wrap grid gap-10 pt-8 lg:grid-cols-12 lg:items-center lg:gap-8 lg:pt-14">
-          <div className="relative z-10 grid gap-5 lg:col-span-5 lg:pb-24">
-            <DisplayWord className="hero-in -mb-4 text-kumkum lg:-mb-8">रंग</DisplayWord>
+        <div className="wrap grid gap-6 pt-6 lg:grid-cols-12 lg:items-center lg:gap-8 lg:pt-14">
+          <div className="relative z-10 grid gap-5 pb-4 lg:col-span-5 lg:pb-24">
+            {/* Phones get the rangoli tile instead of the big word. */}
+            <div className="hidden lg:block">
+              <DisplayWord className="hero-in -mb-8 text-kumkum">रंग</DisplayWord>
+            </div>
             <div>
               <h1 className="hero-title font-heading text-display">{h.hero.title}</h1>
               <BrushUnderline className="brush--draw mt-3 w-2/3 max-w-xs" />
@@ -68,9 +73,13 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="-mx-5 sm:mx-0 lg:col-span-7 lg:-mt-14 lg:mr-[calc(50%-50vw)] lg:self-stretch">
-            <div className="grid aspect-square place-items-center bg-charcoal grain-dark lg:aspect-auto lg:h-full lg:min-h-[620px]">
-              <GenerativeRangoli seed="siddesh-home" tone="dark" animate className="w-[84%] max-w-[560px]" />
+          {/* Phone: a smaller tile above the headline so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
+          <div className="order-first lg:order-none lg:col-span-7 lg:-mt-14 lg:mr-[calc((min(100vw,77.5rem)_-_100vw)_/_2_-_1.25rem)] lg:self-stretch">
+            <div className="relative mx-auto grid aspect-square w-[60vw] max-w-80 place-items-center bg-charcoal shadow-frame grain-dark lg:aspect-auto lg:h-full lg:min-h-[620px] lg:w-auto lg:max-w-none lg:shadow-none">
+              <GenerativeRangoli seed="siddesh-home" style="sanskar" tone="dark" animate className="w-[84%] max-w-[560px] -translate-y-[3%]" />
+              {/* Finale: a diya lights at the foot of the rangoli, then he signs it. */}
+              <span className="diya hero-diya absolute bottom-[3%] left-1/2 -translate-x-1/2 max-lg:scale-75" />
+              <Signature draw="load" className="absolute right-[5%] bottom-[4%] text-paper/85" />
             </div>
           </div>
         </div>
@@ -84,25 +93,16 @@ export default async function HomePage() {
         <div className="wrap relative grid gap-12 lg:grid-cols-12">
           <div className="grid content-start gap-6 lg:col-span-5">
             <p className="font-semibold text-kumkum">{h.events.kicker}</p>
-            <h2 className="reveal font-heading text-h1">{h.events.title}</h2>
+            <h2 className="font-heading text-h1">{h.events.title}</h2>
             <p className="text-muted">{h.events.sub}</p>
-            <ol className="grid gap-5">
-              {h.events.steps.map((step, i) => (
-                <li key={step} className="reveal grid grid-cols-[3.5rem_1fr] items-center gap-3">
-                  <span aria-hidden="true" className="font-display text-[3.25rem] leading-none text-kumkum">
-                    {DEVA_DIGITS[i]}
-                  </span>
-                  <span className="text-h3-sm">{step}</span>
-                </li>
-              ))}
-            </ol>
+            <StepList steps={h.events.steps} />
             <ButtonLink href={p('/events')} variant="secondary" className="sm:justify-self-start">
               {h.events.cta}
             </ButtonLink>
           </div>
           <div className="grid grid-cols-3 items-start gap-3 sm:gap-5 lg:col-span-7">
             {h.events.scenes.map((label, i) => (
-              <DoorstepScene key={label} seed={`doorstep-${i}`} label={label} className={['', 'lg:mt-14', 'lg:mt-28'][i]} />
+              <DoorstepScene key={label} seed={`doorstep-${i}`} style={(['phool', 'kolam', 'poster'] as const)[i]} label={label} className={['', 'lg:mt-14', 'lg:mt-28'][i]} />
             ))}
           </div>
         </div>
@@ -114,7 +114,7 @@ export default async function HomePage() {
       <section className="bg-kumkum grain-dark py-16 text-paper lg:py-28">
         <div className="wrap grid gap-12 lg:grid-cols-12 lg:items-center">
           <div className="grid gap-5 lg:col-span-5">
-            <h2 className="reveal font-heading text-h1">{h.portraits.title}</h2>
+            <h2 className="font-heading text-h1">{h.portraits.title}</h2>
             <p className="text-paper/90">{h.portraits.sub}</p>
             <ButtonLink href={p('/custom-portraits')} variant="light" className="sm:justify-self-start">
               {h.portraits.cta}
@@ -131,7 +131,7 @@ export default async function HomePage() {
       {/* 4 · Categories as heaps of rangoli powder. */}
       <section className="bg-charcoal grain-dark py-16 text-paper lg:py-24">
         <div className="wrap grid gap-10">
-          <h2 className="reveal font-heading text-h1">{h.categories.title}</h2>
+          <h2 className="font-heading text-h1">{h.categories.title}</h2>
           <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
             {heaps.map((c) => (
               <li key={c.label}>
@@ -155,7 +155,7 @@ export default async function HomePage() {
         <div className="wrap grid gap-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="reveal font-heading text-h1">{h.featured.title}</h2>
+              <h2 className="font-heading text-h1">{h.featured.title}</h2>
               <BrushUnderline className="brush--view mt-2 w-48" />
             </div>
             <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
@@ -165,9 +165,9 @@ export default async function HomePage() {
           <ul className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4 lg:gap-x-8">
             {featured.map((f, i) => (
               <li key={f.seed} className={i === 0 ? 'col-span-2 lg:row-span-2' : ''}>
-                <Link href={p('/shop')} className="card reveal grid gap-3">
+                <Link href={p('/shop')} className="card grid gap-3">
                   <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
-                    <PhotoPlaceholder ratio={i === 0 ? '4/5' : '1/1'} seed={f.seed} floor={f.floor} alt={f.label} slot={`Featured artwork ${i + 1}`} />
+                    <PhotoPlaceholder ratio={i === 0 ? '4/5' : '1/1'} seed={f.seed} medium={f.medium} style={f.style} floor={f.floor} alt={f.label} slot={`Featured artwork ${i + 1}`} />
                   </div>
                   <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.label}</span>
                   <span className="text-muted">{h.featured.soon}</span>
@@ -194,12 +194,11 @@ export default async function HomePage() {
         <div className="wrap relative grid gap-14 lg:grid-cols-12 lg:items-center">
           <div className="relative mx-4 lg:col-span-5 lg:mx-0">
             <div className="tilt-left bg-paper p-3 shadow-frame">
-              <PhotoPlaceholder ratio="4/5" seed="artist-portrait" floor="paper" alt="Siddesh Mokashi in the studio" slot="Artist portrait 4:5" />
+              <PhotoPlaceholder ratio="4/5" seed="artist-portrait" medium="artist" note={t.photo.artist} alt={t.about.photoAlt} slot="Artist portrait 4:5" />
             </div>
-            <GenerativeRangoli seed="artist-trail" tone="dark" className="drift pointer-events-none absolute -right-8 -bottom-10 w-36 lg:w-44" />
           </div>
           <div className="grid gap-6 lg:col-span-6 lg:col-start-7">
-            <h2 className="reveal font-heading text-h1">{h.artist.title}</h2>
+            <h2 className="font-heading text-h1">{h.artist.title}</h2>
             <blockquote className="font-heading text-h3 text-paper/95 lg:text-[1.875rem] lg:leading-snug">“{h.artist.body}”</blockquote>
             <Link href={p('/about')} className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold">
               {h.artist.cta}
@@ -218,7 +217,7 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-5 lg:col-span-6 lg:col-start-7">
             <p className="font-semibold text-paper/85">{h.course.kicker}</p>
-            <h2 className="reveal font-heading text-h1">{h.course.name}</h2>
+            <h2 className="font-heading text-h1">{h.course.name}</h2>
             <p className="text-paper/90">
               {h.course.title} · {h.course.meta}
             </p>
@@ -235,7 +234,7 @@ export default async function HomePage() {
       {/* 8 · Festival calendar: the next festival is the big tile. */}
       <section className="bg-paper py-16 lg:py-24">
         <div className="wrap grid gap-8">
-          <h2 className="reveal font-heading text-h1">{h.festivals.title}</h2>
+          <h2 className="font-heading text-h1">{h.festivals.title}</h2>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {festivals.map((f, i) => (
               <li key={f.kind} className={i === 0 ? 'sm:col-span-2' : ''}>

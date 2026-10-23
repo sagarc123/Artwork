@@ -6,7 +6,7 @@ import { BottomTabBar } from '@/components/BottomTabBar'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { FirstVisitLanguagePicker } from '@/components/LanguagePicker'
-import { TapRipple } from '@/components/TapRipple'
+import { ArtDefs } from '@/components/StandIns'
 import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { locales } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -50,7 +50,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         <a href="#main" className="skip-link">
           {t.nav.skip}
         </a>
-        <div aria-hidden="true" className="scroll-ink" />
+        <ArtDefs />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>
@@ -59,7 +59,6 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         <WhatsAppButton {...t.whatsapp} />
         <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
         <FirstVisitLanguagePicker current={locale} />
-        <TapRipple />
       </body>
     </html>
   )

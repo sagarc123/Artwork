@@ -56,6 +56,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
     .filter((p) => p.id !== product.id && (typeof p.category === 'object' ? p.category.id : p.category) === categoryId)
     .slice(0, 4)
     .map((p) => toShopItem(p, locale))
+  const { medium } = toShopItem(product, locale)
   const available = product.variants.some((v) => v.stock - (v.reserved ?? 0) > 0)
 
   // Structured data so Google can show price and availability.
@@ -86,13 +87,13 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
 
         <div className="grid content-start gap-4 lg:col-span-7">
           <div className="tape relative bg-surface p-3 shadow-frame lg:p-5">
-            <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} floor="charcoal" sizes="(min-width: 1024px) 55vw, 100vw" priority />
+            <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, 100vw" priority />
           </div>
           {images.length > 1 && (
             <ul className="grid grid-cols-3 gap-3">
               {images.slice(1).map((m) => (
                 <li key={m.id} className="bg-surface p-2 shadow-frame">
-                  <MediaImage media={m} alt={m.alt} ratio="1/1" seed={`${product.slug}-${m.id}`} sizes="20vw" />
+                  <MediaImage media={m} alt={m.alt} ratio="1/1" seed={`${product.slug}-${m.id}`} medium={medium} sizes="20vw" />
                 </li>
               ))}
             </ul>
@@ -164,7 +165,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
       {/* Outside the grid above, so the sticky buy panel stops before it. */}
       {related.length > 0 && (
         <section className="wrap mt-20 grid gap-8 lg:mt-28">
-          <h2 className="reveal font-heading text-h1">{s.related}</h2>
+          <h2 className="font-heading text-h1">{s.related}</h2>
           <ShopGrid items={related} t={s} controls={false} />
         </section>
       )}

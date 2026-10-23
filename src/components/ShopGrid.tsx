@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
+import { noRepeat, styleFor, type Medium } from '@/lib/art'
 import { formatPrice } from '@/lib/site'
 import { MediaImage } from './MediaImage'
 import type { Floor } from './PhotoPlaceholder'
@@ -21,6 +22,7 @@ export type ShopItem = {
   meta: string
   image: Media | null
   seed: string
+  medium: Medium
   floor: Floor
   createdAt: string
 }
@@ -35,6 +37,9 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
   const shown = items
     .filter((i) => type === 'all' || i.type === type)
     .sort((a, b) => (sort === 'low' ? a.price - b.price : sort === 'high' ? b.price - a.price : b.createdAt.localeCompare(a.createdAt)))
+
+  // Neighbouring rangoli stand-ins never share a style.
+  const styles = noRepeat(shown.map((i) => styleFor(i.seed)))
 
   if (items.length === 0) return <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.empty}</p>
 
@@ -78,7 +83,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
         <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.emptyFilter}</p>
       ) : (
         <ul className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
-          {shown.map((item) => (
+          {shown.map((item, i) => (
             <li key={item.href} className="relative">
               <Link href={item.href} className="card grid gap-3">
                 <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
@@ -87,6 +92,8 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                     alt={item.title}
                     ratio="4/5"
                     seed={item.seed}
+                    medium={item.medium}
+                    style={styles[i]}
                     floor={item.floor}
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                     className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}

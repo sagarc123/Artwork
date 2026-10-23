@@ -8,15 +8,15 @@ import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
 import { SavedCount } from './SavedCount'
-import { GenerativeRangoli } from './GenerativeRangoli'
+import { KolamMark } from './Art'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
-function Logo({ locale }: { locale: Locale }) {
+function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
-    <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${site.brandName} — home`}>
-      <GenerativeRangoli seed="siddesh-logo" className="size-9 shrink-0" />
-      <span className="font-heading text-[1.375rem] leading-none whitespace-nowrap xl:text-[1.625rem]">{site.brandName}</span>
+    <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
+      <KolamMark className="size-9 shrink-0" />
+      <span className="font-heading text-[1.375rem] leading-none whitespace-nowrap xl:text-[1.625rem]">{brand}</span>
     </Link>
   )
 }
@@ -53,7 +53,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
 
       {/* Desktop main row */}
       <div className="wrap hidden h-20 items-center justify-between gap-6 xl:flex">
-        <Logo locale={locale} />
+        <Logo locale={locale} brand={t.brand} />
         <nav aria-label={t.nav.mainNav}>
           <ul className="flex items-center gap-6">
             {commissions.map((item) => (
@@ -79,7 +79,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <Search aria-hidden="true" className="size-6" />
             {t.nav.search}
           </Link>
-          <Link href={p('/wishlist')} className={`relative ${iconLink}`}>
+          <Link href={p('/wishlist')} data-pinch="saved" className={`relative ${iconLink}`}>
             <SavedCount label={t.savedPage.count} />
             <Heart aria-hidden="true" className="size-6" />
             {t.nav.saved}
@@ -88,7 +88,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <User aria-hidden="true" className="size-6" />
             {t.nav.me}
           </Link>
-          <Link href={p('/cart')} className={`relative ${iconLink}`}>
+          <Link href={p('/cart')} data-pinch="cart" className={`relative ${iconLink}`}>
             <CartCount label={t.cart.items} />
             <ShoppingCart aria-hidden="true" className="size-6" />
             {t.nav.cart}
@@ -107,7 +107,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           phone={site.phone}
         />
         <div className="flex justify-center">
-          <Logo locale={locale} />
+          <Logo locale={locale} brand={t.brand} />
         </div>
         <Link href={p('/search')} className={iconLink}>
           <Search aria-hidden="true" className="size-6" />
