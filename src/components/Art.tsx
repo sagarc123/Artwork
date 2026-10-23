@@ -1,5 +1,5 @@
 // Hand-made-looking art pieces drawn in code (no image files). All decorative: aria-hidden.
-import type { CSSProperties, ReactNode } from 'react'
+import { useId, type CSSProperties, type ReactNode } from 'react'
 import { cubic, taperedPath, type Pt, type RangoliStyle } from '@/lib/art'
 import { GenerativeRangoli } from './GenerativeRangoli'
 import { PhotoStandIn, SketchStandIn } from './StandIns'
@@ -123,12 +123,46 @@ export function KolamWeave({ className = '' }: { className?: string }) {
 const BINDU_STROKE =
   'M13.01,-2.77L13.72,-1.04L13.97,0.82L13.92,2.71L13.58,4.6L12.96,6.43L12.08,8.16L10.96,9.77L9.61,11.21L8.07,12.46L6.36,13.48L4.52,14.26L2.58,14.78L0.58,15.03L-1.43,15L-3.43,14.69L-5.36,14.11L-7.2,13.27L-8.9,12.19L-10.44,10.88L-11.79,9.38L-12.91,7.71L-13.8,5.9L-14.42,3.99L-14.78,2.02L-14.87,0.03L-14.68,-1.95L-14.23,-3.87L-13.53,-5.71L-12.58,-7.43L-11.41,-9L-10.05,-10.38L-8.52,-11.56L-6.85,-12.51L-5.09,-13.22L-3.25,-13.67L-1.38,-13.87L0.48,-13.81L2.29,-13.49L4.03,-12.91L5.62,-12.05L5.54,-11.87L3.83,-12.29L2.13,-12.54L0.43,-12.58L-1.24,-12.4L-2.86,-12.01L-4.4,-11.42L-5.83,-10.64L-7.15,-9.69L-8.32,-8.59L-9.32,-7.35L-10.15,-6L-10.79,-4.56L-11.24,-3.06L-11.49,-1.52L-11.53,0.03L-11.37,1.56L-11.02,3.05L-10.48,4.48L-9.76,5.82L-8.87,7.06L-7.84,8.17L-6.67,9.13L-5.39,9.93L-4.01,10.57L-2.57,11.02L-1.08,11.28L0.44,11.35L1.96,11.22L3.45,10.9L4.9,10.39L6.28,9.7L7.57,8.83L8.75,7.8L9.79,6.62L10.69,5.3L11.43,3.87L11.99,2.34L12.38,0.72L12.6,-0.95L12.81,-2.72Z'
 
+// Motion (the CSS lives with the mark so the site and the admin panel share it):
+// - on load the stroke trickles round like powder from a pinch, then the dot drops into the gap;
+// - on hover/focus the dot circles once with the line chasing it, then both settle back.
+// Off for reduced motion and the site's "Stop animations" / lite modes.
+const BINDU_CSS = `
+.bm .bm-reveal{stroke-dasharray:1;stroke-dashoffset:0}
+.bm .bm-orbit,.bm .bm-chase{transform-box:view-box;transform-origin:50% 50%}
+.bm .bm-dot{transform-box:fill-box;transform-origin:50% 100%}
+@keyframes bm-draw{from{stroke-dashoffset:1}}
+@keyframes bm-drop{0%{opacity:0;transform:translateY(-9px) scale(.5)}55%{opacity:1;transform:translateY(.6px) scaleY(.85)}100%{opacity:1;transform:none}}
+@keyframes bm-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:no-preference){
+.bm .bm-reveal{animation:bm-draw .9s cubic-bezier(.65,0,.35,1) .15s both}
+.bm .bm-dot{animation:bm-drop .5s cubic-bezier(.22,1,.36,1) 1s both}
+:is(a,button):is(:hover,:focus-visible) .bm .bm-orbit,.bm:hover .bm-orbit{animation:bm-spin 1s cubic-bezier(.65,0,.35,1)}
+:is(a,button):is(:hover,:focus-visible) .bm .bm-chase,.bm:hover .bm-chase{animation:bm-spin 1s cubic-bezier(.65,0,.35,1) .12s}
+}
+:root:is([data-motion=off],[data-fx=lite]) .bm *{animation:none!important}
+`
+
 /** Header and admin mark. The stroke takes the text colour (works on light and dark); the dot stays kumkum. Decorative. */
 export function BrandMark({ className = '' }: { className?: string }) {
+  // The mark appears twice on a page (header and menu): each copy needs its own mask id.
+  const uid = `bm${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (
-    <svg aria-hidden="true" focusable="false" viewBox="-17 -17 34 34" className={className}>
-      <path d={BINDU_STROKE} fill="currentColor" />
-      <circle cx="10.4" cy="-8.13" r="2.8" fill="var(--color-kumkum, #A6261D)" />
+    // viewBox starts at 0 so "50% 50%" is the centre in every browser; the shapes are drawn around 0,0 and moved in.
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 34 34" className={`bm ${className}`}>
+      <style>{BINDU_CSS}</style>
+      <mask id={uid} maskUnits="userSpaceOnUse" x="-17" y="-17" width="34" height="34">
+        {/* The stroke is revealed along its own arc, start to end, like powder being trickled. */}
+        <path className="bm-reveal" d="M12.91,-2.74A13.2,13.2 0 1 1 5.58,-11.96" fill="none" stroke="#fff" strokeWidth="7" pathLength={1} />
+      </mask>
+      <g className="bm-chase">
+        <path transform="translate(17 17)" d={BINDU_STROKE} fill="currentColor" mask={`url(#${uid})`} />
+      </g>
+      <g className="bm-orbit">
+        <g transform="translate(17 17)">
+          <circle className="bm-dot" cx="10.4" cy="-8.13" r="2.8" fill="var(--color-kumkum, #A6261D)" />
+        </g>
+      </g>
     </svg>
   )
 }
