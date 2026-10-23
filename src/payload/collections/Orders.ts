@@ -112,6 +112,7 @@ export const Orders: CollectionConfig = {
           { name: 'subtotal', type: 'number', admin: { readOnly: true } },
           { name: 'shipping', type: 'number', admin: { readOnly: true } },
           { name: 'codFee', label: 'COD fee', type: 'number', admin: { readOnly: true } },
+          { name: 'giftWrapFee', label: 'Gift wrap', type: 'number', admin: { readOnly: true } },
           { name: 'total', label: 'Total (₹)', type: 'number', admin: { readOnly: true } },
         ],
       },
@@ -145,6 +146,7 @@ export const Orders: CollectionConfig = {
         ],
       },
     ]),
+    ...lock([{ name: 'giftNote', label: 'Gift card message (print on the card, not the invoice)', type: 'textarea', admin: { readOnly: true } }]),
     { name: 'note', type: 'textarea' },
     ...lock([
       {

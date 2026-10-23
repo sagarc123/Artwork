@@ -9,7 +9,9 @@ import { submitEnquiry, type EnquiryState } from '@/server/enquiry-action'
 import { pinch } from './pinch'
 
 type Labels = Dictionary['forms']
-type Props = { kind: 'event' | 'portrait' | 'general'; locale: string; t: Labels; typeLabel: string }
+/** "from ₹X" under a chip, keyed by the chip's value. */
+type Hints = Record<string, string>
+type Props = { kind: 'event' | 'portrait' | 'general'; locale: string; t: Labels; typeLabel: string; hints?: { size?: Hints; medium?: Hints; paperSize?: Hints } }
 
 const input =
   'h-13 w-full rounded-ui border border-border bg-surface px-4 text-charcoal aria-invalid:border-kumkum aria-invalid:border-2'
@@ -37,15 +39,16 @@ function Field({ id, label, hint, error, children }: { id: string; label: ReactN
   )
 }
 
-function Chips({ legend, name, type, options }: { legend: string; name: string; type: 'radio' | 'checkbox'; options: Record<string, string> }) {
+function Chips({ legend, name, type, options, hints }: { legend?: string; name: string; type: 'radio' | 'checkbox'; options: Record<string, string>; hints?: Hints }) {
   return (
     <fieldset className="grid gap-3">
-      <legend className="mb-1 font-semibold">{legend}</legend>
+      {legend && <legend className="mb-1 font-semibold">{legend}</legend>}
       <div className="flex flex-wrap gap-2">
         {Object.entries(options).map(([value, label]) => (
-          <label key={value} className={chip}>
+          <label key={value} className={`${chip} ${hints?.[value] ? 'flex-col justify-center py-1 leading-tight' : ''}`}>
             <input type={type} name={name} value={value} className="sr-only" />
             {label}
+            {hints?.[value] && <span className="opacity-80">{hints[value]}</span>}
           </label>
         ))}
       </div>
@@ -70,26 +73,29 @@ function summarise(f: FormData, t: Labels, typeLabel: string) {
     [t.medium, pick('medium', t.mediums)],
     [t.paperSize, pick('paperSize')],
     [t.faces, pick('faces')],
-    [t.occasion, pick('occasion')],
     [t.message, pick('message')],
   ]
   return [`${t.waIntro} (${typeLabel})`, ...lines.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`)].join('\n')
 }
 
 /** Enquiry form: saves to the admin inbox, then hands over to WhatsApp with the details filled in. */
-export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
+export function EnquiryForm({ kind, locale, t, typeLabel, hints }: Props) {
   const [state, action, pending] = useActionState<EnquiryState, FormData>(submitEnquiry, { status: 'idle' })
   const [summary, setSummary] = useState('')
   const formRef = useRef<HTMLFormElement>(null)
   const doneRef = useRef<HTMLDivElement>(null)
   // After sending, move focus to the result: the success box, or the first field to fix (else the error message).
+  // On success the chat opens straight away with the details filled in. Same tab: a new window opened after the
+  // server reply would be blocked as a pop-up. Phones hand over to the WhatsApp app; the panel keeps a button in case.
   useEffect(() => {
-    if (state.status === 'ok') doneRef.current?.focus()
-    else if (state.status !== 'idle') {
+    if (state.status === 'ok') {
+      doneRef.current?.focus()
+      if (summary) window.location.assign(whatsappLink(summary))
+    } else if (state.status !== 'idle') {
       const form = formRef.current
       ;(form?.querySelector<HTMLElement>('[aria-invalid="true"]') ?? form?.querySelector<HTMLElement>('[role="alert"]'))?.focus()
     }
-  }, [state])
+  }, [state, summary])
   const errors = state.status === 'error' ? state.errors : []
   const err = (f: EnquiryField) => (errors.includes(f) ? t.errors[f] : undefined)
   const described = (id: string, f?: EnquiryField, hint?: boolean) =>
@@ -159,25 +165,40 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
 
       {kind === 'event' ? (
         <>
-          <Field id="eventDate" label={`${t.date} ${t.optional}`} error={err('date')}>
-            <input id="eventDate" name="eventDate" type="date" className={input} aria-invalid={!!err('date')} aria-describedby={described('eventDate', 'date')} />
+          <Field id="eventDate" label={`${t.date} ${t.required}`} error={err('date') ?? err('dateRequired')}>
+            <input
+              id="eventDate"
+              name="eventDate"
+              type="date"
+              required
+              className={input}
+              aria-invalid={!!(err('date') ?? err('dateRequired'))}
+              aria-describedby={described('eventDate', errors.includes('dateRequired') ? 'dateRequired' : 'date')}
+            />
           </Field>
           <Field id="city" label={`${t.city} ${t.optional}`}>
             <input id="city" name="city" type="text" autoComplete="address-level2" className={input} />
           </Field>
           <Chips legend={t.venue} name="venue" type="radio" options={t.venues} />
-          <Chips legend={t.size} name="size" type="radio" options={t.sizes} />
-          <Chips legend={t.styles} name="styles" type="checkbox" options={t.styleOptions} />
+          <Chips legend={t.size} name="size" type="radio" options={t.sizes} hints={hints?.size} />
+          <details className="group rounded-ui border border-border/40 px-4">
+            <summary className="flex min-h-12 cursor-pointer items-center justify-between font-semibold">
+              {t.stylesToggle} {t.optional}
+              <span aria-hidden="true" className="text-xl transition-transform group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <div className="pb-4">
+              <Chips name="styles" type="checkbox" options={t.styleOptions} />
+            </div>
+          </details>
         </>
       ) : kind === 'portrait' ? (
         <>
-          <Chips legend={t.medium} name="medium" type="radio" options={t.mediums} />
-          <Chips legend={t.paperSize} name="paperSize" type="radio" options={{ A4: 'A4', A3: 'A3', A2: 'A2' }} />
+          <Chips legend={t.medium} name="medium" type="radio" options={t.mediums} hints={hints?.medium} />
+          <Chips legend={t.paperSize} name="paperSize" type="radio" options={{ A4: 'A4', A3: 'A3', A2: 'A2' }} hints={hints?.paperSize} />
           <Field id="faces" label={t.faces}>
             <input id="faces" name="faces" type="number" inputMode="numeric" min={1} max={12} defaultValue={1} className={`${input} max-w-32`} />
-          </Field>
-          <Field id="occasion" label={`${t.occasion} ${t.optional}`}>
-            <input id="occasion" name="occasion" type="text" className={input} />
           </Field>
           <Field id="eventDate" label={`${t.neededBy} ${t.optional}`} error={err('date')}>
             <input id="eventDate" name="eventDate" type="date" className={input} aria-invalid={!!err('date')} aria-describedby={described('eventDate', 'date')} />
@@ -217,14 +238,14 @@ export function EnquiryForm({ kind, locale, t, typeLabel }: Props) {
       <Field id="message" label={`${kind === 'general' ? t.yourMessage : t.message} ${t.optional}`}>
         <textarea id="message" name="message" rows={4} className="w-full rounded-ui border border-border bg-surface p-4" />
       </Field>
-      <label className="flex min-h-12 items-center gap-3">
-        <input type="checkbox" name="offers" value="yes" className="size-6 accent-kumkum" />
-        {t.offers}
-      </label>
-
+      {/* ponytail: the "festival offers" opt-in left the forms; the wantsOffers field stays for a later newsletter. */}
       <button type="submit" disabled={pending} className="press h-13 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90 disabled:opacity-60 sm:justify-self-start">
         {pending ? t.sending : t.submit}
       </button>
+      <a href={whatsappLink(t.waTalk.replace('{type}', typeLabel))} target="_blank" rel="noopener noreferrer" className="ink-link -mt-2 inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-leaf">
+        <MessageCircle aria-hidden="true" className="size-5" />
+        {t.voiceNote}
+      </a>
     </form>
   )
 }

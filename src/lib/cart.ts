@@ -27,7 +27,15 @@ export type QuoteLine = {
 }
 
 // cod and online are filled in by the checkout server (they depend on settings and payment keys).
-export type Quote = { lines: QuoteLine[]; subtotal: number; shipping: number; total: number; ok: boolean; cod?: CodOption; online?: boolean }
+export type Quote = { lines: QuoteLine[]; subtotal: number; shipping: number; total: number; ok: boolean; cod?: CodOption; online?: boolean; giftWrapFee?: number }
+
+export const GIFT_NOTE_MAX = 200
+
+/** Gift wrap is charged once per order, and only when something physical ships. */
+export const giftWrapCharge = (wanted: boolean, lines: Pick<QuoteLine, 'type'>[], fee: number) => (wanted && lines.some((l) => l.type !== 'digital') ? Math.max(0, fee) : 0)
+
+/** What the buyer pays: items and delivery, plus any COD fee and gift wrap. */
+export const orderTotal = (quote: Pick<Quote, 'total'>, codFee = 0, giftWrap = 0) => quote.total + codFee + giftWrap
 
 export function priceCart(lines: CartLine[], products: Product[]): Quote {
   const bySlug = new Map(products.map((p) => [p.slug, p]))

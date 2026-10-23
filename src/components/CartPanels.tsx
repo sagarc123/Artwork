@@ -5,16 +5,19 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
-import type { CartLine, CodBlock, Quote, QuoteLine } from '@/lib/cart'
+import { GIFT_NOTE_MAX, giftWrapCharge, orderTotal, type CartLine, type CodBlock, type Quote, type QuoteLine } from '@/lib/cart'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
+import { lookupPincode } from '@/server/pincode'
+import { DeliveryPromise } from './DeliveryPromise'
 import { cartActions, useCart } from './cart-store'
 import { pickMedium } from '@/lib/art'
 import { MediaImage } from './MediaImage'
 import { useHydrated } from './local-store'
 
 type T = Pick<Dictionary, 'cart' | 'checkout' | 'forms' | 'shop'>
+type Extra = { label: string; amount: number }
 
 
 /** Quotes the cart; with a pincode, cash on delivery is checked for it too. */
@@ -25,6 +28,8 @@ function useQuote(locale: string, pincode = '') {
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
   useEffect(() => {
+    // An empty cart needs no quote. This also keeps the cart clearing after an order from firing an action from the next page.
+    if (lines.length === 0) return
     let live = true
     getCartQuote(lines, locale, pincode || undefined)
       .then((q) => {
@@ -56,21 +61,22 @@ function QuoteError({ t, retry }: { t: T['checkout']['errors']; retry: () => voi
 
 const toLine = (l: QuoteLine) => ({ slug: l.slug, variantId: l.variantId, frameId: l.frameId, qty: l.qty })
 
-function Totals({ quote, t, codFee }: { quote: Quote; t: T['cart']; codFee?: { label: string; amount: number } }) {
+/** Subtotal, delivery and any extras (COD fee, gift wrap), then the total. */
+function Totals({ quote, t, extras = [] }: { quote: Quote; t: T['cart']; extras?: Extra[] }) {
   return (
     <dl className="grid grid-cols-[1fr_auto] gap-y-2 border-t border-border/30 pt-4">
       <dt>{t.subtotal}</dt>
       <dd>{formatPrice(quote.subtotal)}</dd>
       <dt>{t.shipping}</dt>
       <dd>{quote.shipping ? formatPrice(quote.shipping) : t.free}</dd>
-      {codFee && (
-        <>
-          <dt>{codFee.label}</dt>
-          <dd>{formatPrice(codFee.amount)}</dd>
-        </>
-      )}
+      {extras.map((x) => (
+        <div key={x.label} className="contents">
+          <dt>{x.label}</dt>
+          <dd>{formatPrice(x.amount)}</dd>
+        </div>
+      ))}
       <dt className="text-h3 font-semibold">{t.total}</dt>
-      <dd className="text-h3 font-semibold">{formatPrice(quote.total + (codFee?.amount ?? 0))}</dd>
+      <dd className="text-h3 font-semibold">{formatPrice(quote.total + extras.reduce((sum, x) => sum + x.amount, 0))}</dd>
       <dd className="col-span-2 text-muted">
         {t.gst} {t.freeFrom}
       </dd>
@@ -183,6 +189,28 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   // The server may refuse COD for reasons the quote can't know (an open COD order on this phone).
   const [codRefused, setCodRefused] = useState<CodBlock | null>(null)
   const [wantsGst, setWantsGst] = useState(false)
+  const [giftWrap, setGiftWrap] = useState(false)
+  // City and state filled in from the pincode (India Post). Only fields the buyer hasn't changed get overwritten.
+  const [filledFrom, setFilledFrom] = useState('')
+  const autoFilled = useRef({ city: '', state: 'Maharashtra' })
+  useEffect(() => {
+    if (!pin) return
+    let live = true
+    lookupPincode(pin)
+      .then((place) => {
+        const form = formRef.current
+        if (!live || !place || !form) return
+        for (const name of ['city', 'state'] as const) {
+          const el = form.elements.namedItem(name) as HTMLInputElement | null
+          if (el && (el.value.trim() === '' || el.value === autoFilled.current[name])) el.value = autoFilled.current[name] = place[name]
+        }
+        setFilledFrom(pin)
+      })
+      .catch(() => {}) // never blocks checkout: the buyer types them
+    return () => {
+      live = false
+    }
+  }, [pin])
   const [busy, setBusy] = useState(false)
   const [errors, setErrors] = useState<CheckoutField[]>([])
   const [message, setMessage] = useState<string | null>(null)
@@ -206,6 +234,14 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   const codReason = cod?.block ?? codRefused
   const payMode: 'prepaid' | 'cod' = (mode === 'cod' || !online) && cod && !codReason ? 'cod' : 'prepaid'
   const codText = (b: CodBlock) => t.checkout.codBlocked[b].replace('{max}', formatPrice(cod?.maxTotal ?? 0)).replace('{pincode}', pin)
+  const physical = quote?.lines.some((l) => l.type !== 'digital') ?? false
+  const giftFee = quote ? giftWrapCharge(giftWrap, quote.lines, quote.giftWrapFee ?? 0) : 0
+  const codFee = payMode === 'cod' && cod ? cod.fee : 0
+  const extras: Extra[] = [
+    ...(codFee ? [{ label: t.checkout.codFee, amount: codFee }] : []),
+    ...(giftFee ? [{ label: t.cart.giftWrap, amount: giftFee }] : []),
+  ]
+  const toPay = quote ? orderTotal(quote, codFee, giftFee) : 0
 
   if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
   if (lines.length === 0)
@@ -229,6 +265,8 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
       note: get('note'),
       paymentMode: payMode,
       gst: wantsGst ? { gstin: get('gstin'), businessName: get('businessName') } : null,
+      giftWrap,
+      giftNote: giftWrap ? get('giftNote') : '',
     }
     setBusy(true)
     setMessage(null)
@@ -239,7 +277,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
       if (result.status === 'not_ready' && quote) {
         const items = quote.lines.map((l) => `• ${l.title} (${[l.variantLabel, l.frameLabel].filter(Boolean).join(', ')}) × ${l.qty} — ${formatPrice(l.lineTotal)}`)
         const addr = [input.address.line1, input.address.line2, input.address.city, input.address.state, input.address.pincode].filter(Boolean).join(', ')
-        setNotReady([t.shop.waOrder, ...items, `${t.cart.total}: ${formatPrice(quote.total)}`, `${input.customer.name}, ${addr}`].join('\n'))
+        setNotReady([t.shop.waOrder, ...items, ...(giftFee ? [`${t.cart.giftWrap}: ${formatPrice(giftFee)}`] : []), `${t.cart.total}: ${formatPrice(quote.total + giftFee)}`, `${input.customer.name}, ${addr}`].join('\n'))
       }
       if (result.status === 'cod') {
         opened = true // stays busy while the order page loads
@@ -319,20 +357,15 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           {field('name', `${t.forms.name} ${t.forms.required}`, { autoComplete: 'name', required: true })}
           {field('phone', `${t.forms.phone} ${t.forms.required}`, { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', required: true, onChange: () => setCodRefused(null) })}
           {field('email', `${t.forms.email} ${t.forms.optional}`, { type: 'email', autoComplete: 'email' })}
-          <label className="flex min-h-11 items-center gap-3 font-semibold">
-            <input type="checkbox" checked={wantsGst} onChange={(e) => setWantsGst(e.target.checked)} className="size-5 accent-kumkum" />
-            {c.gstToggle}
-          </label>
-          {wantsGst && (
-            <div className="grid gap-5 sm:grid-cols-2">
-              {field('gstin', c.gstin, { maxLength: 15, autoCapitalize: 'characters', spellCheck: false, required: true })}
-              {field('businessName', c.businessName, { autoComplete: 'organization', required: true })}
-            </div>
-          )}
         </fieldset>
         <fieldset className="grid gap-5">
           <legend className="mb-2 font-heading text-h2">{c.address}</legend>
           {field('pincode', `${c.pincode} (${c.pincodeHint})`, { inputMode: 'numeric', maxLength: 6, autoComplete: 'postal-code', required: true, onChange: (e: { target: HTMLInputElement }) => setPincode(e.target.value.trim()) })}
+          {filledFrom && filledFrom === pin && (
+            <p role="status" className="-mt-3 text-muted">
+              {c.pincodeFilled}
+            </p>
+          )}
           {field('line1', c.line1, { autoComplete: 'address-line1', required: true })}
           {field('line2', c.line2, { autoComplete: 'address-line2' })}
           <div className="grid gap-5 sm:grid-cols-2">
@@ -341,6 +374,43 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           </div>
           {field('note', c.note)}
         </fieldset>
+        {physical && quote && (
+          <fieldset className="grid gap-4">
+            <legend className="mb-2 font-heading text-h3">{c.gift}</legend>
+            <label className="flex min-h-11 items-center gap-3 font-semibold">
+              <input type="checkbox" checked={giftWrap} onChange={(e) => setGiftWrap(e.target.checked)} className="size-5 accent-kumkum" />
+              {c.giftWrap.replace('{fee}', formatPrice(quote.giftWrapFee ?? 0))}
+            </label>
+            {giftWrap && (
+              <div className="grid gap-2">
+                <label htmlFor="giftNote" className="font-semibold">
+                  {c.giftNote}
+                </label>
+                <p id="giftNote-hint" className="-mt-1 text-muted">
+                  {c.giftNoteHint}
+                </p>
+                <textarea id="giftNote" name="giftNote" rows={3} maxLength={GIFT_NOTE_MAX} aria-describedby="giftNote-hint" className="w-full rounded-ui border border-border bg-surface p-4" />
+              </div>
+            )}
+          </fieldset>
+        )}
+        {/* Rarely needed, so folded away at the end; opening it is what asks for the GST invoice. */}
+        <details open={wantsGst} onToggle={(e) => setWantsGst(e.currentTarget.open)} className="group rounded-ui border border-border/40 px-4">
+          <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 font-semibold">
+            <span>
+              {c.business} <span className="font-normal text-muted">{c.businessHint}</span>
+            </span>
+            <span aria-hidden="true" className="text-xl transition-transform group-open:rotate-45">
+              +
+            </span>
+          </summary>
+          {wantsGst && (
+            <div className="grid gap-5 pb-4 sm:grid-cols-2">
+              {field('gstin', c.gstin, { maxLength: 15, autoCapitalize: 'characters', spellCheck: false, required: true })}
+              {field('businessName', c.businessName, { autoComplete: 'organization', required: true })}
+            </div>
+          )}
+        </details>
         <fieldset className="grid gap-4">
           <legend className="mb-2 font-heading text-h2">{c.payment}</legend>
           <label className={option}>
@@ -379,11 +449,11 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
               {payMode === 'cod'
                 ? busy
                   ? c.placing
-                  : c.codButton.replace('{amount}', formatPrice((quote?.total ?? 0) + (cod?.fee ?? 0)))
+                  : c.codButton.replace('{amount}', formatPrice(toPay))
                 : busy
                   ? c.paying
                   : online
-                    ? c.payButton.replace('{amount}', quote ? formatPrice(quote.total) : '')
+                    ? c.payButton.replace('{amount}', quote ? formatPrice(toPay) : '')
                     : c.sendWhatsapp}
             </button>
           )}
@@ -395,7 +465,8 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
         {quote ? (
           <>
             <Lines quote={quote} t={t.cart} editable={false} />
-            <Totals quote={quote} t={t.cart} codFee={payMode === 'cod' && cod ? { label: c.codFee, amount: cod.fee } : undefined} />
+            <Totals quote={quote} t={t.cart} extras={extras} />
+            {physical && <DeliveryPromise locale={locale} deliveredBy={t.shop.deliveredBy} cod={cod && !codReason ? t.shop.codAvailable : null} />}
           </>
         ) : (
           !failed && <p className="text-muted">{t.cart.loading}</p>

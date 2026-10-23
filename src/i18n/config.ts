@@ -43,21 +43,38 @@ export function stripLocale(pathname: string): string {
 
 export type LocaleRoute =
   | { action: 'next' }
-  | { action: 'redirect'; to: string }
+  | { action: 'redirect'; to: string; remember?: Locale }
   | { action: 'rewrite'; to: string }
+
+/** The visitor's best language from the browser's Accept-Language header (`mr-IN,mr;q=0.9,en;q=0.8`). */
+export function preferredLocale(header: string | null | undefined): Locale {
+  const ranked = (header ?? '')
+    .split(',')
+    .map((part, i) => {
+      const [tag, ...params] = part.trim().toLowerCase().split(';')
+      const q = Number(params.find((p) => p.trim().startsWith('q='))?.split('=')[1] ?? 1)
+      return { lang: tag.split('-')[0], q: Number.isFinite(q) ? q : 0, i }
+    })
+    .filter((x) => x.q > 0)
+    .sort((a, b) => b.q - a.q || a.i - b.i)
+  return ranked.map((x) => x.lang).find(isLocale) ?? defaultLocale
+}
 
 /**
  * Decides what the proxy does with an incoming page path.
  * - `/en/...` is never public: redirect to the unprefixed URL.
  * - `/mr/...`, `/hi/...` pass through.
- * - Unprefixed paths serve English, unless the visitor chose Marathi/Hindi before.
+ * - Unprefixed paths serve English, unless the visitor chose Marathi/Hindi before,
+ *   or (first visit, no choice yet) their browser prefers Marathi/Hindi: then they go there and it is remembered.
  */
-export function resolveLocaleRoute(pathname: string, cookieLocale?: string): LocaleRoute {
+export function resolveLocaleRoute(pathname: string, cookieLocale?: string, acceptLanguage?: string | null): LocaleRoute {
   const first = pathname.split('/')[1]
   if (first === defaultLocale) return { action: 'redirect', to: stripLocale(pathname) }
   if (isLocale(first)) return { action: 'next' }
   if (isLocale(cookieLocale) && cookieLocale !== defaultLocale) {
     return { action: 'redirect', to: localePath(cookieLocale, pathname) }
   }
+  const browser = isLocale(cookieLocale) ? defaultLocale : preferredLocale(acceptLanguage)
+  if (browser !== defaultLocale) return { action: 'redirect', to: localePath(browser, pathname), remember: browser }
   return { action: 'rewrite', to: pathname === '/' ? '/en' : `/en${pathname}` }
 }

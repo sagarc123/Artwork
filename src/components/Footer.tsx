@@ -5,16 +5,16 @@ import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MotionToggle } from './MotionSettings'
 import { Signature } from './Signature'
+import { getCategories } from '@/server/content'
 
-export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
+export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   const p = (path: string) => localePath(locale, path)
+  const categories = await getCategories(locale, 'shop')
   const columns = [
     {
       title: t.footer.shop,
       links: [
-        { href: p('/shop'), label: t.home.categories.drawings },
-        { href: p('/shop'), label: t.home.categories.paintings },
-        { href: p('/shop'), label: t.home.categories.rangoli },
+        ...(categories.length ? categories.slice(0, 5).map((c) => ({ href: p(`/shop/${c.slug}`), label: c.name })) : [{ href: p('/shop'), label: t.nav.shop }]),
         { href: p('/artwork'), label: t.nav.artwork },
       ],
     },
@@ -23,13 +23,14 @@ export function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
       links: [
         { href: p('/events'), label: t.nav.events },
         { href: p('/custom-portraits'), label: t.nav.portraits },
-        { href: p('/courses'), label: t.nav.courses },
+        ...(site.coursesLive ? [{ href: p('/courses'), label: t.nav.courses }] : []),
         { href: p('/about'), label: t.nav.about },
       ],
     },
     {
       title: t.footer.help,
       links: [
+        { href: p('/track'), label: t.footer.track },
         { href: p('/help'), label: t.nav.help },
         { href: p('/contact'), label: t.nav.contact },
         { href: p('/policies/shipping'), label: t.footer.shipping },

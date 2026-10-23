@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { localePath, resolveLocaleRoute, stripLocale } from './config.ts'
+import { localePath, preferredLocale, resolveLocaleRoute, stripLocale } from './config.ts'
 
 test('localePath keeps English unprefixed and prefixes mr/hi', () => {
   assert.equal(localePath('en', '/shop'), '/shop')
@@ -23,4 +23,22 @@ test('resolveLocaleRoute', () => {
   assert.deepEqual(resolveLocaleRoute('/shop', 'hi'), { action: 'redirect', to: '/hi/shop' })
   assert.deepEqual(resolveLocaleRoute('/shop', 'en'), { action: 'rewrite', to: '/en/shop' })
   assert.deepEqual(resolveLocaleRoute('/shop', 'xx'), { action: 'rewrite', to: '/en/shop' })
+})
+
+test('preferredLocale reads Accept-Language by weight', () => {
+  assert.equal(preferredLocale('mr-IN,mr;q=0.9,en;q=0.8'), 'mr')
+  assert.equal(preferredLocale('en-US,en;q=0.9,hi;q=0.8'), 'en')
+  assert.equal(preferredLocale('fr;q=0.9,hi;q=0.5'), 'hi')
+  assert.equal(preferredLocale('en;q=0.2,mr;q=0.6'), 'mr')
+  assert.equal(preferredLocale('mr;q=0,de'), 'en')
+  assert.equal(preferredLocale(''), 'en')
+  assert.equal(preferredLocale(undefined), 'en')
+})
+
+test('first visit follows the browser language; a remembered choice wins', () => {
+  assert.deepEqual(resolveLocaleRoute('/shop', undefined, 'mr-IN,mr;q=0.9'), { action: 'redirect', to: '/mr/shop', remember: 'mr' })
+  assert.deepEqual(resolveLocaleRoute('/', undefined, 'hi-IN'), { action: 'redirect', to: '/hi', remember: 'hi' })
+  assert.deepEqual(resolveLocaleRoute('/shop', 'en', 'mr-IN'), { action: 'rewrite', to: '/en/shop' })
+  assert.deepEqual(resolveLocaleRoute('/shop', undefined, 'en-GB'), { action: 'rewrite', to: '/en/shop' })
+  assert.deepEqual(resolveLocaleRoute('/hi/shop', undefined, 'mr'), { action: 'next' })
 })

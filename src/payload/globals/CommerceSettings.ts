@@ -32,6 +32,14 @@ export const CommerceSettings: GlobalConfig = {
       ],
     },
     {
+      name: 'giftWrapFee',
+      label: 'Gift wrap fee (₹)',
+      type: 'number',
+      defaultValue: 49,
+      min: 0,
+      admin: { description: 'Added when a buyer ticks "Gift wrap". SAMPLE value — owner to confirm.' },
+    },
+    {
       name: 'tax',
       type: 'group',
       fields: [

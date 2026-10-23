@@ -30,7 +30,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
   const sections = [
     { href: p('/shop'), label: t.nav.shop },
     { href: p('/artwork'), label: t.nav.artwork },
-    { href: p('/courses'), label: t.nav.courses },
+    ...(site.coursesLive ? [{ href: p('/courses'), label: t.nav.courses }] : []),
     { href: p('/about'), label: t.nav.about },
   ]
   const navClass =
@@ -84,10 +84,12 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <Heart aria-hidden="true" className="size-6" />
             {t.nav.saved}
           </Link>
-          <Link href={p('/account')} className={iconLink}>
-            <User aria-hidden="true" className="size-6" />
-            {t.nav.me}
-          </Link>
+          {site.accountsLive && (
+            <Link href={p('/account')} className={iconLink}>
+              <User aria-hidden="true" className="size-6" />
+              {t.nav.me}
+            </Link>
+          )}
           <Link href={p('/cart')} data-pinch="cart" className={`relative ${iconLink}`}>
             <CartCount label={t.cart.items} />
             <ShoppingCart aria-hidden="true" className="size-6" />

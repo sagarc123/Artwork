@@ -2,7 +2,7 @@
 
 import { MessageCircle, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { formatPrice, whatsappLink } from '@/lib/site'
 import { cartActions } from './cart-store'
@@ -10,10 +10,22 @@ import { pinch } from './pinch'
 
 type Variant = { id: string; label: string; price: number; compareAtPrice?: number | null; stock: number }
 type Frame = { id: string; label: string; extraPrice: number }
-type Props = { slug: string; title: string; variants: Variant[]; framing: Frame[]; t: Dictionary['shop']; cart: Dictionary['cart']; cartHref: string }
+type Props = {
+  slug: string
+  title: string
+  /** Prints and originals get WhatsApp as an equal second button; downloads keep it as a link. */
+  physical: boolean
+  variants: Variant[]
+  framing: Frame[]
+  t: Dictionary['shop']
+  cart: Dictionary['cart']
+  cartHref: string
+  /** Delivery date and COD line, shown just above the buttons. */
+  promise?: ReactNode
+}
 
-/** Size and frame choice with a live price; ordering continues on WhatsApp until online payment arrives. */
-export function ProductBuy({ slug, title, variants, framing, t, cart, cartHref }: Props) {
+/** Size and frame choice with a live price; buy here or on WhatsApp, whichever the buyer trusts. */
+export function ProductBuy({ slug, title, physical, variants, framing, t, cart, cartHref, promise }: Props) {
   const [added, setAdded] = useState(false)
   const [v, setV] = useState(Math.max(0, variants.findIndex((x) => x.stock > 0)))
   const [f, setF] = useState(-1)
@@ -66,18 +78,32 @@ export function ProductBuy({ slug, title, variants, framing, t, cart, cartHref }
         <p className="rounded-ui bg-kumkum px-4 py-3 font-semibold text-white">{t.sold}</p>
       ) : (
         <div className="grid gap-3">
-          <button
-            type="button"
-            onClick={(e) => {
-              cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
-              pinch(e.currentTarget, 'cart')
-              setAdded(true)
-            }}
-            className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90"
-          >
-            <ShoppingCart aria-hidden="true" className="size-6" />
-            {cart.add}
-          </button>
+          {promise}
+          <div className={`grid gap-3 ${physical ? 'sm:grid-cols-2' : ''}`}>
+            <button
+              type="button"
+              onClick={(e) => {
+                cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
+                pinch(e.currentTarget, 'cart')
+                setAdded(true)
+              }}
+              className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90"
+            >
+              <ShoppingCart aria-hidden="true" className="size-6" />
+              {cart.add}
+            </button>
+            {physical && (
+              <a
+                href={whatsappLink(message)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-leaf px-6 font-semibold text-white hover:bg-leaf/90"
+              >
+                <MessageCircle aria-hidden="true" className="size-6" />
+                {t.order}
+              </a>
+            )}
+          </div>
           {added && (
             <p role="status" className="flex flex-wrap items-center gap-x-3 font-semibold text-leaf">
               {cart.added} ✓
@@ -86,10 +112,12 @@ export function ProductBuy({ slug, title, variants, framing, t, cart, cartHref }
               </Link>
             </p>
           )}
-          <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-leaf">
-            <MessageCircle aria-hidden="true" className="size-5" />
-            {t.order}
-          </a>
+          {!physical && (
+            <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-leaf">
+              <MessageCircle aria-hidden="true" className="size-5" />
+              {t.order}
+            </a>
+          )}
         </div>
       )}
     </div>

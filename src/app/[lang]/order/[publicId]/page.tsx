@@ -1,9 +1,15 @@
 import config from '@payload-config'
-import { CheckCircle2, Clock, FileDown, MessageCircle } from 'lucide-react'
+import { Check, CheckCircle2, Clock, FileDown, MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
-import { getDictionary } from '@/i18n/dictionaries'
+import { OrderAgain } from '@/components/OrderAgain'
+import { localePath } from '@/i18n/config'
+import { getDictionary, getLocale } from '@/i18n/dictionaries'
+import type { CartLine } from '@/lib/cart'
+import { deliveryRange } from '@/lib/dates'
+import { orderProgress, TIMELINE } from '@/lib/track'
 import { formatPrice, whatsappLink } from '@/lib/site'
 
 // Private, per-request page: render fully on the server before sending, so a wrong link gets a real 404.
@@ -24,10 +30,30 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
   if (!order) notFound()
   const { totalDocs: invoices } = await payload.count({ collection: 'invoices', where: { order: { equals: order.id } } })
   const t = await getDictionary()
+  const locale = await getLocale()
   const o = t.order
   const awaitingCod = order.status === 'cod_pending_confirmation'
   const paid = order.status !== 'pending_payment' && order.status !== 'cancelled' && !awaitingCod
   const total = formatPrice(order.total ?? 0)
+
+  const progress = orderProgress(order.status)
+  const physical = (order.items ?? []).some((it) => it.type !== 'digital')
+  const day = (ymd: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${ymd}T00:00:00Z`))
+  // ponytail: estimated from the order date (5–8 days); the courier's date replaces it with Shiprocket.
+  const [eta1, eta2] = deliveryRange(order.createdAt.slice(0, 10))
+  const showEta = physical && 'step' in progress && progress.step < 4
+
+  // "Order again": the same pieces (by slug), with the frame matched back from its label.
+  const productIds = (order.items ?? []).map((it) => it.product).filter((id): id is number => typeof id === 'number')
+  const { docs: products } = productIds.length
+    ? await payload.find({ collection: 'products', where: { id: { in: productIds } }, depth: 0, limit: productIds.length, select: { slug: true, framing: true } })
+    : { docs: [] }
+  const again: CartLine[] = (order.items ?? []).flatMap((it) => {
+    const p = products.find((x) => x.id === it.product)
+    if (!p?.slug || !it.variantId) return []
+    const frameId = it.frameLabel ? p.framing?.find((f) => f.label === it.frameLabel)?.id : undefined
+    return [{ slug: p.slug, variantId: it.variantId, frameId: frameId ?? undefined, qty: it.qty ?? 1 }]
+  })
 
   return (
     <section className="bg-paper grain py-12 lg:py-20">
@@ -53,6 +79,29 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             </p>
             {paid && <p className="text-muted">{o.note}</p>}
           </div>
+          <div className="grid gap-4">
+            <h2 className="font-heading text-h3">{o.timelineTitle}</h2>
+            {'stopped' in progress ? (
+              <p className="rounded-ui border-2 border-kumkum p-4 font-semibold">{o.stopped[progress.stopped]}</p>
+            ) : (
+              <ol className="grid gap-0">
+                {TIMELINE.map((step, i) => {
+                  const done = i <= progress.step
+                  const label = step === 'confirmed' && order.paymentMode !== 'cod' ? o.steps.paid : o.steps[step]
+                  return (
+                    <li key={step} aria-current={i === progress.step ? 'step' : undefined} className="relative flex min-h-12 items-center gap-4 pl-1">
+                      {i < TIMELINE.length - 1 && <span aria-hidden="true" className={`absolute top-8 left-[1.05rem] h-[calc(100%-1rem)] w-0.5 ${i < progress.step ? 'bg-leaf' : 'bg-border/40'}`} />}
+                      <span className={`relative z-10 grid size-8 shrink-0 place-items-center rounded-full border-2 ${done ? 'border-leaf bg-leaf text-white' : 'border-border/50 bg-surface'}`}>
+                        {done && <Check aria-hidden="true" className="size-5" />}
+                      </span>
+                      <span className={i === progress.step ? 'font-semibold' : done ? '' : 'text-muted'}>{label}</span>
+                    </li>
+                  )
+                })}
+              </ol>
+            )}
+            {showEta && <p className="font-semibold">{o.expected.replace('{from}', day(eta1)).replace('{to}', day(eta2))}</p>}
+          </div>
           <div className="grid gap-3">
             <h2 className="font-heading text-h3">{o.items}</h2>
             <ul className="grid gap-2">
@@ -68,6 +117,7 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             {[
               [t.cart.shipping, order.shipping],
               [t.checkout.codFee, order.codFee],
+              [t.cart.giftWrap, order.giftWrapFee],
             ].map(([label, amount]) =>
               amount ? (
                 <p key={label} className="flex justify-between text-muted">
@@ -96,9 +146,15 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             <h2 className="font-heading text-h3">{o.deliverTo}</h2>
             <p className="text-muted">{[order.customer?.name, order.address?.line1, order.address?.line2, order.address?.city, order.address?.pincode].filter(Boolean).join(', ')}</p>
           </div>
-          <a href={whatsappLink(`${o.number}: ${order.orderNumber}`)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold text-leaf">
-            {o.whatsapp}
-          </a>
+          <OrderAgain lines={again} label={o.orderAgain} cartHref={localePath(locale, '/cart')} />
+          <div className="flex flex-wrap gap-x-8">
+            <a href={whatsappLink(`${o.number}: ${order.orderNumber}`)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center font-semibold text-leaf">
+              {o.whatsapp}
+            </a>
+            <Link href={localePath(locale, '/track')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
+              {o.track}
+            </Link>
+          </div>
         </div>
       </div>
     </section>

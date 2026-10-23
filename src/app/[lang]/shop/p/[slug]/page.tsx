@@ -3,15 +3,17 @@ import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DeliveryPromise } from '@/components/DeliveryPromise'
 import { MediaImage } from '@/components/MediaImage'
 import { ProductBuy } from '@/components/ProductBuy'
 import { SaveButton } from '@/components/SaveButton'
+import { ShareButton } from '@/components/ShareButton'
 import { ShopGrid } from '@/components/ShopGrid'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { site } from '@/lib/site'
-import { getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
+import { getBusiness, getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
@@ -58,6 +60,10 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
     .map((p) => toShopItem(p, locale))
   const { medium } = toShopItem(product, locale)
   const available = product.variants.some((v) => v.stock - (v.reserved ?? 0) > 0)
+  const physical = product.type !== 'digital'
+  // Same rule as checkout (src/lib/cart.ts codBlock): prints and originals, within the COD limit.
+  const { cod } = await getBusiness()
+  const codOk = physical && cod.enabled && Math.min(...product.variants.map((v) => v.price)) + cod.fee <= cod.maxTotal
 
   // Structured data so Google can show price and availability.
   const jsonLd = {
@@ -103,12 +109,17 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
         <div className="grid content-start gap-6 lg:sticky lg:top-32 lg:col-span-5">
           <div className="flex items-center justify-between gap-4">
             <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
-            <SaveButton slug={product.slug} title={product.title} labels={s} />
+            <div className="flex flex-wrap justify-end gap-2">
+              <ShareButton label={s.share} text={s.shareText} links={[{ title: product.title, href: localePath(locale, `/shop/p/${product.slug}`) }]} />
+              <SaveButton slug={product.slug} title={product.title} labels={s} />
+            </div>
           </div>
           <h1 className="font-heading text-h1">{product.title}</h1>
           <ProductBuy
             slug={product.slug}
             title={product.title}
+            physical={physical}
+            promise={physical ? <DeliveryPromise locale={locale} deliveredBy={s.deliveredBy} cod={codOk ? s.codAvailable : null} /> : undefined}
             variants={product.variants.map((v) => ({ id: v.id!, label: v.label, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock - (v.reserved ?? 0) }))}
             framing={(product.framing ?? []).map((f) => ({ id: f.id!, label: f.label, extraPrice: f.extraPrice }))}
             t={s}

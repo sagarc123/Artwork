@@ -2,7 +2,7 @@
 
 export const ENQUIRY_TYPES = ['event', 'portrait', 'workshop', 'general'] as const
 export type EnquiryType = (typeof ENQUIRY_TYPES)[number]
-export type EnquiryField = 'type' | 'name' | 'phone' | 'email' | 'date'
+export type EnquiryField = 'type' | 'name' | 'phone' | 'email' | 'date' | 'dateRequired'
 
 export type EnquiryData = {
   type: EnquiryType
@@ -58,6 +58,8 @@ export function validateEnquiry(form: FormLike, today: string): { ok: true; data
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('email')
   const eventDate = text(form, 'eventDate', 10)
   if (eventDate && (!realDate(eventDate) || eventDate < today)) errors.push('date')
+  // Events need a date to plan; portraits ("needed by") don't.
+  if (!eventDate && type === 'event') errors.push('dateRequired')
   if (errors.length) return { ok: false, errors }
 
   const faces = Number(text(form, 'faces', 3))

@@ -70,10 +70,11 @@ const mediums = {
   acrylic: await named('mediums', 'acrylic', { en: 'Acrylic', mr: 'ॲक्रिलिक', hi: 'एक्रिलिक' }),
   rangoli: await named('mediums', 'rangoli-colours', { en: 'Rangoli colours', mr: 'रांगोळीचे रंग', hi: 'रंगोली के रंग' }),
 }
+// Sample festival dates (check the panchang each year): they drive the home page countdown.
 const fest = {
-  diwali: await named('festivals', 'diwali', { en: 'Diwali', mr: 'दिवाळी', hi: 'दिवाली' }, { order: 1, intro: 'Five nights of light deserve a doorstep that glows. (sample text)' }),
-  ganesh: await named('festivals', 'ganesh-chaturthi', { en: 'Ganesh Chaturthi', mr: 'गणेशोत्सव', hi: 'गणेश चतुर्थी' }, { order: 2 }),
-  gudi: await named('festivals', 'gudi-padwa', { en: 'Gudi Padwa', mr: 'गुढीपाडवा', hi: 'गुड़ी पड़वा' }, { order: 3 }),
+  diwali: await named('festivals', 'diwali', { en: 'Diwali', mr: 'दिवाळी', hi: 'दिवाली' }, { order: 1, nextDate: '2026-11-08T12:00:00.000Z', intro: 'Five nights of light deserve a doorstep that glows. (sample text)' }),
+  ganesh: await named('festivals', 'ganesh-chaturthi', { en: 'Ganesh Chaturthi', mr: 'गणेशोत्सव', hi: 'गणेश चतुर्थी' }, { order: 2, nextDate: '2027-09-04T12:00:00.000Z' }),
+  gudi: await named('festivals', 'gudi-padwa', { en: 'Gudi Padwa', mr: 'गुढीपाडवा', hi: 'गुड़ी पड़वा' }, { order: 3, nextDate: '2027-04-07T12:00:00.000Z' }),
   wedding: await named('festivals', 'wedding', { en: 'Weddings', mr: 'लग्नसोहळा', hi: 'शादी' }, { order: 4 }),
 }
 
@@ -97,7 +98,73 @@ await payload.delete({ collection: 'tax-classes', where: { name: { like: '(sampl
 const taxClass = async (name: string, hsn: string, rate: number) =>
   (await payload.create({ collection: 'tax-classes', data: { name: `${name} (sample — confirm with CA)`, hsn, rate } })).id
 const taxClasses = { original: await taxClass('Original artwork', '9701', 12), print: await taxClass('Print', '4911', 12) }
-await payload.updateGlobal({ slug: 'commerce-settings', data: { tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print } } })
+await payload.updateGlobal({ slug: 'commerce-settings', data: { giftWrapFee: 49, tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print } } })
+
+// SAMPLE starting prices — the owner confirms or replaces them in Admin → Settings → Service prices.
+const round100 = (n: number) => Math.round(n / 100) * 100
+const pencil = { a4: 1800, a3: 2800, a2: 4500 }
+const scaled = (pct: number) => ({ a4: round100(pencil.a4 * pct), a3: round100(pencil.a3 * pct), a2: round100(pencil.a2 * pct) })
+await payload.updateGlobal({
+  slug: 'service-prices',
+  locale: 'en',
+  data: {
+    events: { small: 1500, medium: 3500, large: 7500, travelNote: 'Sample: travel outside Pune is added to the quote.' },
+    portraits: {
+      pencil: { ...pencil, days: '7–10' },
+      charcoal: { ...scaled(1.2), days: '10–14' }, // +20%
+      colour: { ...scaled(1.5), days: '10–14' }, // +50%
+      extraPersonPercent: 40,
+      advancePercent: 50,
+    },
+  },
+})
+await payload.updateGlobal({ slug: 'service-prices', locale: 'mr', data: { events: { travelNote: 'नमुना: पुण्याबाहेरचा प्रवास खर्च किमतीत जोडला जातो.' } } })
+await payload.updateGlobal({ slug: 'service-prices', locale: 'hi', data: { events: { travelNote: 'नमूना: पुणे से बाहर का यात्रा खर्च कीमत में जुड़ता है।' } } })
+
+// Sample reviews, clearly marked, so the review sections can be seen working. Real ones need the customer's permission.
+await payload.delete({ collection: 'testimonials', where: { name: { like: '(sample)' } } })
+const reviews = [
+  {
+    name: 'Priya, Nashik (sample)', rating: 5, featured: true,
+    context: { en: 'Wedding rangoli', mr: 'लग्नाची रांगोळी', hi: 'शादी की रंगोली' },
+    quote: {
+      en: 'The entrance rangoli was the first thing every guest photographed. He came early and finished before the baraat.',
+      mr: 'प्रवेशद्वारावरची रांगोळी पाहून प्रत्येक पाहुण्याने आधी फोटो काढला. ते लवकर आले आणि वरात येण्याआधी काम पूर्ण झाले.',
+      hi: 'प्रवेश द्वार की रंगोली की हर मेहमान ने सबसे पहले फ़ोटो ली। वे जल्दी आए और बारात से पहले काम पूरा हो गया।',
+    },
+  },
+  {
+    name: 'Rohan, Pune (sample)', rating: 5, featured: true,
+    context: { en: 'Charcoal portrait', mr: 'चारकोल पोर्ट्रेट', hi: 'चारकोल पोर्ट्रेट' },
+    quote: {
+      en: 'I only had one torn photo of my grandfather. The portrait looks just like him — my father was in tears.',
+      mr: 'आजोबांचा एकच फाटलेला फोटो होता. पोर्ट्रेट अगदी त्यांच्यासारखे दिसते — बाबांच्या डोळ्यांत पाणी आले.',
+      hi: 'दादाजी की बस एक फटी फ़ोटो थी। पोर्ट्रेट बिल्कुल उनके जैसा है — पापा की आँखें भर आईं।',
+    },
+  },
+  {
+    name: 'Sunita, Pune (sample)', rating: 5, featured: false,
+    context: { en: 'Diwali print, cash on delivery', mr: 'दिवाळी प्रिंट, कॅश ऑन डिलिव्हरी', hi: 'दिवाली प्रिंट, कैश ऑन डिलीवरी' },
+    quote: {
+      en: 'Ordered on WhatsApp, paid when it arrived. Packed so well, and it came before Diwali.',
+      mr: 'WhatsApp वर ऑर्डर केली, आल्यावर पैसे दिले. छान पॅकिंग, आणि दिवाळीआधी पोहोचली.',
+      hi: 'WhatsApp पर ऑर्डर किया, आने पर पैसे दिए। बढ़िया पैकिंग, और दिवाली से पहले पहुँच गया।',
+    },
+  },
+  {
+    name: 'Kulkarni family, Satara (sample)', rating: 4, featured: false,
+    context: { en: 'Society Ganesh festival', mr: 'सोसायटीचा गणेशोत्सव', hi: 'सोसायटी का गणेशोत्सव' },
+    quote: {
+      en: 'Quick reply, a clear price before the day, and a huge rangoli the children still talk about.',
+      mr: 'लगेच उत्तर, आधीच स्पष्ट किंमत, आणि मुले अजूनही जिच्याबद्दल बोलतात अशी भव्य रांगोळी.',
+      hi: 'तुरंत जवाब, पहले से साफ़ कीमत, और इतनी बड़ी रंगोली कि बच्चे आज भी उसकी बात करते हैं।',
+    },
+  },
+] as const
+for (const r of reviews) {
+  const doc = await payload.create({ collection: 'testimonials', locale: 'en', data: { name: r.name, rating: r.rating, featured: r.featured, permission: true, context: r.context.en, quote: r.quote.en } })
+  for (const locale of ['mr', 'hi'] as const) await payload.update({ collection: 'testimonials', id: doc.id, locale, data: { context: r.context[locale], quote: r.quote[locale] } })
+}
 
 const productIds: Record<string, number> = {}
 for (const p of products) {
@@ -157,5 +224,5 @@ for (const [i, [slug, title, category, festival]] of artworks.entries()) {
   })
 }
 
-console.log(`Seeded ${products.length} sample products, ${artworks.length} artworks, 4 festivals.`)
+console.log(`Seeded ${products.length} sample products, ${artworks.length} artworks, 4 festivals, ${reviews.length} reviews and sample service prices.`)
 process.exit(0)

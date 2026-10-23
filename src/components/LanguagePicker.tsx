@@ -1,8 +1,8 @@
 'use client'
 
-import { Languages } from 'lucide-react'
+import { Languages, X } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { LOCALE_COOKIE, localeNames, localePath, locales, stripLocale, type Locale } from '@/i18n/config'
 
 function rememberLocale(locale: Locale) {
@@ -40,46 +40,40 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
   )
 }
 
-/** One-time "Choose your language" screen on a visitor's first visit. */
-export function FirstVisitLanguagePicker({ current }: { current: Locale }) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const chosen = useRef(false)
-  const switchTo = useSwitchLocale(current)
+const noop = () => () => {}
+const hasChoice = () => document.cookie.split('; ').some((c) => c.startsWith(`${LOCALE_COOKIE}=`))
 
-  useEffect(() => {
-    if (!document.cookie.split('; ').some((c) => c.startsWith(`${LOCALE_COOKIE}=`))) ref.current?.showModal()
-  }, [])
+/** Slim, non-blocking strip on a first visit (no language chosen yet). Choosing or closing it is remembered. */
+export function LanguageStrip({ current, label, close }: { current: Locale; label: string; close: string }) {
+  // Hidden in the server HTML; shown after hydration only when no choice was made.
+  const chosen = useSyncExternalStore(noop, hasChoice, () => true)
+  const [closed, setClosed] = useState(false)
+  const switchTo = useSwitchLocale(current)
+  if (chosen || closed) return null
 
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby="lang-title"
-      // Closing without choosing (Esc) keeps the current language and doesn't ask again.
-      onClose={() => chosen.current || rememberLocale(current)}
-      className="m-auto w-[min(92vw,28rem)] rounded-sheet bg-surface p-6 text-charcoal shadow-lg backdrop:bg-charcoal/60"
-    >
-      <h2 id="lang-title" className="text-center font-heading text-h3">
-        <span lang="en">Choose your language</span>
-        <br />
-        <span lang="mr">भाषा निवडा</span> · <span lang="hi">भाषा चुनें</span>
-      </h2>
-      <div className="mt-6 grid gap-3">
-        {locales.map((l) => (
-          <button
-            key={l}
-            type="button"
-            lang={l}
-            onClick={() => {
-              chosen.current = true
-              switchTo(l)
-              ref.current?.close()
-            }}
-            className="h-14 rounded-ui border-[1.5px] border-charcoal text-h3 font-semibold hover:bg-charcoal hover:text-paper"
-          >
-            {localeNames[l]}
-          </button>
-        ))}
+    <div role="region" aria-label={label} className="border-b border-border/25 bg-turmeric/25">
+      <div className="wrap flex flex-wrap items-center gap-x-3 gap-y-1 py-1">
+        <div className="flex flex-wrap items-center gap-1">
+          {(['mr', 'hi', 'en'] as const).map((l) => (
+            <button key={l} type="button" lang={l} aria-pressed={l === current} onClick={() => switchTo(l)} className="min-h-11 rounded-ui px-3 font-semibold underline-offset-4 hover:underline aria-pressed:bg-charcoal aria-pressed:text-paper">
+              {localeNames[l]}
+            </button>
+          ))}
+        </div>
+        <span className="text-muted">{label}</span>
+        <button
+          type="button"
+          onClick={() => {
+            rememberLocale(current)
+            setClosed(true)
+          }}
+          className="ml-auto grid min-h-11 min-w-11 place-items-center rounded-ui hover:bg-charcoal/5"
+        >
+          <X aria-hidden="true" className="size-5" />
+          <span className="sr-only">{close}</span>
+        </button>
       </div>
-    </dialog>
+    </div>
   )
 }

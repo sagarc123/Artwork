@@ -10,6 +10,9 @@ export const site = {
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
   youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL || '',
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
+  // Sections still being built: every link to them stays hidden until the flag is switched on.
+  coursesLive: false,
+  accountsLive: false,
 }
 
 /** ₹4,500 style prices (Indian grouping). Stored as whole rupees. */

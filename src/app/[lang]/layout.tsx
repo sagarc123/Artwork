@@ -5,12 +5,12 @@ import '../globals.css'
 import { BottomTabBar } from '@/components/BottomTabBar'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
-import { FirstVisitLanguagePicker } from '@/components/LanguagePicker'
+import { LanguageStrip } from '@/components/LanguagePicker'
 import { ArtDefs } from '@/components/StandIns'
 import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { locales } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { site } from '@/lib/site'
+import { site, whatsappLink } from '@/lib/site'
 
 const tiro = Tiro_Devanagari_Marathi({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-tiro', display: 'swap' })
 // Festival-poster display face, used only for one giant word per section and step numerals.
@@ -51,14 +51,14 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
           {t.nav.skip}
         </a>
         <ArtDefs />
+        <LanguageStrip current={locale} label={t.langStrip.label} close={t.langStrip.close} />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>
         </main>
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />
-        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
-        <FirstVisitLanguagePicker current={locale} />
+        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} whatsappHref={whatsappLink(t.whatsapp.message)} />
       </body>
     </html>
   )

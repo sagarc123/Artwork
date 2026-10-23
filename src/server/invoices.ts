@@ -53,6 +53,7 @@ export async function issueInvoice(orderId: number, req?: PayloadRequest) {
     [
       { description: 'Delivery charges', total: order.shipping ?? 0 },
       { description: 'Cash on delivery fee', total: order.codFee ?? 0 },
+      { description: 'Gift wrap', total: order.giftWrapFee ?? 0 },
     ],
     isIntraState(buyerState, sellerState),
     taxed,

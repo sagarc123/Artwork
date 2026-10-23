@@ -8,6 +8,7 @@ import { PageHero } from '@/components/PageHero'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { alternates, localePath } from '@/i18n/config'
 import { STYLES } from '@/lib/art'
+import { site } from '@/lib/site'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Same order as `about.make` in the message files.
 const MAKE_LINKS = ['/shop', '/events', '/custom-portraits', '/courses']
+// The courses card waits for the courses pages (site.coursesLive).
 
 export default async function AboutPage() {
   const locale = await getLocale()
@@ -79,8 +81,8 @@ export default async function AboutPage() {
       <section className="bg-paper grain py-16 lg:py-24">
         <div className="wrap grid gap-10">
           <h2 className="font-heading text-h1">{a.makeTitle}</h2>
-          <ul className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-            {a.make.map((m, i) => (
+          <ul className={`grid gap-6 sm:grid-cols-2 ${site.coursesLive ? 'xl:grid-cols-4' : 'lg:grid-cols-3'}`}>
+            {a.make.map((m, i) => (MAKE_LINKS[i] === '/courses' && !site.coursesLive ? null : (
               <li key={m.title} className="grid content-start gap-3 rounded-ui bg-surface p-6 shadow-frame">
                 <GenerativeRangoli seed={`about-make-${i}`} style={STYLES[i % STYLES.length]} className="size-16" />
                 <h3 className="font-heading text-h3">{m.title}</h3>
@@ -89,7 +91,7 @@ export default async function AboutPage() {
                   {m.link} →
                 </Link>
               </li>
-            ))}
+            )))}
           </ul>
         </div>
       </section>

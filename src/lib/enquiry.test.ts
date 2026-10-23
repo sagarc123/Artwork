@@ -43,3 +43,10 @@ test('impossible dates are rejected', () => {
     assert.deepEqual(r.ok ? [] : r.errors, ['date'], eventDate)
   }
 })
+
+test('event enquiries need a date; portraits and general questions do not', () => {
+  const r = validateEnquiry(form({ type: 'event', name: 'Priya', phone: '9876543210' }), '2026-10-22')
+  assert.deepEqual(r.ok ? [] : r.errors, ['dateRequired'])
+  assert.ok(validateEnquiry(form({ type: 'portrait', name: 'Rohan', phone: '9876543210' }), '2026-10-22').ok)
+  assert.ok(validateEnquiry(form({ type: 'general', name: 'Aarya', phone: '9876543210' }), '2026-10-22').ok)
+})

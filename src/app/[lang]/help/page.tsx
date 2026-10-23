@@ -74,6 +74,9 @@ export default async function HelpPage() {
               <Link href={localePath(locale, '/contact')} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
                 {h.contact} →
               </Link>
+              <Link href={localePath(locale, '/track')} className="-mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+                {t.footer.track} →
+              </Link>
             </div>
           </aside>
         </div>

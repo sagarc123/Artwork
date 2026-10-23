@@ -23,10 +23,17 @@ export async function proxy(request: NextRequest) {
   // Any unknown path under the locale renders the not-found page with a 404 status.
   if (order && !(await orderExists(order[2]))) return NextResponse.rewrite(new URL(`/${order[1] ?? 'en'}/not-found`, request.url))
 
-  const route = resolveLocaleRoute(pathname, request.cookies.get(LOCALE_COOKIE)?.value)
+  const route = resolveLocaleRoute(pathname, request.cookies.get(LOCALE_COOKIE)?.value, request.headers.get('accept-language'))
   if (route.action === 'next') return NextResponse.next()
   const url = new URL(`${route.to}${search}`, request.url)
-  return route.action === 'redirect' ? NextResponse.redirect(url) : NextResponse.rewrite(url)
+  if (route.action === 'rewrite') return NextResponse.rewrite(url)
+  const res = NextResponse.redirect(url)
+  if (route.remember) {
+    // Same cookie the language switcher writes; the first-visit strip then stays hidden.
+    res.cookies.set(LOCALE_COOKIE, route.remember, { path: '/', maxAge: 31536000, sameSite: 'lax' })
+    res.headers.set('Vary', 'Accept-Language, Cookie')
+  }
+  return res
 }
 
 export const config = {

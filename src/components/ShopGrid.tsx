@@ -28,6 +28,7 @@ export type ShopItem = {
 }
 
 type Sort = 'newest' | 'low' | 'high'
+const FILTER_FROM = 20
 
 /** Product grid with type filter and sort (`controls={false}`: just the cards). Runs in the browser: the whole catalogue is small. */
 export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: Dictionary['shop']; controls?: boolean }) {
@@ -47,31 +48,34 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
     <div className="grid gap-8">
       {controls && (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div role="group" aria-label={t.type} className="flex flex-wrap gap-2">
-              {(['all', 'original', 'print', 'digital'] as const).map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  aria-pressed={type === v}
-                  onClick={() => setType(v)}
-                  className="min-h-12 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
-                >
-                  {v === 'all' ? t.all : t.types[v]}
-                </button>
-              ))}
-            </div>
-            <label className="flex items-center gap-3">
-              <span className="font-semibold">{t.sort}</span>
-              <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-12 rounded-ui border border-border bg-surface px-3">
-                {(Object.keys(t.sorts) as Sort[]).map((s) => (
-                  <option key={s} value={s}>
-                    {t.sorts[s]}
-                  </option>
+          {/* A short list reads faster without filters: they appear once there are more than 20 pieces. */}
+          {items.length > FILTER_FROM && (
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div role="group" aria-label={t.type} className="flex flex-wrap gap-2">
+                {(['all', 'original', 'print', 'digital'] as const).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    aria-pressed={type === v}
+                    onClick={() => setType(v)}
+                    className="min-h-12 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
+                  >
+                    {v === 'all' ? t.all : t.types[v]}
+                  </button>
                 ))}
-              </select>
-            </label>
-          </div>
+              </div>
+              <label className="flex items-center gap-3">
+                <span className="font-semibold">{t.sort}</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="h-12 rounded-ui border border-border bg-surface px-3">
+                  {(Object.keys(t.sorts) as Sort[]).map((s) => (
+                    <option key={s} value={s}>
+                      {t.sorts[s]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          )}
 
           <p aria-live="polite" className="text-muted">
             {shown.length} {shown.length === 1 ? t.countOne : t.count}

@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { Product } from '@/payload-types'
+import * as cart from './cart.ts'
 import { codBlock, parsePincodes, priceCart } from './cart.ts'
 
 const product = (slug: string, type: string, variants: object[], framing: object[] = []) =>
@@ -52,4 +53,13 @@ test('COD: prints and originals only, fee counts towards the limit, blocked pinc
   assert.equal(codBlock(rules, print, 1899, '400001'), 'pincode')
   assert.equal(codBlock(rules, print, 1899, '411001'), null)
   assert.equal(codBlock(rules, print, 1899, '411001', true), 'open')
+})
+
+test('gift wrap: once per order, only with something physical, added to the total', () => {
+  const { giftWrapCharge, orderTotal } = cart
+  assert.equal(giftWrapCharge(true, [{ type: 'print' }, { type: 'original' }], 49), 49)
+  assert.equal(giftWrapCharge(true, [{ type: 'digital' }], 49), 0)
+  assert.equal(giftWrapCharge(false, [{ type: 'print' }], 49), 0)
+  assert.equal(orderTotal({ total: 999 }, 49, 49), 1097)
+  assert.equal(orderTotal({ total: 999 }), 999)
 })

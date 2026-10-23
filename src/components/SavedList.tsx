@@ -9,6 +9,7 @@ import { cartActions, savedActions, useSaved } from './cart-store'
 import { useHydrated } from './local-store'
 import { MediaImage } from './MediaImage'
 import { pinch } from './pinch'
+import { ShareButton } from './ShareButton'
 import type { ShopItem } from './ShopGrid'
 
 /** A saved product. `variantId` is set when it can go straight into the cart (one size, in stock). */
@@ -40,9 +41,12 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
   const btn = 'press inline-flex min-h-12 items-center justify-center gap-2 rounded-ui px-4 font-semibold'
   return (
     <div className="grid gap-6">
-      <p aria-live="polite" className="text-muted">
-        {items.length} {t.count}
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p aria-live="polite" className="text-muted">
+          {items.length} {t.count}
+        </p>
+        <ShareButton label={shop.share} text={t.shareText} links={items.map((i) => ({ title: i.title, href: i.href }))} />
+      </div>
       <ul className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
         {items.map((item) => (
           <li key={item.slug} className="grid content-start gap-3">

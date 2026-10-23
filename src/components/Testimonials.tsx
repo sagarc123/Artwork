@@ -1,0 +1,45 @@
+import type { Testimonial } from '@/payload-types'
+import { BrushUnderline } from './Art'
+import { MediaImage } from './MediaImage'
+
+type Labels = { title: string; rating: string }
+
+/** Quote cards from happy customers (only ones who agreed to be shown). Nothing at all when there are none. */
+export function Testimonials({ items, t, className = 'bg-paper' }: { items: Testimonial[]; t: Labels; className?: string }) {
+  if (items.length === 0) return null
+  return (
+    <section className={`py-16 lg:py-24 ${className}`}>
+      <div className="wrap grid gap-10">
+        <div>
+          <h2 className="font-heading text-h1">{t.title}</h2>
+          <BrushUnderline className="brush--view mt-2 w-48" />
+        </div>
+        <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {items.map((q) => {
+            const rating = Math.min(5, Math.max(1, Math.round(q.rating ?? 5)))
+            return (
+              <li key={q.id}>
+                <figure className="grid h-full content-start gap-4 rounded-ui bg-surface p-6 shadow-frame">
+                  <p role="img" aria-label={t.rating.replace('{n}', String(rating))} className="text-h3-sm tracking-widest text-kumkum">
+                    {'★'.repeat(rating)}
+                    <span className="text-charcoal/25">{'★'.repeat(5 - rating)}</span>
+                  </p>
+                  <blockquote className="font-heading text-h3-sm leading-relaxed">“{q.quote}”</blockquote>
+                  <figcaption className="mt-auto flex items-center gap-3">
+                    {q.photo && typeof q.photo === 'object' && (
+                      <MediaImage media={q.photo} alt="" ratio="1/1" seed={`testimonial-${q.id}`} sizes="56px" className="size-14 shrink-0 rounded-full" />
+                    )}
+                    <span className="grid">
+                      <span className="font-semibold">{q.name}</span>
+                      {q.context && <span className="text-muted">{q.context}</span>}
+                    </span>
+                  </figcaption>
+                </figure>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </section>
+  )
+}

@@ -114,10 +114,12 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     'commerce-settings': CommerceSetting;
+    'service-prices': ServicePrice;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'commerce-settings': CommerceSettingsSelect<false> | CommerceSettingsSelect<true>;
+    'service-prices': ServicePricesSelect<false> | ServicePricesSelect<true>;
   };
   locale: 'en' | 'mr' | 'hi';
   widgets: {
@@ -185,6 +187,7 @@ export interface Order {
   subtotal?: number | null;
   shipping?: number | null;
   codFee?: number | null;
+  giftWrapFee?: number | null;
   total?: number | null;
   paymentMode?: ('prepaid' | 'cod') | null;
   customer?: {
@@ -201,6 +204,7 @@ export interface Order {
     state?: string | null;
     pincode?: string | null;
   };
+  giftNote?: string | null;
   note?: string | null;
   razorpayOrderId?: string | null;
   razorpayPaymentId?: string | null;
@@ -838,6 +842,7 @@ export interface OrdersSelect<T extends boolean = true> {
   subtotal?: T;
   shipping?: T;
   codFee?: T;
+  giftWrapFee?: T;
   total?: T;
   paymentMode?: T;
   customer?:
@@ -858,6 +863,7 @@ export interface OrdersSelect<T extends boolean = true> {
         state?: T;
         pincode?: T;
       };
+  giftNote?: T;
   note?: T;
   razorpayOrderId?: T;
   razorpayPaymentId?: T;
@@ -1323,6 +1329,10 @@ export interface CommerceSetting {
      */
     blockedPincodes?: string | null;
   };
+  /**
+   * Added when a buyer ticks "Gift wrap". SAMPLE value — owner to confirm.
+   */
+  giftWrapFee?: number | null;
   tax: {
     /**
      * Buyers in this state pay CGST + SGST; everyone else pays IGST.
@@ -1332,6 +1342,99 @@ export interface CommerceSetting {
      * Used for products without a tax class of their own.
      */
     defaultTaxClass?: (number | null) | TaxClass;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Starting prices shown on Book an Event, Custom Portraits and the home page. SAMPLE value from setup — owner to confirm before launch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-prices".
+ */
+export interface ServicePrice {
+  id: number;
+  /**
+   * SAMPLE value from setup — owner to confirm before launch.
+   */
+  events?: {
+    /**
+     * Starting price in ₹. Leave empty to hide it.
+     */
+    small?: number | null;
+    /**
+     * Starting price in ₹. Leave empty to hide it.
+     */
+    medium?: number | null;
+    /**
+     * Starting price in ₹. Leave empty to hide it.
+     */
+    large?: number | null;
+    /**
+     * e.g. "Travel outside Pune is added to the quote."
+     */
+    travelNote?: string | null;
+  };
+  /**
+   * SAMPLE value from setup — owner to confirm before launch.
+   */
+  portraits?: {
+    pencil?: {
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a4?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a3?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a2?: number | null;
+      /**
+       * e.g. 7–10
+       */
+      days?: string | null;
+    };
+    charcoal?: {
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a4?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a3?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a2?: number | null;
+      /**
+       * e.g. 7–10
+       */
+      days?: string | null;
+    };
+    colour?: {
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a4?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a3?: number | null;
+      /**
+       * Starting price in ₹. Leave empty to hide it.
+       */
+      a2?: number | null;
+      /**
+       * e.g. 7–10
+       */
+      days?: string | null;
+    };
+    extraPersonPercent?: number | null;
+    advancePercent?: number | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1389,11 +1492,59 @@ export interface CommerceSettingsSelect<T extends boolean = true> {
         fee?: T;
         blockedPincodes?: T;
       };
+  giftWrapFee?: T;
   tax?:
     | T
     | {
         sellerState?: T;
         defaultTaxClass?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "service-prices_select".
+ */
+export interface ServicePricesSelect<T extends boolean = true> {
+  events?:
+    | T
+    | {
+        small?: T;
+        medium?: T;
+        large?: T;
+        travelNote?: T;
+      };
+  portraits?:
+    | T
+    | {
+        pencil?:
+          | T
+          | {
+              a4?: T;
+              a3?: T;
+              a2?: T;
+              days?: T;
+            };
+        charcoal?:
+          | T
+          | {
+              a4?: T;
+              a3?: T;
+              a2?: T;
+              days?: T;
+            };
+        colour?:
+          | T
+          | {
+              a4?: T;
+              a3?: T;
+              a2?: T;
+              days?: T;
+            };
+        extraPersonPercent?: T;
+        advancePercent?: T;
       };
   updatedAt?: T;
   createdAt?: T;

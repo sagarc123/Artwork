@@ -175,3 +175,27 @@ export async function getBusiness() {
   }
   return { ...b, values }
 }
+
+/** Owner-set "from" prices for events and portraits (empty fields stay null, and the pages hide them). */
+export async function getServicePrices(locale: Locale) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('service-prices')
+  return (await db()).findGlobal({ slug: 'service-prices', locale, depth: 0 })
+}
+
+/** Reviews the customer agreed to share, featured first. */
+export async function getTestimonials(locale: Locale) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('testimonials', 'media')
+  const { docs } = await (await db()).find({
+    collection: 'testimonials',
+    locale,
+    where: { permission: { equals: true } },
+    sort: ['-featured', '-createdAt'],
+    limit: 6,
+    depth: 1,
+  })
+  return docs
+}

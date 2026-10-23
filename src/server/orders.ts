@@ -4,7 +4,8 @@ import { randomBytes } from 'node:crypto'
 import config from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 import { isLocale } from '@/i18n/config'
-import { codBlock, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type Quote } from '@/lib/cart'
+import { isPincode } from '@/lib/pincode'
+import { codBlock, GIFT_NOTE_MAX, giftWrapCharge, orderTotal, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type Quote } from '@/lib/cart'
 import { isValidGstin } from '@/lib/gst'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
@@ -22,13 +23,14 @@ function cleanLines(input: unknown): CartLine[] {
   })
 }
 
-async function codRules(payload: Payload): Promise<CodRules> {
-  const { cod } = await payload.findGlobal({ slug: 'commerce-settings', depth: 0 })
+async function settings(payload: Payload): Promise<{ cod: CodRules; giftWrapFee: number }> {
+  const { cod, giftWrapFee } = await payload.findGlobal({ slug: 'commerce-settings', depth: 0 })
   // Fallbacks match the field defaults, for before the owner first saves the settings.
-  return { enabled: cod?.enabled ?? true, maxTotal: cod?.maxTotal ?? 5000, fee: cod?.fee ?? 49, blockedPincodes: parsePincodes(cod?.blockedPincodes) }
+  return {
+    cod: { enabled: cod?.enabled ?? true, maxTotal: cod?.maxTotal ?? 5000, fee: cod?.fee ?? 49, blockedPincodes: parsePincodes(cod?.blockedPincodes) },
+    giftWrapFee: giftWrapFee ?? 49,
+  }
 }
-
-const isPincode = (s: unknown): s is string => typeof s === 'string' && /^[1-9]\d{5}$/.test(s)
 
 /** Current prices and stock for the browser's cart, plus which ways to pay are open (COD checked against the pincode, if given). */
 export async function getCartQuote(input: unknown, locale: string, pincode?: string): Promise<Quote> {
@@ -43,9 +45,9 @@ export async function getCartQuote(input: unknown, locale: string, pincode?: str
     limit: 30,
   })
   const quote = priceCart(lines, docs)
-  const rules = await codRules(payload)
+  const { cod: rules, giftWrapFee } = await settings(payload)
   const cod = { fee: rules.fee, maxTotal: rules.maxTotal, block: codBlock(rules, quote.lines, quote.total, isPincode(pincode) ? pincode : '') }
-  return { ...quote, cod, online: razorpayConfig() !== null }
+  return { ...quote, cod, online: razorpayConfig() !== null, giftWrapFee }
 }
 
 /** One open COD order per phone: waiting for confirmation, or confirmed but not yet shipped. */
@@ -69,6 +71,9 @@ export type CheckoutInput = {
   address: { line1: string; line2: string; city: string; state: string; pincode: string }
   note: string
   paymentMode?: 'prepaid' | 'cod'
+  giftWrap?: boolean
+  /** Written on a card in the parcel; never on the invoice. */
+  giftNote?: string
   /** Only when the buyer asked for a GST invoice. */
   gst?: { gstin: string; businessName: string } | null
 }
@@ -115,13 +120,15 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const quote = await getCartQuote(input.lines, input.locale)
   if (!quote.ok) return { status: 'unavailable' }
   const payload = await getPayload({ config })
+  const rules = await settings(payload)
+  const giftFee = giftWrapCharge(input.giftWrap === true, quote.lines, rules.giftWrapFee)
   let codFee = 0
   if (cod) {
-    const rules = await codRules(payload)
-    const reason = codBlock(rules, quote.lines, quote.total, a.pincode, await hasOpenCod(payload, c.phone!))
+    const reason = codBlock(rules.cod, quote.lines, quote.total + giftFee, a.pincode, await hasOpenCod(payload, c.phone!))
     if (reason) return { status: 'cod_blocked', reason }
-    codFee = rules.fee
+    codFee = rules.cod.fee
   }
+  const total = orderTotal(quote, codFee, giftFee)
   const soldOut = await holdStock(quote.lines)
   if (soldOut) return { status: 'sold_out', title: soldOut }
 
@@ -148,7 +155,9 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         subtotal: quote.subtotal,
         shipping: quote.shipping,
         codFee: cod ? codFee : undefined,
-        total: quote.total + codFee,
+        giftWrapFee: giftFee || undefined,
+        giftNote: clip(input.giftNote, GIFT_NOTE_MAX) || undefined,
+        total,
         customer: { name: c.name, phone: c.phone!, email: c.email || undefined, gstin: gst?.gstin, businessName: gst?.businessName },
         address: a,
         note: clip(input.note, 500) || undefined,
@@ -162,7 +171,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       await payload.update({ collection: 'orders', id: order.id, data: { orderNumber } })
       return { status: 'cod', orderNumber, publicId }
     }
-    const rzpOrder = await createRazorpayOrder(quote.total * 100, orderNumber)
+    const rzpOrder = await createRazorpayOrder(total * 100, orderNumber)
     await payload.update({ collection: 'orders', id: order.id, data: { orderNumber, razorpayOrderId: rzpOrder.id } })
     return { status: 'ok', keyId: rzp!.keyId, razorpayOrderId: rzpOrder.id, amount: rzpOrder.amount, orderNumber, publicId }
   } catch (error) {

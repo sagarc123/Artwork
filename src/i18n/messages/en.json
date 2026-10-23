@@ -29,7 +29,9 @@
     "shop": "Shop",
     "learn": "Learn",
     "cart": "Cart",
-    "me": "Me"
+    "me": "Me",
+    "book": "Book",
+    "whatsapp": "WhatsApp"
   },
   "header": {
     "replyPromise": "I reply within 4 hours on WhatsApp"
@@ -62,14 +64,16 @@
         "Wedding",
         "Festival",
         "Society"
-      ]
+      ],
+      "from": "Event rangoli from {price}"
     },
     "portraits": {
       "title": "Your photo, drawn by hand",
       "sub": "Pencil, charcoal or colour portraits — a gift people keep for life. Ready in 10–14 days.",
       "cta": "Start my portrait",
       "photo": "Your photo",
-      "drawing": "Drawn by hand"
+      "drawing": "Drawn by hand",
+      "from": "Portraits from {price}"
     },
     "categories": {
       "title": "Explore my work",
@@ -85,7 +89,8 @@
       "itemTitle": "Artwork name",
       "priceSoon": "Price coming soon",
       "soon": "New pieces arriving soon",
-      "ask": "Ask on WhatsApp"
+      "ask": "Ask on WhatsApp",
+      "empty": "New pieces are on their way. Ask me on WhatsApp what is ready."
     },
     "artist": {
       "title": "Hello, I'm Siddesh Mokashi",
@@ -106,7 +111,12 @@
       "ganesh": "Ganesh Chaturthi",
       "gudi": "Gudi Padwa",
       "weddings": "Weddings",
-      "next": "Next festival"
+      "next": "Next festival",
+      "countdown": "{days} days to {name}",
+      "tomorrow": "{name} is tomorrow",
+      "today": "{name} is today",
+      "orderBy": "order by {date}",
+      "bookBy": "Book event rangoli by {date}"
     },
     "help": {
       "title": "New to buying online?",
@@ -131,7 +141,8 @@
     "email": "Email",
     "follow": "Follow my work",
     "motionStop": "Stop animations",
-    "motionStart": "Start animations"
+    "motionStart": "Start animations",
+    "track": "Track my order"
   },
   "whatsapp": {
     "label": "WhatsApp",
@@ -228,15 +239,20 @@
       "email": "This email looks incomplete.",
       "date": "Please choose a date from today onwards.",
       "rate": "You have sent a few enquiries already. Please message me on WhatsApp instead.",
-      "failed": "Something went wrong. Please message me on WhatsApp — I will reply soon."
+      "failed": "Something went wrong. Please message me on WhatsApp — I will reply soon.",
+      "dateRequired": "Please choose the date of your event."
     },
     "success": {
       "title": "Thank you! I have your details.",
-      "body": "Tap below to send them on WhatsApp so we can talk. I reply within 4 hours.",
+      "body": "WhatsApp is opening with your details filled in — just tap send. I reply within 4 hours.",
       "whatsapp": "Continue on WhatsApp"
     },
     "waIntro": "Namaste! I just sent an enquiry on your website.",
-    "yourMessage": "Your message"
+    "yourMessage": "Your message",
+    "stylesToggle": "Any style in mind?",
+    "voiceNote": "Prefer to talk? Send a voice note on WhatsApp",
+    "fromHint": "from {price}",
+    "waTalk": "Namaste! I would like to talk about: {type}"
   },
   "eventsPage": {
     "metaTitle": "Book event rangoli",
@@ -266,7 +282,13 @@
     ],
     "stepsTitle": "How it works",
     "formTitle": "Tell me about your event",
-    "formSub": "Takes one minute. Then we continue on WhatsApp."
+    "formSub": "Takes one minute. Then we continue on WhatsApp.",
+    "prices": {
+      "title": "Rough prices",
+      "from": "from {price}",
+      "note": "Final price after we see your space — I confirm it on WhatsApp before you pay anything."
+    },
+    "portraitLink": "Want a portrait drawn instead?"
   },
   "portraitsPage": {
     "metaTitle": "Custom hand-drawn portraits",
@@ -292,7 +314,21 @@
     "good": "Good",
     "bad": "Avoid",
     "formTitle": "Start your portrait",
-    "formSub": "Tell me what you have in mind — I quote within 4 hours."
+    "formSub": "Tell me what you have in mind — I quote within 4 hours.",
+    "prices": {
+      "title": "Prices",
+      "medium": "Medium",
+      "ready": "Ready in",
+      "days": "{days} days",
+      "from": "Prices start from these. I confirm the exact price on WhatsApp after seeing your photo.",
+      "extraPerson": "Each extra person in the portrait: +{pct}%.",
+      "advance": "{pct}% advance to start. The rest after you approve the preview photo.",
+      "changes": "One round of changes after the preview is included."
+    },
+    "oldPhoto": {
+      "title": "Old, faded or torn photo?",
+      "body": "Send it anyway — I work from the clearest details, and we agree on them first."
+    }
   },
   "gallery": {
     "metaTitle": "Artwork gallery",
@@ -367,7 +403,11 @@
     "back": "Back to the shop",
     "waOrder": "Namaste! I would like to order",
     "save": "Save",
-    "saved": "Saved"
+    "saved": "Saved",
+    "share": "Share with family",
+    "shareText": "Look at this piece by Siddesh Mokashi:",
+    "deliveredBy": "Delivered by {from} – {to}",
+    "codAvailable": "Cash on delivery available"
   },
   "cart": {
     "title": "Your cart",
@@ -389,7 +429,8 @@
     "add": "Add to cart",
     "view": "View cart",
     "loading": "Checking prices…",
-    "items": "items"
+    "items": "items",
+    "giftWrap": "Gift wrap"
   },
   "checkout": {
     "title": "Almost there",
@@ -444,7 +485,14 @@
     },
     "gstToggle": "Need a GST invoice?",
     "gstin": "GSTIN",
-    "businessName": "Business name (as registered for GST)"
+    "businessName": "Business name (as registered for GST)",
+    "business": "Business purchase?",
+    "businessHint": "Get a GST invoice with your business name.",
+    "gift": "Is it a gift?",
+    "giftWrap": "Gift wrap it (+{fee})",
+    "giftNote": "Message for the card (optional)",
+    "giftNoteHint": "Up to 200 characters. Written on a card inside the parcel — not on the invoice.",
+    "pincodeFilled": "City and state filled in from your pincode. Change them if needed."
   },
   "order": {
     "metaTitle": "Your order",
@@ -475,7 +523,23 @@
     "payment": "Payment",
     "paidOnline": "Paid online",
     "codDue": "Cash on delivery · {amount} due on delivery",
-    "invoice": "Download invoice (PDF)"
+    "invoice": "Download invoice (PDF)",
+    "timelineTitle": "Where your order is",
+    "steps": {
+      "placed": "Order placed",
+      "confirmed": "Confirmed",
+      "paid": "Paid",
+      "packed": "Packed",
+      "shipped": "Shipped",
+      "delivered": "Delivered"
+    },
+    "stopped": {
+      "cancelled": "This order was cancelled. If you paid, the money comes back to you.",
+      "refund": "Your refund is on its way. It reaches you in 5–7 working days."
+    },
+    "expected": "Expected delivery: {from} – {to}",
+    "orderAgain": "Order again",
+    "track": "Track another order"
   },
   "ownerNote": "Note for the owner (only shown while developing): sample text — replace it in src/i18n/messages before launch.",
   "missing": "to be filled in",
@@ -695,7 +759,8 @@
     "choose": "Choose a size",
     "similar": "Ask for something similar",
     "loading": "Loading your saved pieces…",
-    "count": "saved"
+    "count": "saved",
+    "shareText": "Pieces I liked by Siddesh Mokashi:"
   },
   "policies": {
     "draft": "Draft — have this reviewed by a lawyer before launch. (Only shown while developing.)",
@@ -917,5 +982,24 @@
         }
       ]
     }
+  },
+  "langStrip": {
+    "label": "भाषा निवडा · भाषा चुनें · Choose your language",
+    "close": "Close"
+  },
+  "testimonials": {
+    "title": "What families say",
+    "rating": "Rated {n} out of 5"
+  },
+  "trackPage": {
+    "metaTitle": "Track my order",
+    "title": "Track my order",
+    "sub": "Enter the mobile number you ordered with and your order number. It starts with ART- and is in your WhatsApp message.",
+    "number": "Order number",
+    "numberHint": "e.g. ART-10482",
+    "button": "Show my order",
+    "finding": "Looking…",
+    "notFound": "No order matches this mobile number and order number. Please check both, or message me on WhatsApp.",
+    "rate": "Too many tries. Please wait a few minutes, or message me on WhatsApp."
   }
 }

@@ -1,15 +1,19 @@
 import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BrushUnderline, DisplayWord, DoorstepScene, FestivalMotif, KolamWeave, PortraitPair, PowderHeap, StepList, Threshold } from '@/components/Art'
+import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, PowderHeap, StepList, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
+import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
-import { PhotoPlaceholder, type Floor } from '@/components/PhotoPlaceholder'
+import { MediaImage } from '@/components/MediaImage'
+import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
+import { Testimonials } from '@/components/Testimonials'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import type { Medium, RangoliStyle } from '@/lib/art'
-import { whatsappLink } from '@/lib/site'
+import { eventFrom, fromText, portraitFrom } from '@/lib/prices'
+import { formatPrice, site, whatsappLink } from '@/lib/site'
+import { festivalLook, getCategories, getFestivals, getProducts, getServicePrices, getTestimonials, toShopItem } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: alternates(await getLocale(), '/') }
@@ -22,29 +26,41 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
+  const [products, categories, festivalDocs, prices, testimonials] = await Promise.all([
+    getProducts(locale),
+    getCategories(locale, 'shop'),
+    getFestivals(locale),
+    getServicePrices(locale),
+    getTestimonials(locale),
+  ])
 
+  // Each heap opens its own shop category (matched by slug, which doesn't change with the language).
+  const shopFor = (word: string) => {
+    const c = categories.find((x) => x.slug.includes(word))
+    return p(c ? `/shop/${c.slug}` : '/shop')
+  }
   const heaps = [
-    { href: p('/shop'), label: h.categories.drawings, color: '#ece4d6' },
-    { href: p('/shop'), label: h.categories.paintings, color: 'var(--color-marigold)' },
-    { href: p('/shop'), label: h.categories.rangoli, color: '#d0473b' },
+    { href: shopFor('drawing'), label: h.categories.drawings, color: '#ece4d6' },
+    { href: shopFor('painting'), label: h.categories.paintings, color: 'var(--color-marigold)' },
+    { href: shopFor('rangoli'), label: h.categories.rangoli, color: '#d0473b' },
     { href: p('/custom-portraits'), label: h.categories.portraits, color: 'var(--color-turmeric)' },
-    { href: p('/courses'), label: h.categories.courses, color: '#5aa16a' },
+    ...(site.coursesLive ? [{ href: p('/courses'), label: h.categories.courses, color: '#5aa16a' }] : []),
   ]
-  // Each stand-in in its own medium; the two rangoli in different styles from each other and from the hero.
-  const featured: { label: string; floor: Floor; seed: string; medium: Medium; style?: RangoliStyle }[] = [
-    { label: h.categories.rangoli, floor: 'charcoal', seed: 'featured-rangoli', medium: 'rangoli', style: 'phool' },
-    { label: h.categories.paintings, floor: 'paper', seed: 'featured-painting', medium: 'painting' },
-    { label: h.categories.drawings, floor: 'paper', seed: 'featured-drawing', medium: 'drawing' },
-    { label: h.categories.portraits, floor: 'paper', seed: 'featured-portrait', medium: 'portrait' },
-    { label: h.categories.rangoli, floor: 'leaf', seed: 'featured-rangoli-2', medium: 'rangoli', style: 'kolam' },
-  ]
-  // ponytail: fixed order with the next festival first; comes from the Festivals collection's dates later.
-  const festivals = [
-    { kind: 'diwali' as const, name: h.festivals.diwali, floor: 'bg-charcoal' },
-    { kind: 'ganesh' as const, name: h.festivals.ganesh, floor: 'bg-kumkum' },
-    { kind: 'gudi' as const, name: h.festivals.gudi, floor: 'bg-peacock' },
-    { kind: 'wedding' as const, name: h.festivals.weddings, floor: 'bg-leaf' },
-  ]
+  // Latest pieces, the ones marked "featured" first.
+  const featured = [...products]
+    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
+    .slice(0, 5)
+    .map((x) => toShopItem(x, locale))
+  const festivals = festivalDocs.map((f) => ({
+    slug: f.slug,
+    href: p(`/festivals/${f.slug}`),
+    name: f.name,
+    nextDate: f.nextDate ? f.nextDate.slice(0, 10) : null,
+    order: f.order ?? 0,
+    ...festivalLook(f.slug),
+  }))
+  const eventPrice = fromText(h.events.from, eventFrom(prices), formatPrice)
+  const portraitPrice = fromText(h.portraits.from, portraitFrom(prices), formatPrice)
 
   return (
     <>
@@ -68,9 +84,11 @@ export default async function HomePage() {
               <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
                 {h.hero.ctaShop}
               </Link>
-              <Link href={p('/courses')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
-                {h.hero.ctaLearn}
-              </Link>
+              {site.coursesLive && (
+                  <Link href={p('/courses')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
+                    {h.hero.ctaLearn}
+                  </Link>
+              )}
             </div>
           </div>
           {/* Phone: a smaller tile above the headline so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
@@ -95,6 +113,7 @@ export default async function HomePage() {
             <p className="font-semibold text-kumkum">{h.events.kicker}</p>
             <h2 className="font-heading text-h1">{h.events.title}</h2>
             <p className="text-muted">{h.events.sub}</p>
+            {eventPrice && <p className="text-h3-sm font-semibold">{eventPrice}</p>}
             <StepList steps={h.events.steps} />
             <ButtonLink href={p('/events')} variant="secondary" className="sm:justify-self-start">
               {h.events.cta}
@@ -116,6 +135,7 @@ export default async function HomePage() {
           <div className="grid gap-5 lg:col-span-5">
             <h2 className="font-heading text-h1">{h.portraits.title}</h2>
             <p className="text-paper/90">{h.portraits.sub}</p>
+            {portraitPrice && <p className="text-h3-sm font-semibold">{portraitPrice}</p>}
             <ButtonLink href={p('/custom-portraits')} variant="light" className="sm:justify-self-start">
               {h.portraits.cta}
             </ButtonLink>
@@ -132,7 +152,7 @@ export default async function HomePage() {
       <section className="bg-charcoal grain-dark py-16 text-paper lg:py-24">
         <div className="wrap grid gap-10">
           <h2 className="font-heading text-h1">{h.categories.title}</h2>
-          <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-6">
+          <ul className={`grid gap-2 sm:grid-cols-3 lg:gap-6 ${heaps.length > 4 ? 'lg:grid-cols-5' : 'sm:grid-cols-4'}`}>
             {heaps.map((c) => (
               <li key={c.label}>
                 <Link
@@ -162,19 +182,41 @@ export default async function HomePage() {
               {h.featured.seeAll}
             </Link>
           </div>
-          <ul className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4 lg:gap-x-8">
-            {featured.map((f, i) => (
-              <li key={f.seed} className={i === 0 ? 'col-span-2 lg:row-span-2' : ''}>
-                <Link href={p('/shop')} className="card grid gap-3">
-                  <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
-                    <PhotoPlaceholder ratio={i === 0 ? '4/5' : '1/1'} seed={f.seed} medium={f.medium} style={f.style} floor={f.floor} alt={f.label} slot={`Featured artwork ${i + 1}`} />
-                  </div>
-                  <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.label}</span>
-                  <span className="text-muted">{h.featured.soon}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {featured.length === 0 ? (
+            <p className="rounded-ui bg-surface p-8 text-center text-muted">{h.featured.empty}</p>
+          ) : (
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4 lg:gap-x-8">
+              {featured.map((f, i) => (
+                <li key={f.slug} className={i === 0 ? 'col-span-2 lg:row-span-2' : ''}>
+                  <Link href={f.href} className="card grid gap-3">
+                    <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
+                      <MediaImage
+                        media={f.image}
+                        alt={f.title}
+                        ratio={i === 0 ? '4/5' : '1/1'}
+                        seed={f.seed}
+                        medium={f.medium}
+                        floor={f.floor}
+                        sizes={i === 0 ? '(min-width: 1024px) 50vw, 100vw' : '(min-width: 1024px) 25vw, 50vw'}
+                        className={f.sold ? 'opacity-70 grayscale-[.3]' : ''}
+                      />
+                    </div>
+                    <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.title}</span>
+                    <span className="font-semibold">
+                      {f.sold ? (
+                        t.shop.sold
+                      ) : (
+                        <>
+                          {f.hasMorePrices && <span className="font-normal text-muted">{t.shop.from} </span>}
+                          {formatPrice(f.price)}
+                        </>
+                      )}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
           <a
             href={whatsappLink(t.whatsapp.message)}
             target="_blank"
@@ -207,9 +249,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Threshold />
-
       {/* 7 · Course on a peacock floor: a kolam line weaves through the dots as you scroll. */}
+      {site.coursesLive && <Threshold />}
+      {site.coursesLive && (
       <section className="bg-peacock grain-dark py-16 text-paper lg:py-28">
         <div className="wrap grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
@@ -228,36 +270,21 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       <Threshold />
 
-      {/* 8 · Festival calendar: the next festival is the big tile. */}
-      <section className="bg-paper py-16 lg:py-24">
-        <div className="wrap grid gap-8">
-          <h2 className="font-heading text-h1">{h.festivals.title}</h2>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {festivals.map((f, i) => (
-              <li key={f.kind} className={i === 0 ? 'sm:col-span-2' : ''}>
-                <Link
-                  href={p('/festivals')}
-                  className={`card group relative flex h-full min-h-40 flex-col justify-between gap-6 overflow-hidden rounded-ui p-5 text-paper grain-dark ${f.floor} ${i === 0 ? 'lg:min-h-72' : ''}`}
-                >
-                  {i === 0 ? (
-                    <span className="relative z-10 self-start rounded-full bg-turmeric px-3 font-semibold text-charcoal">{h.festivals.next}</span>
-                  ) : (
-                    <span />
-                  )}
-                  <FestivalMotif
-                    kind={f.kind}
-                    className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-52 lg:w-64' : 'w-28'}`}
-                  />
-                  <span className={`relative z-10 font-heading ${i === 0 ? 'text-h1' : 'text-h3'}`}>{f.name}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      {/* 8 · Festival calendar: the next festival is the big tile, with a countdown. */}
+      {festivals.length > 0 && (
+        <section className="bg-paper py-16 lg:py-24">
+          <div className="wrap grid gap-8">
+            <h2 className="font-heading text-h1">{h.festivals.title}</h2>
+            <FestivalTiles festivals={festivals} t={h.festivals} locale={locale} />
+          </div>
+        </section>
+      )}
+
+      <Testimonials items={testimonials} t={t.testimonials} />
 
       {/* 9 · A note for first-time online buyers. */}
       <section className="bg-paper pt-4 pb-20 lg:pb-28">

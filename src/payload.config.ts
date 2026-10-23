@@ -16,6 +16,7 @@ import { TaxClasses } from './payload/collections/TaxClasses'
 import { Testimonials } from './payload/collections/Testimonials'
 import { Users } from './payload/collections/Users'
 import { CommerceSettings } from './payload/globals/CommerceSettings'
+import { ServicePrices } from './payload/globals/ServicePrices'
 import { SiteSettings } from './payload/globals/SiteSettings'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -35,7 +36,7 @@ export default buildConfig({
     meta: { titleSuffix: ' — Siddesh Mokashi admin' },
   },
   collections: [Orders, Invoices, Enquiries, Products, Artworks, Courses, Lessons, Festivals, Testimonials, Media, Categories, Mediums, TaxClasses, Users],
-  globals: [SiteSettings, CommerceSettings],
+  globals: [SiteSettings, CommerceSettings, ServicePrices],
   localization: {
     locales: [
       { code: 'en', label: 'English' },
