@@ -11,6 +11,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { locales } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { site, whatsappLink } from '@/lib/site'
+import { InlineScript } from '@/components/InlineScript'
 
 const tiro = Tiro_Devanagari_Marathi({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-tiro', display: 'swap' })
 // Festival-poster display face, used only for one giant word per section and step numerals.
@@ -44,7 +45,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
     <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`} suppressHydrationWarning>
       <head>
         {/* Apply a saved "Stop animations" before first paint so the hero doesn't start drawing and then jump. */}
-        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem("motion")==="off")document.documentElement.dataset.motion="off"}catch(e){}` }} />
+        <InlineScript html={`try{if(localStorage.getItem("motion")==="off")document.documentElement.dataset.motion="off"}catch(e){}`} />
       </head>
       <body className="flex min-h-dvh flex-col">
         <a href="#main" className="skip-link">
