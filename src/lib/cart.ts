@@ -134,6 +134,23 @@ export function applySale<P extends Pick<Product, 'category' | 'variants'>>(prod
   )
 }
 
+const lineKey = (l: { slug: string; variantId: string; frameId?: string | null }) => `${l.slug}:${l.variantId}:${l.frameId ?? ''}`
+
+/**
+ * Brings the browser's cart in line with what the server priced: lines for pieces that left the shop are dropped,
+ * quantities are capped. Returns null when nothing changed.
+ */
+export function reconcileCart(sent: CartLine[], priced: Pick<QuoteLine, 'slug' | 'variantId' | 'frameId' | 'qty'>[]) {
+  const byKey = new Map(priced.map((l) => [lineKey(l), l]))
+  const lines: CartLine[] = []
+  for (const l of sent) {
+    const p = byKey.get(lineKey(l))
+    if (p) lines.push(p.qty === l.qty ? l : { ...l, qty: p.qty })
+  }
+  const removed = sent.length - lines.length
+  return removed || lines.some((l, i) => l !== sent[i]) ? { lines, removed } : null
+}
+
 /** Cash-on-delivery settings (owner-editable, in rupees). */
 export type CodRules = { enabled: boolean; maxTotal: number; fee: number; blockedPincodes: string[] }
 /** Why COD is not offered, in the order the buyer should hear it. */

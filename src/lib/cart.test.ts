@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { Product } from '@/payload-types'
 import * as cart from './cart.ts'
-import { codBlock, parsePincodes, priceCart } from './cart.ts'
+import { codBlock, parsePincodes, priceCart, reconcileCart } from './cart.ts'
 
 const product = (slug: string, type: string, variants: object[], framing: object[] = []) =>
   ({ id: slug.length, slug, title: slug, type, variants, framing, images: [] }) as unknown as Product
@@ -98,4 +98,21 @@ test('festival sale: rounds to whole rupees, strikes the old price, only chosen 
   assert.equal(q.lines[0].unitPrice, 5850)
   assert.equal(q.lines[0].wasTotal, 6500) // crossed out in the cart
   assert.equal(q.total, 5850)
+})
+
+test('reconcileCart drops pieces the server no longer prices and caps quantities', () => {
+  const sent = [
+    { slug: 'gone', variantId: 'x', qty: 1 },
+    { slug: 'print', variantId: 'v2', qty: 9 },
+    { slug: 'original', variantId: 'v1', frameId: 'f1', qty: 1 },
+  ]
+  const priced = [
+    { slug: 'print', variantId: 'v2', qty: 5 },
+    { slug: 'original', variantId: 'v1', frameId: 'f1', qty: 1 },
+  ]
+  const r = reconcileCart(sent, priced)
+  assert.equal(r?.removed, 1)
+  assert.deepEqual(r?.lines.map((l) => [l.slug, l.qty]), [['print', 5], ['original', 1]])
+  assert.equal(reconcileCart(sent.slice(2), priced), null) // nothing to change
+  assert.deepEqual(reconcileCart(sent, [])?.lines, []) // everything gone → empty cart, count 0
 })

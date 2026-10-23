@@ -36,7 +36,9 @@ async function settings(payload: Payload): Promise<{ cod: CodRules; giftWrapFee:
 /** Current prices and stock for the browser's cart, plus which ways to pay are open (COD checked against the pincode, if given). */
 export async function getCartQuote(input: unknown, locale: string, pincode?: string): Promise<Quote> {
   const lines = cleanLines(input)
-  if (!lines.length || !(await allow('quote', 60, 60_000))) return { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false }
+  if (!lines.length) return { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false }
+  // Throw, not an empty quote: the browser drops cart lines missing from a quote, so "busy" must never look like "all gone".
+  if (!(await allow('quote', 60, 60_000))) throw new Error('Too many price checks')
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: 'products',

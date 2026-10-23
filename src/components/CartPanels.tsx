@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
-import { GIFT_NOTE_MAX, giftWrapCharge, orderTotal, type CartLine, type CodBlock, type Quote, type QuoteLine } from '@/lib/cart'
+import { GIFT_NOTE_MAX, giftWrapCharge, orderTotal, reconcileCart, type CartLine, type CodBlock, type Quote, type QuoteLine } from '@/lib/cart'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
@@ -27,6 +27,7 @@ function useQuote(locale: string, pincode = '') {
   const [quotedFor, setQuotedFor] = useState<CartLine[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  const [removed, setRemoved] = useState(0)
   useEffect(() => {
     // An empty cart needs no quote. This also keeps the cart clearing after an order from firing an action from the next page.
     if (lines.length === 0) return
@@ -34,6 +35,12 @@ function useQuote(locale: string, pincode = '') {
     getCartQuote(lines, locale, pincode || undefined)
       .then((q) => {
         if (!live) return
+        // Pieces that left the shop (sold, unpublished, renamed) leave the cart too, so the count and the list agree.
+        const fixed = reconcileCart(lines, q.lines)
+        if (fixed) {
+          if (fixed.removed) setRemoved((n) => n + fixed.removed)
+          cartActions.replace(fixed.lines)
+        }
         setQuote(q)
         setQuotedFor(lines)
         setFailed(false)
@@ -45,7 +52,17 @@ function useQuote(locale: string, pincode = '') {
   }, [lines, locale, pincode, attempt])
   // The old quote stays on screen while a new one loads; editing waits for it.
   const pending = quotedFor !== lines
-  return { lines, quote, pending, failed, retry: () => setAttempt((n) => n + 1), hydrated: useHydrated() }
+  return { lines, quote, pending, failed, removed, retry: () => setAttempt((n) => n + 1), hydrated: useHydrated() }
+}
+
+/** Says plainly that pieces were taken out of the cart, instead of a vague "check your cart". */
+function RemovedNote({ count, t }: { count: number; t: T['cart'] }) {
+  if (!count) return null
+  return (
+    <p role="status" className="rounded-ui border-2 border-marigold bg-surface p-4 font-semibold">
+      {count === 1 ? t.removedOne : t.removedMany.replace('{n}', String(count))}
+    </p>
+  )
 }
 
 function QuoteError({ t, retry }: { t: T['checkout']['errors']; retry: () => void }) {
@@ -134,11 +151,12 @@ function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart'
 
 /** /cart */
 export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string; t: T; checkoutHref: string; shopHref: string }) {
-  const { lines, quote, pending, failed, retry, hydrated } = useQuote(locale)
+  const { lines, quote, pending, failed, removed, retry, hydrated } = useQuote(locale)
   if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
   if (lines.length === 0)
     return (
       <div className="grid justify-items-center gap-5 rounded-ui bg-surface p-10 text-center">
+        <RemovedNote count={removed} t={t.cart} />
         <p className="font-heading text-h3">{t.cart.empty}</p>
         <Link href={shopHref} className="press inline-flex h-13 items-center rounded-ui bg-kumkum px-6 font-semibold text-white">
           {t.cart.browse}
@@ -150,6 +168,7 @@ export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string
     <div className="grid gap-10 lg:grid-cols-12">
       <div className="grid content-start gap-5 lg:col-span-7">
         {failed && pending && <QuoteError t={t.checkout.errors} retry={retry} />}
+        <RemovedNote count={removed} t={t.cart} />
         <Lines quote={quote} t={t.cart} editable busy={pending} />
       </div>
       <div className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
@@ -187,7 +206,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   const router = useRouter()
   const [pincode, setPincode] = useState('')
   const pin = /^[1-9]\d{5}$/.test(pincode) ? pincode : ''
-  const { lines, quote, pending, failed, retry, hydrated } = useQuote(locale, pin)
+  const { lines, quote, pending, failed, removed, retry, hydrated } = useQuote(locale, pin)
   const [mode, setMode] = useState<'prepaid' | 'cod'>('prepaid')
   // The server may refuse COD for reasons the quote can't know (an open COD order on this phone).
   const [codRefused, setCodRefused] = useState<CodBlock | null>(null)
@@ -249,11 +268,12 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
   if (lines.length === 0)
     return (
-      <p className="rounded-ui bg-surface p-8 text-center">
+      <div className="grid justify-items-center gap-4 rounded-ui bg-surface p-8 text-center">
+        <RemovedNote count={removed} t={t.cart} />
         <Link href={cartHref} className="ink-link font-semibold text-peacock">
           {t.cart.empty}
         </Link>
-      </p>
+      </div>
     )
 
   async function submit(e: FormEvent<HTMLFormElement>) {

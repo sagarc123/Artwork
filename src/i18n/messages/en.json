@@ -430,7 +430,9 @@
     "view": "View cart",
     "loading": "Checking prices…",
     "items": "items",
-    "giftWrap": "Gift wrap"
+    "giftWrap": "Gift wrap",
+    "removedOne": "1 piece was taken out of your cart because it is no longer in the shop.",
+    "removedMany": "{n} pieces were taken out of your cart because they are no longer in the shop."
   },
   "checkout": {
     "title": "Almost there",

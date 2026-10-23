@@ -29,6 +29,10 @@ export const cartActions = {
   clear() {
     write(store.EMPTY)
   },
+  /** Replaces the whole cart (used to drop pieces the server says are gone). */
+  replace(lines: CartLine[]) {
+    write(lines)
+  },
 }
 
 export const useCart = store.useList
