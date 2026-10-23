@@ -21,7 +21,27 @@ export const Orders: CollectionConfig = {
     useAsTitle: 'orderNumber',
     group: 'Orders',
     defaultColumns: ['orderNumber', 'status', 'total', 'paymentMode', 'createdAt'],
-    description: 'Orders from the website. Use the big buttons on an order as you confirm, pack and ship it.',
+    listSearchableFields: ['orderNumber', 'customer.name', 'customer.phone'],
+    description: 'Open an order and use the big buttons as you confirm, pack and ship it.',
+    components: {
+      beforeListTable: [
+        {
+          path: '/payload/admin/QuickFilters#QuickFilters',
+          clientProps: {
+            collection: 'orders',
+            field: 'status',
+            tabs: [
+              { label: 'To confirm', values: ['cod_pending_confirmation'] },
+              { label: 'To pack', values: ['paid', 'cod_confirmed'] },
+              { label: 'Packed', values: ['packed'] },
+              { label: 'Shipped', values: ['shipped'] },
+              { label: 'Needs refund', values: ['needs_refund'] },
+              { label: 'All' },
+            ],
+          },
+        },
+      ],
+    },
     // Opens the invoice PDF once one is issued, otherwise the customer's order page.
     preview: async (doc, { req }) => {
       if (!doc.publicId) return null
@@ -72,105 +92,123 @@ export const Orders: CollectionConfig = {
   fields: [
     { name: 'actions', type: 'ui', admin: { components: { Field: '/payload/admin/OrderActions#OrderActions' } } },
     {
-      type: 'row',
-      fields: [
-        { name: 'orderNumber', type: 'text', index: true, access: locked, admin: { readOnly: true } },
-        {
-          name: 'status',
-          type: 'select',
-          required: true,
-          defaultValue: 'pending_payment',
-          options: [
-            { label: 'Waiting for payment', value: 'pending_payment' },
-            { label: 'COD — waiting for customer to confirm', value: 'cod_pending_confirmation' },
-            { label: 'COD confirmed — to pack', value: 'cod_confirmed' },
-            { label: 'Paid — to pack', value: 'paid' },
-            { label: 'Packed', value: 'packed' },
-            { label: 'Shipped', value: 'shipped' },
-            { label: 'Delivered', value: 'delivered' },
-            { label: 'Cancelled', value: 'cancelled' },
-            { label: 'Needs refund', value: 'needs_refund' },
-            { label: 'Refunded', value: 'refunded' },
-          ],
-        },
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'pending_payment',
+      options: [
+        { label: 'Waiting for payment', value: 'pending_payment' },
+        { label: 'COD: customer to confirm', value: 'cod_pending_confirmation' },
+        { label: 'COD confirmed: to pack', value: 'cod_confirmed' },
+        { label: 'Paid: to pack', value: 'paid' },
+        { label: 'Packed', value: 'packed' },
+        { label: 'Shipped', value: 'shipped' },
+        { label: 'Delivered', value: 'delivered' },
+        { label: 'Cancelled', value: 'cancelled' },
+        { label: 'Needs refund', value: 'needs_refund' },
+        { label: 'Refunded', value: 'refunded' },
       ],
+      // Only choices that can work: never back to "waiting", and no money statuses for helpers. The hook above still guards them.
+      filterOptions: ({ options, req, data }) =>
+        options.filter((o) => {
+          const v = typeof o === 'string' ? o : o.value
+          if (v === data?.status) return true
+          if (v === 'pending_payment' || v === 'cod_pending_confirmation') return false
+          if (v === 'cod_confirmed') return data?.status === 'cod_pending_confirmation'
+          return hasRole(req.user, 'owner') || !OWNER_ONLY_STATUSES.includes(v)
+        }),
+      admin: {
+        description: 'The big buttons above change this for you. Change it here only to cancel or fix a mistake.',
+        components: { Cell: '/payload/admin/Cells#StatusCell' },
+      },
     },
     // Staff fill these in when the parcel leaves; "Mark shipped" needs both.
     {
       type: 'row',
+      admin: { condition: (data) => ['paid', 'cod_confirmed', 'packed', 'shipped', 'delivered'].includes(data?.status) },
       fields: [
         { name: 'courier', type: 'text', admin: { description: 'e.g. India Post, DTDC, Delhivery' } },
-        { name: 'trackingNumber', type: 'text' },
+        { name: 'trackingNumber', label: 'Tracking number', type: 'text' },
       ],
     },
-    ...lock([
-      { name: 'publicId', type: 'text', unique: true, index: true, admin: { hidden: true } },
-      {
-        name: 'items',
-        type: 'array',
-        admin: { readOnly: true },
-        fields: [
-          { name: 'product', type: 'relationship', relationTo: 'products' },
-          { name: 'title', type: 'text' },
-          { name: 'variantId', type: 'text' },
-          { name: 'variantLabel', type: 'text' },
-          { name: 'frameLabel', type: 'text' },
-          { name: 'type', type: 'text' },
-          { type: 'row', fields: [{ name: 'unitPrice', type: 'number' }, { name: 'qty', type: 'number' }, { name: 'lineTotal', type: 'number' }] },
-        ],
-      },
-      {
-        type: 'row',
-        fields: [
-          { name: 'subtotal', type: 'number', admin: { readOnly: true } },
-          { name: 'shipping', type: 'number', admin: { readOnly: true } },
-          { name: 'codFee', label: 'COD fee', type: 'number', admin: { readOnly: true } },
-          { name: 'giftWrapFee', label: 'Gift wrap', type: 'number', admin: { readOnly: true } },
-          { name: 'total', label: 'Total (₹)', type: 'number', admin: { readOnly: true } },
-        ],
-      },
-      {
-        name: 'paymentMode',
-        type: 'select',
-        defaultValue: 'prepaid',
-        admin: { readOnly: true },
-        options: [
-          { label: 'Paid online', value: 'prepaid' },
-          { label: 'Cash on delivery', value: 'cod' },
-        ],
-      },
-      {
-        name: 'customer',
-        type: 'group',
-        admin: { readOnly: true },
-        fields: [
-          { type: 'row', fields: [{ name: 'name', type: 'text' }, { name: 'phone', type: 'text' }, { name: 'email', type: 'email' }] },
-          { type: 'row', fields: [{ name: 'businessName', type: 'text' }, { name: 'gstin', label: 'GSTIN', type: 'text' }] },
-        ],
-      },
-      {
-        name: 'address',
-        type: 'group',
-        admin: { readOnly: true },
-        fields: [
-          { name: 'line1', type: 'text' },
-          { name: 'line2', type: 'text' },
-          { type: 'row', fields: [{ name: 'city', type: 'text' }, { name: 'state', type: 'text' }, { name: 'pincode', type: 'text' }] },
-        ],
-      },
-    ]),
-    ...lock([{ name: 'giftNote', label: 'Gift card message (print on the card, not the invoice)', type: 'textarea', admin: { readOnly: true } }]),
-    { name: 'note', type: 'textarea' },
-    ...lock([
-      {
-        type: 'row',
-        fields: [
-          { name: 'razorpayOrderId', type: 'text', index: true, admin: { readOnly: true } },
-          { name: 'razorpayPaymentId', type: 'text', admin: { readOnly: true } },
-        ],
-      },
-      { type: 'row', fields: [{ name: 'paidAt', type: 'date', admin: { readOnly: true } }, { name: 'reservedUntil', type: 'date', admin: { readOnly: true } }] },
-      { name: 'locale', type: 'text', admin: { hidden: true } },
-    ]),
+    { name: 'note', label: 'Your notes (private)', type: 'textarea', admin: { description: 'Only you and your helper see this.' } },
+    {
+      type: 'collapsible',
+      label: 'Full order details (as the customer placed it)',
+      admin: { initCollapsed: true, description: 'Saved by the website at checkout. Nothing here can be changed.' },
+      fields: lock([
+        { name: 'orderNumber', label: 'Order number', type: 'text', index: true, admin: { readOnly: true, components: { Cell: '/payload/admin/Cells#OrderCell' } } },
+        { name: 'publicId', type: 'text', unique: true, index: true, admin: { hidden: true } },
+        {
+          name: 'items',
+          type: 'array',
+          admin: { readOnly: true },
+          fields: [
+            { name: 'product', type: 'relationship', relationTo: 'products' },
+            { name: 'title', type: 'text' },
+            { name: 'variantId', type: 'text', admin: { hidden: true } },
+            { type: 'row', fields: [{ name: 'variantLabel', label: 'Size', type: 'text' }, { name: 'frameLabel', label: 'Frame', type: 'text' }] },
+            { name: 'type', type: 'text', admin: { hidden: true } },
+            { type: 'row', fields: [{ name: 'unitPrice', label: 'Price (₹)', type: 'number' }, { name: 'qty', label: 'Qty', type: 'number' }, { name: 'lineTotal', label: 'Line total (₹)', type: 'number' }] },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'subtotal', label: 'Items (₹)', type: 'number', admin: { readOnly: true } },
+            { name: 'shipping', label: 'Shipping (₹)', type: 'number', admin: { readOnly: true } },
+            { name: 'codFee', label: 'COD fee (₹)', type: 'number', admin: { readOnly: true } },
+            { name: 'giftWrapFee', label: 'Gift wrap (₹)', type: 'number', admin: { readOnly: true } },
+            { name: 'total', label: 'Total (₹)', type: 'number', admin: { readOnly: true, components: { Cell: '/payload/admin/Cells#MoneyCell' } } },
+          ],
+        },
+        {
+          name: 'paymentMode',
+          label: 'Payment',
+          type: 'select',
+          defaultValue: 'prepaid',
+          admin: { readOnly: true },
+          options: [
+            { label: 'Paid online', value: 'prepaid' },
+            { label: 'Cash on delivery', value: 'cod' },
+          ],
+        },
+        {
+          name: 'customer',
+          type: 'group',
+          admin: { readOnly: true },
+          fields: [
+            { type: 'row', fields: [{ name: 'name', type: 'text' }, { name: 'phone', type: 'text' }, { name: 'email', type: 'email' }] },
+            { type: 'row', fields: [{ name: 'businessName', label: 'Business name', type: 'text' }, { name: 'gstin', label: 'GSTIN', type: 'text' }] },
+          ],
+        },
+        {
+          name: 'address',
+          type: 'group',
+          admin: { readOnly: true },
+          fields: [
+            { name: 'line1', label: 'Address line 1', type: 'text' },
+            { name: 'line2', label: 'Address line 2', type: 'text' },
+            { type: 'row', fields: [{ name: 'city', type: 'text' }, { name: 'state', type: 'text' }, { name: 'pincode', label: 'PIN code', type: 'text' }] },
+          ],
+        },
+        { name: 'giftNote', label: 'Gift card message (print on the card, not the invoice)', type: 'textarea', admin: { readOnly: true } },
+        {
+          type: 'row',
+          fields: [
+            { name: 'razorpayOrderId', label: 'Razorpay order ID', type: 'text', index: true, admin: { readOnly: true } },
+            { name: 'razorpayPaymentId', label: 'Razorpay payment ID', type: 'text', admin: { readOnly: true, description: 'Search this in Razorpay to refund.' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'paidAt', label: 'Paid at', type: 'date', admin: { readOnly: true } },
+            { name: 'reservedUntil', label: 'Stock held until', type: 'date', admin: { readOnly: true } },
+          ],
+        },
+        { name: 'locale', type: 'text', admin: { hidden: true } },
+      ]),
+    },
   ],
 }

@@ -1,15 +1,17 @@
 import type { CollectionConfig } from 'payload'
-import { hasRole, isOwner, ownerOnlyField, ROLES } from '../access'
+import { hasRole, hideFromNonOwners, isOwner, ownerOnlyField, ROLES } from '../access'
 
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
   slug: 'users',
+  labels: { singular: 'Account', plural: 'Accounts' },
   admin: {
-    useAsTitle: 'email',
+    useAsTitle: 'name',
     group: 'Settings',
     defaultColumns: ['name', 'email', 'roles'],
     // Only the owner manages accounts; a helper still reaches their own via Account.
-    hidden: ({ user }) => !hasRole(user, 'owner'),
+    description: 'People who can sign in here: you and your helper.',
+    hidden: hideFromNonOwners,
   },
   auth: {
     tokenExpiration: 60 * 60 * 12, // 12 hours
@@ -29,6 +31,7 @@ export const Users: CollectionConfig = {
     { name: 'name', type: 'text', required: true },
     {
       name: 'roles',
+      label: 'What they can do',
       type: 'select',
       hasMany: true,
       required: true,

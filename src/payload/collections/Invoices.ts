@@ -9,11 +9,12 @@ const money = (name: string): Field => ({ name, type: 'number' })
  */
 export const Invoices: CollectionConfig = {
   slug: 'invoices',
+  labels: { singular: 'Invoice', plural: 'Invoices' },
   admin: {
     useAsTitle: 'number',
     group: 'Orders',
     defaultColumns: ['number', 'issuedAt', 'documentType', 'order'],
-    description: 'Issued automatically when an order is paid online, or when a cash-on-delivery order is delivered.',
+    description: 'Made automatically when an order is paid online, or when a cash-on-delivery order is delivered. They cannot be changed. Open one and tap the eye button for the PDF.',
     preview: (doc) => (doc.orderPublicId ? `/api/invoices/${doc.orderPublicId}` : null),
   },
   access: { read: isOrderStaff, create: () => false, update: () => false, delete: () => false },
@@ -22,9 +23,10 @@ export const Invoices: CollectionConfig = {
     {
       type: 'row',
       fields: [
-        { name: 'number', type: 'text', required: true, unique: true, index: true },
+        { name: 'number', label: 'Invoice no.', type: 'text', required: true, unique: true, index: true },
         {
           name: 'documentType',
+          label: 'Kind',
           type: 'select',
           required: true,
           options: [
@@ -32,8 +34,8 @@ export const Invoices: CollectionConfig = {
             { label: 'Bill of supply (no GSTIN yet)', value: 'bill_of_supply' },
           ],
         },
-        { name: 'issuedAt', type: 'date', required: true },
-        { name: 'financialYear', type: 'text', required: true },
+        { name: 'issuedAt', label: 'Date', type: 'date', required: true },
+        { name: 'financialYear', label: 'Financial year', type: 'text', required: true },
       ],
     },
     { name: 'order', type: 'relationship', relationTo: 'orders', unique: true, index: true },

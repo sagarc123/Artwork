@@ -1,13 +1,13 @@
 import type { GlobalConfig } from 'payload'
-import { anyone, isOwner, staffOnlyField } from '../access'
+import { anyone, hideFromHelpers, isOwner, staffOnlyField } from '../access'
 import { refreshGlobalOnChange } from '../hooks'
 
 /** Cash-on-delivery rules and the tax defaults the checkout and invoices use. */
 export const CommerceSettings: GlobalConfig = {
   slug: 'commerce-settings',
-  label: 'Commerce settings',
+  label: 'Shop settings',
   hooks: refreshGlobalOnChange('commerce-settings'),
-  admin: { group: 'Settings' },
+  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Cash on delivery, gift wrap, GST and the festival sale.' },
   access: { read: anyone, update: isOwner },
   fields: [
     {
@@ -25,6 +25,7 @@ export const CommerceSettings: GlobalConfig = {
         },
         {
           name: 'blockedPincodes',
+          label: 'No COD to these PIN codes',
           type: 'textarea',
           access: { read: staffOnlyField },
           admin: { description: 'Pincodes where COD is not offered, separated by commas or new lines.' },
@@ -41,7 +42,9 @@ export const CommerceSettings: GlobalConfig = {
     },
     {
       name: 'tax',
+      label: 'Tax (GST)',
       type: 'group',
+      admin: { description: 'Ask your CA before changing these.' },
       fields: [
         {
           name: 'sellerState',

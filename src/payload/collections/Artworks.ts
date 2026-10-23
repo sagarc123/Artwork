@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
 import { fillAlt } from '../gallery-sync'
-import { canEditContent, isOwner, publishedOrStaff } from '../access'
+import { canEditContent, hideFromHelpers, isOwner, publishedOrStaff } from '../access'
 import { seoFields, slugField } from '../fields'
+import { sitePath } from '../../lib/admin'
 
 /** Portfolio pieces, including ones that are not for sale. */
 export const Artworks: CollectionConfig = {
   slug: 'artworks',
+  labels: { singular: 'Gallery piece', plural: 'Gallery' },
   hooks: {
     ...refreshOnChange('artworks'),
     afterChange: [
@@ -17,30 +19,56 @@ export const Artworks: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     group: 'Gallery & Festivals',
-    defaultColumns: ['title', 'category', 'forSale', '_status'],
-    description: 'Pieces shown on the Artwork page. Paintings added under Shop → Products appear here by themselves; add only pieces that are not for sale.',
+    defaultColumns: ['images', 'category', 'forSale', '_status'],
+    description: 'Pieces shown on the Artwork page. Paintings added under Shop appear here by themselves; add only pieces that are not for sale.',
+    hidden: hideFromHelpers,
+    preview: (_doc, { locale }) => sitePath(locale, '/artwork'),
   },
   versions: { drafts: true },
   access: { read: publishedOrStaff, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [
-    { name: 'title', type: 'text', required: true, localized: true },
-    slugField(),
-    { name: 'images', type: 'upload', relationTo: 'media', hasMany: true, required: true },
-    { name: 'category', type: 'relationship', relationTo: 'categories', required: true, filterOptions: { scope: { in: ['artwork', 'both'] } } },
-    { name: 'medium', type: 'relationship', relationTo: 'mediums' },
-    { name: 'festival', type: 'relationship', relationTo: 'festivals' },
-    { name: 'year', type: 'number', min: 1950, max: 2100 },
-    { name: 'story', type: 'textarea', localized: true, admin: { description: 'A few lines about this piece.' } },
-    { name: 'forSale', type: 'checkbox', admin: { position: 'sidebar' } },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Basics',
+          fields: [
+            { name: 'title', label: 'Name of the piece', type: 'text', required: true, localized: true },
+            { name: 'images', label: 'Photos', type: 'upload', relationTo: 'media', hasMany: true, required: true, admin: { description: 'First photo is the main one.', components: { Cell: '/payload/admin/Cells#ThumbCell' } } },
+            { name: 'category', type: 'relationship', relationTo: 'categories', required: true, filterOptions: { scope: { in: ['artwork', 'both'] } } },
+          ],
+        },
+        {
+          label: 'Story & details',
+          fields: [
+            { name: 'story', type: 'textarea', localized: true, admin: { rows: 5, description: 'A few lines about this piece.' } },
+            {
+              type: 'row',
+              fields: [
+                { name: 'medium', label: 'Medium (pencil, acrylic…)', type: 'relationship', relationTo: 'mediums' },
+                { name: 'festival', type: 'relationship', relationTo: 'festivals' },
+                { name: 'year', label: 'Year made', type: 'number', min: 1950, max: 2100 },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Advanced',
+          description: 'Optional. You can leave all of this as it is.',
+          fields: [slugField('title', 'Web address. Made from the English title; change it only if you need to.', undefined), seoFields],
+        },
+      ],
+    },
+    { name: 'forSale', label: 'For sale in the shop', type: 'checkbox', admin: { position: 'sidebar', components: { Cell: '/payload/admin/Cells#YesNoCell' } } },
     {
       name: 'product',
+      label: 'Shop listing',
       type: 'relationship',
       relationTo: 'products',
       admin: { position: 'sidebar', condition: (_, sibling) => Boolean(sibling?.forSale), description: 'The shop listing visitors can buy.' },
       validate: (value: unknown, { siblingData }: { siblingData: Partial<{ forSale: boolean }> }) =>
         siblingData?.forSale && !value ? 'Choose the shop listing for this piece, or untick "For sale".' : true,
     },
-    { name: 'order', type: 'number', defaultValue: 0, admin: { position: 'sidebar' } },
-    seoFields,
+    { name: 'order', label: 'Position', type: 'number', defaultValue: 0, admin: { position: 'sidebar', description: 'Smaller numbers come first.' } },
   ],
 }

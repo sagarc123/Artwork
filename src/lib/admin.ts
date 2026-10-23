@@ -1,5 +1,6 @@
 // Admin helpers for the Today page and the one-tap WhatsApp buttons. No server-only imports (used by admin client components).
 import { formatPrice, site, whatsappLink } from './site.ts'
+import { isLocale, localePath } from '../i18n/config.ts'
 
 type Lang = 'en' | 'mr' | 'hi'
 const lang = (l?: string | null): Lang => (l === 'mr' || l === 'hi' ? l : 'en')
@@ -67,3 +68,6 @@ export function listUrl(collection: string, field: string, values: string[]) {
   const where = values.length === 1 ? `where[${field}][equals]=${values[0]}` : values.map((v, i) => `where[${field}][in][${i}]=${v}`).join('&')
   return `/admin/collections/${collection}?${where}`
 }
+
+/** A page on the public site in the given language, for "View on site" buttons. */
+export const sitePath = (locale: string | undefined, path: string) => localePath(isLocale(locale) ? locale : 'en', path)

@@ -11,6 +11,7 @@ export const slugify = (text: string) =>
 
 export const slugField = (from = 'title', description = 'Web address. Filled from the English title if left empty.', position: 'sidebar' | undefined = 'sidebar'): Field => ({
   name: 'slug',
+  label: 'Web address',
   type: 'text',
   required: true,
   unique: true,
@@ -50,11 +51,12 @@ export const rupeesField = (name: string, required = true, description = 'In ₹
 
 export const seoFields: Field = {
   name: 'seo',
+  label: 'Google search (optional)',
   type: 'group',
   admin: { description: 'Optional. Shown in Google results; filled from the title if empty.' },
   fields: [
-    { name: 'title', type: 'text', localized: true, maxLength: 60 },
-    { name: 'description', type: 'textarea', localized: true, maxLength: 155 },
+    { name: 'title', label: 'Title in Google', type: 'text', localized: true, maxLength: 60 },
+    { name: 'description', label: 'Short description in Google', type: 'textarea', localized: true, maxLength: 155 },
   ],
 }
 

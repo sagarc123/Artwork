@@ -150,14 +150,16 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Orders from the website. Use the big buttons on an order as you confirm, pack and ship it.
+ * Open an order and use the big buttons as you confirm, pack and ship it.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
   id: number;
-  orderNumber?: string | null;
+  /**
+   * The big buttons above change this for you. Change it here only to cancel or fix a mistake.
+   */
   status:
     | 'pending_payment'
     | 'cod_pending_confirmation'
@@ -174,6 +176,11 @@ export interface Order {
    */
   courier?: string | null;
   trackingNumber?: string | null;
+  /**
+   * Only you and your helper see this.
+   */
+  note?: string | null;
+  orderNumber?: string | null;
   publicId?: string | null;
   items?:
     | {
@@ -210,8 +217,10 @@ export interface Order {
     pincode?: string | null;
   };
   giftNote?: string | null;
-  note?: string | null;
   razorpayOrderId?: string | null;
+  /**
+   * Search this in Razorpay to refund.
+   */
   razorpayPaymentId?: string | null;
   paidAt?: string | null;
   reservedUntil?: string | null;
@@ -287,6 +296,9 @@ export interface Product {
   widthCm?: number | null;
   heightCm?: number | null;
   year?: number | null;
+  /**
+   * Optional. Also shows it on that festival's page.
+   */
   festival?: (number | null) | Festival;
   /**
    * Optional. Leave empty if the piece is sold unframed only.
@@ -295,26 +307,18 @@ export interface Product {
     | {
         label: string;
         /**
-         * In ₹ (rupees), including GST.
+         * Extra ₹ on top of the price.
          */
         extraPrice: number;
         id?: string | null;
       }[]
     | null;
   /**
-   * Also shows this piece on the Artwork gallery page.
-   */
-  showInGallery?: boolean | null;
-  /**
-   * Show on the home page
-   */
-  featured?: boolean | null;
-  /**
    * Web address. Made from the English title; change it only if you need to.
    */
   slug: string;
   /**
-   * Leave empty: GST is set from the product type (Commerce settings → Tax).
+   * Leave empty: GST is set from the product type (Shop settings → Tax).
    */
   taxClass?: (number | null) | TaxClass;
   /**
@@ -324,12 +328,17 @@ export interface Product {
     title?: string | null;
     description?: string | null;
   };
+  /**
+   * Also shows this piece on the Artwork gallery page.
+   */
+  showInGallery?: boolean | null;
+  featured?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Photos for paintings, the gallery and festivals.
+ * Every photo you have uploaded. Usually you add photos straight from a painting; come here to fix a description.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
@@ -379,6 +388,8 @@ export interface Media {
   };
 }
 /**
+ * The groups pieces are sorted into in the shop and gallery menus.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
@@ -393,6 +404,9 @@ export interface Category {
    * Where this category is used. "Shop and gallery" keeps one list for both.
    */
   scope: 'both' | 'shop' | 'artwork' | 'course';
+  /**
+   * Smaller numbers come first.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -414,6 +428,8 @@ export interface Medium {
   createdAt: string;
 }
 /**
+ * Festival pages (Diwali, Ganesh Chaturthi…). Update the next date every year; Today reminds you.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "festivals".
  */
@@ -424,12 +440,18 @@ export interface Festival {
    * Web address. Filled from the English title if left empty.
    */
   slug: string;
+  /**
+   * A few lines at the top of the festival page.
+   */
   intro?: string | null;
   heroImage?: (number | null) | Media;
   /**
-   * Next festival date, shown as a booking deadline. Update it every year (Today reminds you).
+   * Shown as a booking deadline. Update it every year (Today reminds you). Leave empty for things without a date, like weddings.
    */
   nextDate?: string | null;
+  /**
+   * Smaller numbers come first.
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -449,7 +471,7 @@ export interface TaxClass {
   createdAt: string;
 }
 /**
- * Issued automatically when an order is paid online, or when a cash-on-delivery order is delivered.
+ * Made automatically when an order is paid online, or when a cash-on-delivery order is delivered. They cannot be changed. Open one and tap the eye button for the PDF.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoices".
@@ -501,7 +523,7 @@ export interface Invoice {
   createdAt: string;
 }
 /**
- * New requests from the website. Tap "Reply on WhatsApp"; it marks the enquiry as replied.
+ * Requests from the website forms. Tap the green WhatsApp button to reply; it marks the enquiry as replied.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "enquiries".
@@ -524,14 +546,20 @@ export interface Enquiry {
   framing?: boolean | null;
   occasion?: string | null;
   message?: string | null;
+  /**
+   * Price quoted, advance received, anything to remember.
+   */
   notes?: string | null;
   wantsOffers?: boolean | null;
+  /**
+   * en = English, mr = मराठी, hi = हिंदी. The WhatsApp reply is written in this language.
+   */
   locale?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
- * Pieces shown on the Artwork page. Paintings added under Shop → Products appear here by themselves; add only pieces that are not for sale.
+ * Pieces shown on the Artwork page. Paintings added under Shop appear here by themselves; add only pieces that are not for sale.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "artworks".
@@ -540,24 +568,21 @@ export interface Artwork {
   id: number;
   title: string;
   /**
-   * Web address. Filled from the English title if left empty.
+   * First photo is the main one.
    */
-  slug: string;
   images: (number | Media)[];
   category: number | Category;
-  medium?: (number | null) | Medium;
-  festival?: (number | null) | Festival;
-  year?: number | null;
   /**
    * A few lines about this piece.
    */
   story?: string | null;
-  forSale?: boolean | null;
+  medium?: (number | null) | Medium;
+  festival?: (number | null) | Festival;
+  year?: number | null;
   /**
-   * The shop listing visitors can buy.
+   * Web address. Made from the English title; change it only if you need to.
    */
-  product?: (number | null) | Product;
-  order?: number | null;
+  slug: string;
   /**
    * Optional. Shown in Google results; filled from the title if empty.
    */
@@ -565,11 +590,22 @@ export interface Artwork {
     title?: string | null;
     description?: string | null;
   };
+  forSale?: boolean | null;
+  /**
+   * The shop listing visitors can buy.
+   */
+  product?: (number | null) | Product;
+  /**
+   * Smaller numbers come first.
+   */
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Kind words from customers, shown on the home page and service pages.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
  */
@@ -583,6 +619,9 @@ export interface Testimonial {
    * e.g. "Wedding rangoli" or "Student"
    */
   context?: string | null;
+  /**
+   * In their own words and language.
+   */
   quote: string;
   rating?: number | null;
   photo?: (number | null) | Media;
@@ -687,6 +726,8 @@ export interface Lesson {
   createdAt: string;
 }
 /**
+ * People who can sign in here: you and your helper.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -841,10 +882,11 @@ export interface PayloadMigration {
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-  orderNumber?: T;
   status?: T;
   courier?: T;
   trackingNumber?: T;
+  note?: T;
+  orderNumber?: T;
   publicId?: T;
   items?:
     | T
@@ -885,7 +927,6 @@ export interface OrdersSelect<T extends boolean = true> {
         pincode?: T;
       };
   giftNote?: T;
-  note?: T;
   razorpayOrderId?: T;
   razorpayPaymentId?: T;
   paidAt?: T;
@@ -1013,8 +1054,6 @@ export interface ProductsSelect<T extends boolean = true> {
         extraPrice?: T;
         id?: T;
       };
-  showInGallery?: T;
-  featured?: T;
   slug?: T;
   taxClass?: T;
   seo?:
@@ -1023,6 +1062,8 @@ export interface ProductsSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
+  showInGallery?: T;
+  featured?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1033,22 +1074,22 @@ export interface ProductsSelect<T extends boolean = true> {
  */
 export interface ArtworksSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   images?: T;
   category?: T;
+  story?: T;
   medium?: T;
   festival?: T;
   year?: T;
-  story?: T;
-  forSale?: T;
-  product?: T;
-  order?: T;
+  slug?: T;
   seo?:
     | T
     | {
         title?: T;
         description?: T;
       };
+  forSale?: T;
+  product?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1298,14 +1339,25 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Your name, contact numbers and business details, shown in the footer, policies and invoices.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
  */
 export interface SiteSetting {
   id: number;
+  /**
+   * Leave empty to use "Siddesh Mokashi".
+   */
   brandName?: string | null;
+  /**
+   * One short line under your name.
+   */
   tagline?: string | null;
   business?: {
+    /**
+     * As on your PAN or GST certificate.
+     */
     legalName?: string | null;
     /**
      * Leave empty until GST registration is done.
@@ -1321,6 +1373,9 @@ export interface SiteSetting {
     whatsapp?: string | null;
     phone?: string | null;
     email?: string | null;
+    /**
+     * Today warns you when an enquiry has waited longer than this.
+     */
     replyHours?: number | null;
   };
   /**
@@ -1330,6 +1385,9 @@ export interface SiteSetting {
     name?: string | null;
     email?: string | null;
   };
+  /**
+   * Full links, e.g. https://instagram.com/yourname
+   */
   social?: {
     instagram?: string | null;
     youtube?: string | null;
@@ -1339,6 +1397,8 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
+ * Cash on delivery, gift wrap, GST and the festival sale.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "commerce-settings".
  */
@@ -1357,6 +1417,9 @@ export interface CommerceSetting {
    * Added when a buyer ticks "Gift wrap". SAMPLE value — owner to confirm.
    */
   giftWrapFee?: number | null;
+  /**
+   * Ask your CA before changing these.
+   */
   tax: {
     /**
      * Buyers in this state pay CGST + SGST; everyone else pays IGST.

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { codConfirmAsk, customerChat, enquiryReply, listUrl, trackingMessage, waited } from './admin.ts'
+import { codConfirmAsk, customerChat, enquiryReply, listUrl, sitePath, trackingMessage, waited } from './admin.ts'
 
 test('enquiry reply is in the customer language, with their name and what they asked about', () => {
   assert.match(enquiryReply({ name: 'Priya', type: 'event', locale: 'en' }), /^Namaste Priya!.*rangoli for your event/)
@@ -33,4 +33,10 @@ test('waiting time reads naturally', () => {
 test('list links filter by one or several values', () => {
   assert.equal(listUrl('enquiries', 'status', ['new']), '/admin/collections/enquiries?where[status][equals]=new')
   assert.equal(listUrl('orders', 'status', ['paid', 'cod_confirmed']), '/admin/collections/orders?where[status][in][0]=paid&where[status][in][1]=cod_confirmed')
+})
+
+test('View on site links follow the language being edited', () => {
+  assert.equal(sitePath('en', '/shop/p/x'), '/shop/p/x')
+  assert.equal(sitePath('mr', '/shop/p/x'), '/mr/shop/p/x')
+  assert.equal(sitePath(undefined, '/artwork'), '/artwork')
 })

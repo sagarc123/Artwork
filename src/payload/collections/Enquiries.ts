@@ -11,8 +11,26 @@ export const Enquiries: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     group: 'Enquiries',
-    defaultColumns: ['name', 'phone', 'type', 'eventDate', 'status', 'createdAt'],
-    description: 'New requests from the website. Tap "Reply on WhatsApp"; it marks the enquiry as replied.',
+    defaultColumns: ['name', 'status', 'phone', 'type', 'eventDate', 'createdAt'],
+    listSearchableFields: ['name', 'phone', 'city'],
+    description: 'Requests from the website forms. Tap the green WhatsApp button to reply; it marks the enquiry as replied.',
+    components: {
+      beforeListTable: [
+        {
+          path: '/payload/admin/QuickFilters#QuickFilters',
+          clientProps: {
+            collection: 'enquiries',
+            field: 'status',
+            tabs: [
+              { label: 'New', values: ['new'] },
+              { label: 'Talking', values: ['replied', 'quoted', 'advance_paid'] },
+              { label: 'Done', values: ['done'] },
+              { label: 'All' },
+            ],
+          },
+        },
+      ],
+    },
   },
   access: { read: isOrderStaff, create: isStaff, update: isOrderStaff, delete: isOwner },
   disableDuplicate: true,
@@ -24,7 +42,7 @@ export const Enquiries: CollectionConfig = {
       name: 'status',
       type: 'select',
       defaultValue: 'new',
-      admin: { components: { Field: '/payload/admin/ChoiceButtons#ChoiceButtons' } },
+      admin: { components: { Field: '/payload/admin/ChoiceButtons#ChoiceButtons', Cell: '/payload/admin/Cells#StatusCell' } },
       options: [
         { label: 'New', value: 'new' },
         { label: 'Replied', value: 'replied' },
@@ -47,6 +65,7 @@ export const Enquiries: CollectionConfig = {
       fields: [
         {
           name: 'type',
+          label: 'Asking about',
           type: 'select',
           required: true,
           options: [
@@ -57,22 +76,22 @@ export const Enquiries: CollectionConfig = {
           ],
         },
         { name: 'city', type: 'text' },
-        { name: 'eventDate', label: 'Date (event or needed by)', type: 'date', admin: { date: { pickerAppearance: 'dayOnly' }, ...only('event', 'portrait', 'workshop') } },
+        { name: 'eventDate', label: 'Date (event or needed by)', type: 'date', admin: { date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' }, ...only('event', 'portrait', 'workshop') } },
       ],
     },
-    { type: 'row', fields: [{ name: 'venue', type: 'text', admin: only('event') }, { name: 'size', type: 'text', admin: only('event') }, { name: 'styles', type: 'text', hasMany: true, admin: only('event') }] },
+    { type: 'row', fields: [{ name: 'venue', type: 'text', admin: only('event') }, { name: 'size', label: 'Rangoli size', type: 'text', admin: only('event') }, { name: 'styles', label: 'Styles they like', type: 'text', hasMany: true, admin: only('event') }] },
     {
       type: 'row',
       fields: [
         { name: 'medium', type: 'text', admin: only('portrait') },
-        { name: 'paperSize', type: 'text', admin: only('portrait') },
-        { name: 'faces', type: 'number', min: 1, admin: only('portrait') },
-        { name: 'framing', type: 'checkbox', admin: only('portrait') },
+        { name: 'paperSize', label: 'Paper size', type: 'text', admin: only('portrait') },
+        { name: 'faces', label: 'People in it', type: 'number', min: 1, admin: only('portrait') },
+        { name: 'framing', label: 'Wants a frame', type: 'checkbox', admin: only('portrait') },
       ],
     },
     { name: 'occasion', type: 'text', admin: only('event', 'portrait') },
-    { name: 'message', type: 'textarea' },
-    { name: 'notes', label: 'Your notes (private)', type: 'textarea' },
-    { type: 'row', fields: [{ name: 'wantsOffers', label: 'Agreed to WhatsApp offers', type: 'checkbox' }, { name: 'locale', label: 'Language', type: 'text', admin: { readOnly: true } }] },
+    { name: 'message', label: 'Their message', type: 'textarea' },
+    { name: 'notes', label: 'Your notes (private)', type: 'textarea', admin: { description: 'Price quoted, advance received, anything to remember.' } },
+    { type: 'row', fields: [{ name: 'wantsOffers', label: 'Agreed to WhatsApp offers', type: 'checkbox' }, { name: 'locale', label: 'Website language', type: 'text', admin: { readOnly: true, description: 'en = English, mr = मराठी, hi = हिंदी. The WhatsApp reply is written in this language.' } }] },
   ],
 }

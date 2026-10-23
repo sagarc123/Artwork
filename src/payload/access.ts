@@ -22,3 +22,8 @@ export const publishedOrStaff: Access = ({ req }) =>
 export const ownerOnlyField: FieldAccess = ({ req }) => hasRole(req.user, 'owner')
 /** Hidden from the public REST/GraphQL API. The site's own Local API reads skip access checks, so pages still see it. */
 export const staffOnlyField: FieldAccess = ({ req }) => hasRole(req.user, 'owner', 'staff', 'editor')
+
+/** admin.hidden: helpers (orders only) don't see shop, gallery and settings screens they can't change. */
+export const hideFromHelpers = ({ user }: { user: unknown }) => !hasRole(user, 'owner', 'editor')
+/** admin.hidden: owner-only screens. */
+export const hideFromNonOwners = ({ user }: { user: unknown }) => !hasRole(user, 'owner')

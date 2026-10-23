@@ -1,15 +1,16 @@
 import type { CollectionConfig } from 'payload'
-import { hasRole, isOwner, isStaff } from '../access'
+import { hideFromNonOwners, isOwner, isStaff } from '../access'
 
 /** HSN/SAC codes and GST rates, set by the CA. Rates are never hard-coded: they change. */
 export const TaxClasses: CollectionConfig = {
   slug: 'tax-classes',
+  labels: { singular: 'GST class', plural: 'GST classes' },
   admin: {
     useAsTitle: 'name',
     group: 'Settings',
     defaultColumns: ['name', 'hsn', 'rate'],
     description: 'GST rates per kind of product. Ask your CA before changing these.',
-    hidden: ({ user }) => !hasRole(user, 'owner'),
+    hidden: hideFromNonOwners,
   },
   access: { read: isStaff, create: isOwner, update: isOwner, delete: isOwner },
   fields: [

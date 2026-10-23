@@ -26,29 +26,61 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 if (!process.env.PAYLOAD_SECRET) throw new Error('PAYLOAD_SECRET is not set (see .env.example)')
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set (see .env.example)')
 
+// Development: the admin talks to whatever port `next dev` runs on (NEXT_PUBLIC_SITE_URL may still say :3000), so its
+// requests stay same-origin and the login cookie is accepted. Production keeps the single site address.
+const dev = process.env.NODE_ENV !== 'production'
+
+/** No "API" tab on edit screens: it shows raw JSON, which only confuses. */
+const noApiTab = <T extends { admin?: object }>(c: T): T => ({ ...c, admin: { ...c.admin, hideAPIURL: true } })
+
 export default buildConfig({
-  serverURL: siteUrl,
-  csrf: [siteUrl],
+  serverURL: dev ? undefined : siteUrl,
+  csrf: dev ? [siteUrl, 'http://localhost:3000', 'http://localhost:3001'] : [siteUrl],
   routes: { api: '/cms-api' },
   admin: {
     user: Users.slug,
     importMap: { baseDir: path.resolve(dirname) },
-    meta: { titleSuffix: ' — Siddesh Mokashi admin' },
+    meta: {
+      titleSuffix: ' · Siddesh Mokashi',
+      description: 'Back office for siddeshmokashi.com',
+      icons: [{ rel: 'icon', type: 'image/png', url: '/icon.png' }, { rel: 'apple-touch-icon', url: '/apple-icon.png' }],
+      defaultOGImageType: 'off',
+      robots: { index: false, follow: false },
+    },
+    dateFormat: 'd MMM yyyy, h:mm a',
     components: {
+      graphics: { Logo: '/payload/admin/Brand#Logo', Icon: '/payload/admin/Brand#Icon' },
       // "Today": what needs doing, above the usual collection cards.
       beforeDashboard: ['/payload/admin/Today#Today'],
       beforeNavLinks: ['/payload/admin/Today#TodayNavLink'],
+      actions: ['/payload/admin/LocaleNote#LocaleNote'],
     },
     // ponytail: the admin itself stays in English; Payload has no Marathi or Hindi admin translations yet.
   },
+  // Plain words instead of Payload's own (merged over its English texts).
+  i18n: {
+    translations: {
+      en: {
+        general: {
+          locale: 'Language',
+          locales: 'Languages',
+          payloadSettings: 'Your settings',
+          adminTheme: 'Colours',
+          createNew: 'Add new',
+          dashboard: 'Today',
+        },
+        authentication: { forceUnlock: 'Unlock (after too many wrong passwords)', login: 'Sign in' },
+      },
+    },
+  },
   // Menu groups follow this order: Orders, Enquiries, Shop, Gallery & Festivals, (Courses, hidden), Settings.
-  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users],
-  globals: [SiteSettings, CommerceSettings, ServicePrices],
+  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users].map(noApiTab),
+  globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {
     locales: [
       { code: 'en', label: 'English' },
-      { code: 'mr', label: 'मराठी' },
-      { code: 'hi', label: 'हिंदी' },
+      { code: 'mr', label: 'मराठी (Marathi)' },
+      { code: 'hi', label: 'हिंदी (Hindi)' },
     ],
     defaultLocale: 'en',
     fallback: true,

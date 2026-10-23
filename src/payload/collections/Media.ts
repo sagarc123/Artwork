@@ -1,13 +1,20 @@
 import path from 'node:path'
 import { refreshOnChange } from '../hooks'
 import type { CollectionConfig } from 'payload'
-import { anyone, canEditContent, isOwner } from '../access'
+import { anyone, canEditContent, hideFromHelpers, isOwner } from '../access'
 
 /** Photos for products, artworks, courses and pages. */
 export const Media: CollectionConfig = {
   slug: 'media',
   hooks: refreshOnChange('media'),
-  admin: { group: 'Gallery & Festivals', description: 'Photos for paintings, the gallery and festivals.' },
+  labels: { singular: 'Photo', plural: 'Photos' },
+  admin: {
+    group: 'Gallery & Festivals',
+    description: 'Every photo you have uploaded. Usually you add photos straight from a painting; come here to fix a description.',
+    defaultColumns: ['filename', 'alt', 'createdAt'],
+    listSearchableFields: ['alt', 'filename'],
+    hidden: hideFromHelpers,
+  },
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   upload: {
     // ponytail: local disk for development; production moves to cloud storage (Supabase/S3) before launch.

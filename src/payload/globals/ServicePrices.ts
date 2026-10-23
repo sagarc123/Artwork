@@ -1,5 +1,5 @@
 import type { Field, GlobalConfig } from 'payload'
-import { anyone, isOwner } from '../access'
+import { anyone, hideFromHelpers, isOwner } from '../access'
 import { refreshGlobalOnChange } from '../hooks'
 
 const SAMPLE = 'SAMPLE value from setup — owner to confirm before launch.'
@@ -19,9 +19,9 @@ const medium = (name: string, label: string): Field => ({
 /** "From ₹X" prices for event rangoli and custom portraits. The website only ever says "from": the final price is agreed on WhatsApp. */
 export const ServicePrices: GlobalConfig = {
   slug: 'service-prices',
-  label: 'Service prices',
+  label: 'Event & portrait prices',
   hooks: refreshGlobalOnChange('service-prices'),
-  admin: { group: 'Settings', description: `Starting prices shown on Book an Event, Custom Portraits and the home page. ${SAMPLE}` },
+  admin: { group: 'Settings', hidden: hideFromHelpers, description: `Starting prices shown on Book an Event, Custom Portraits and the home page. ${SAMPLE}` },
   access: { read: anyone, update: isOwner },
   fields: [
     {
