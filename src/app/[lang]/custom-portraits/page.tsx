@@ -21,7 +21,7 @@ export default async function CustomPortraitsPage() {
   const t = await getDictionary()
   const p = t.portraitsPage
   const h = t.home.portraits
-  const [prices, testimonials] = await Promise.all([getServicePrices(locale), getTestimonials(locale)])
+  const [prices, testimonials] = await Promise.all([getServicePrices(locale), getTestimonials(locale, 'portrait')])
   const pr = prices.portraits
   const rows = PORTRAIT_MEDIUMS.filter((m) => PAPER_SIZES.some((s) => pr?.[m]?.[s]))
   const fromHint = (n: number) => t.forms.fromHint.replace('{price}', formatPrice(n))

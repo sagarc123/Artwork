@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
 import { canEditContent, hideFromHelpers, isOwner, publishedOrStaff, staffOnlyField } from '../access'
-import { rupeesField, seoFields, slugField, validateVariants } from '../fields'
-import { originalFromSimpleFields, syncGallery, unlinkGallery } from '../gallery-sync'
+import { adminTitleField, englishRequired, rupeesField, seoFields, slugField, validateVariants } from '../fields'
+import { keepLiveStock, originalFromSimpleFields, syncGallery, unlinkGallery } from '../gallery-sync'
 import { sitePath } from '../../lib/admin'
 
 const refresh = refreshOnChange('products')!
@@ -14,11 +14,12 @@ export const Products: CollectionConfig = {
   labels: { singular: 'Painting or print', plural: 'Paintings & prints' },
   hooks: {
     beforeValidate: [originalFromSimpleFields],
+    beforeChange: [keepLiveStock],
     afterChange: [...(refresh.afterChange ?? []), syncGallery],
     afterDelete: [...(refresh.afterDelete ?? []), unlinkGallery],
   },
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'adminTitle',
     group: 'Shop',
     defaultColumns: ['images', 'type', 'sold', '_status', 'updatedAt'],
     description: 'Add a painting, drawing, print or download. It also appears in the gallery (untick "Show in gallery" to keep it shop-only).',
@@ -35,7 +36,15 @@ export const Products: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
-            { name: 'title', label: 'Name of the piece', type: 'text', required: true, localized: true },
+            {
+              name: 'title',
+              label: 'Name of the piece',
+              type: 'text',
+              required: true,
+              localized: true,
+              validate: englishRequired,
+              admin: { description: 'Needed in English. Marathi and Hindi are optional: when empty, the English name shows.' },
+            },
             {
               name: 'type',
               label: 'What are you selling?',
@@ -90,7 +99,22 @@ export const Products: CollectionConfig = {
                   type: 'checkbox',
                   virtual: true,
                   access: { read: staffOnlyField },
-                  admin: { readOnly: false, description: 'Tick when it has found a home. The page stays up with a "Sold" badge.', components: { Cell: '/payload/admin/SoldCell#SoldCell' } },
+                  // A new piece is for sale; the switch appears once it is saved.
+                  admin: {
+                    readOnly: false,
+                    condition: (data) => Boolean(data?.id),
+                    description: 'Tick when it has found a home. The page stays up with a "Sold" badge.',
+                    components: { Cell: '/payload/admin/SoldCell#SoldCell' },
+                  },
+                  hooks: { afterRead: [({ siblingData }) => (siblingData?.variants?.[0]?.stock ?? 1) <= 0] },
+                },
+                // The switch as the form loaded it, so a save only changes stock when the switch itself was changed.
+                {
+                  name: 'soldSeen',
+                  type: 'checkbox',
+                  virtual: true,
+                  access: { read: staffOnlyField },
+                  admin: { hidden: true },
                   hooks: { afterRead: [({ siblingData }) => (siblingData?.variants?.[0]?.stock ?? 1) <= 0] },
                 },
               ],
@@ -115,7 +139,17 @@ export const Products: CollectionConfig = {
                       fields: [
                         { name: 'label', label: 'Size', type: 'text', required: true, admin: { description: 'e.g. "A4 print"' } },
                         rupeesField('price'),
-                        { name: 'stock', label: 'In stock', type: 'number', required: true, defaultValue: 1, min: 0, access: { read: staffOnlyField }, admin: { step: 1, description: 'How many you have' } },
+                        // Saved sizes change stock only with the + / − buttons (one database step each); a save keeps what checkout left.
+                        {
+                          name: 'stock',
+                          label: 'In stock',
+                          type: 'number',
+                          required: true,
+                          defaultValue: 1,
+                          min: 0,
+                          access: { read: staffOnlyField },
+                          admin: { step: 1, description: 'How many you have', components: { Field: '/payload/admin/StockField#StockField' } },
+                        },
                       ],
                     },
                     // Kept for existing data; the festival sale replaces "was" prices.
@@ -189,5 +223,6 @@ export const Products: CollectionConfig = {
     },
     { name: 'showInGallery', label: 'Show in gallery', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar', description: 'Also shows this piece on the Artwork gallery page.' } },
     { name: 'featured', label: 'Show on home page', type: 'checkbox', admin: { position: 'sidebar' } },
+    adminTitleField('title'),
   ],
 }

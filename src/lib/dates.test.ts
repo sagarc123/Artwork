@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { addDays, deliveryRange, festivalCountdown, localToday, sortFestivals } from './dates.ts'
+import { addDays, deliveryRange, festivalCountdown, indiaToday, localToday, sortFestivals } from './dates.ts'
 
 test('adding days crosses months and years', () => {
   assert.equal(addDays('2026-10-30', 5), '2026-11-04')
@@ -24,4 +24,9 @@ test('upcoming festivals first, soonest first; past and undated keep the owner o
     { slug: 'wedding', nextDate: null, order: 0 },
   ]
   assert.deepEqual(sortFestivals(list, '2026-10-23').map((f) => f.slug), ['diwali', 'gudi', 'wedding', 'ganesh'])
+})
+
+test('India date: the server clock is UTC, but "today" is the Indian calendar day', () => {
+  assert.equal(indiaToday(new Date('2026-10-22T19:00:00Z')), '2026-10-23') // 00:30 IST
+  assert.equal(indiaToday(new Date('2026-10-22T18:00:00Z')), '2026-10-22') // 23:30 IST
 })

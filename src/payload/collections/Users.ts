@@ -1,5 +1,9 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
 import { hasRole, hideFromNonOwners, isOwner, ownerOnlyField, ROLES } from '../access'
+
+/** An error whose message shows in the admin (see Orders). */
+const refuse = (message: string) => Object.assign(new APIError(message, 400, null, true), { name: 'APIError' })
 
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
@@ -26,6 +30,27 @@ export const Users: CollectionConfig = {
     // Must be signed in: anonymous bulk updates have no id, and undefined === undefined would otherwise pass.
     update: ({ req, id }) => !!req.user && (hasRole(req.user, 'owner') || (id !== undefined && req.user.id === id)),
     delete: isOwner,
+    // "Unlock (after too many wrong passwords)" is for the owner to help someone else.
+    unlock: isOwner,
+  },
+  hooks: {
+    // There is always an owner: nobody removes their own Owner role, and the last owner stays.
+    beforeChange: [
+      async ({ data, originalDoc, operation, req }) => {
+        if (operation !== 'update' || !Array.isArray(data.roles) || !hasRole(originalDoc, 'owner') || data.roles.includes('owner')) return data
+        if (req.user?.id === originalDoc.id) throw refuse('You cannot remove your own Owner role.')
+        const { totalDocs } = await req.payload.count({ collection: 'users', where: { and: [{ roles: { in: ['owner'] } }, { id: { not_equals: originalDoc.id } }] }, req })
+        if (!totalDocs) throw refuse('Keep at least one owner.')
+        return data
+      },
+    ],
+    beforeDelete: [
+      async ({ id, req }) => {
+        const { totalDocs } = await req.payload.count({ collection: 'users', where: { and: [{ roles: { in: ['owner'] } }, { id: { not_equals: id } }] }, req })
+        const doc = await req.payload.findByID({ collection: 'users', id, depth: 0, req })
+        if (hasRole(doc, 'owner') && !totalDocs) throw refuse('Keep at least one owner.')
+      },
+    ],
   },
   fields: [
     { name: 'name', type: 'text', required: true },

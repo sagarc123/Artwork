@@ -9,7 +9,8 @@ import { applySale, codBlock, GIFT_NOTE_MAX, giftWrapCharge, orderTotal, parsePi
 import { isValidGstin } from '@/lib/gst'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
-import { expireHolds, holdStock, HOLD_MINUTES, markPaid, releaseStock } from './order-service'
+import { cancelPlan } from '@/lib/orders'
+import { cancelOrder, expireHolds, holdStock, HOLD_MINUTES, markPaid, refreshProducts } from './order-service'
 import { allow } from './rate-limit'
 
 /** Accepts only well-formed cart lines from the browser. */
@@ -35,23 +36,30 @@ async function settings(payload: Payload): Promise<{ cod: CodRules; giftWrapFee:
 
 /** Current prices and stock for the browser's cart, plus which ways to pay are open (COD checked against the pincode, if given). */
 export async function getCartQuote(input: unknown, locale: string, pincode?: string): Promise<Quote> {
+  return (await quoteWithRules(input, locale, pincode)).quote
+}
+
+/** The quote and the shop rules it used (checkout needs both; the settings are read once). */
+async function quoteWithRules(input: unknown, locale: string, pincode?: string) {
   const lines = cleanLines(input)
-  if (!lines.length) return { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false }
+  const payload = await getPayload({ config })
+  if (!lines.length) return { quote: { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false } as Quote, rules: null, payload }
   // Throw, not an empty quote: the browser drops cart lines missing from a quote, so "busy" must never look like "all gone".
   if (!(await allow('quote', 60, 60_000))) throw new Error('Too many price checks')
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'products',
-    locale: isLocale(locale) ? locale : 'en',
-    where: { and: [{ _status: { equals: 'published' } }, { slug: { in: lines.map((l) => l.slug) } }] },
-    depth: 1,
-    limit: 30,
-  })
-  const { cod: rules, giftWrapFee, sale } = await settings(payload)
+  const [{ docs }, rules] = await Promise.all([
+    payload.find({
+      collection: 'products',
+      locale: isLocale(locale) ? locale : 'en',
+      where: { and: [{ _status: { equals: 'published' } }, { slug: { in: lines.map((l) => l.slug) } }] },
+      depth: 1,
+      limit: 30,
+    }),
+    settings(payload),
+  ])
   // Festival sale prices, checked against the clock now: the order is charged what the quote shows.
-  const quote = priceCart(lines, applySale(docs, sale, new Date()))
-  const cod = { fee: rules.fee, maxTotal: rules.maxTotal, block: codBlock(rules, quote.lines, quote.total, isPincode(pincode) ? pincode : '') }
-  return { ...quote, cod, online: razorpayConfig() !== null, giftWrapFee }
+  const quote = priceCart(lines, applySale(docs, rules.sale, new Date()))
+  const cod = { fee: rules.cod.fee, maxTotal: rules.cod.maxTotal, block: codBlock(rules.cod, quote.lines, quote.total, isPincode(pincode) ? pincode : '') }
+  return { quote: { ...quote, cod, online: razorpayConfig() !== null, giftWrapFee: rules.giftWrapFee } as Quote, rules, payload }
 }
 
 /** One open COD order per phone: waiting for confirmation, or confirmed but not yet shipped. */
@@ -121,10 +129,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
 
   // Also cancels this phone's earlier open checkouts, so retries don't pile up held stock.
   await expireHolds(c.phone!)
-  const quote = await getCartQuote(input.lines, input.locale)
-  if (!quote.ok) return { status: 'unavailable' }
-  const payload = await getPayload({ config })
-  const rules = await settings(payload)
+  const { quote, rules, payload } = await quoteWithRules(input.lines, input.locale)
+  if (!quote.ok || !rules) return { status: 'unavailable' }
   const giftFee = giftWrapCharge(input.giftWrap === true, quote.lines, rules.giftWrapFee)
   let codFee = 0
   if (cod) {
@@ -133,55 +139,66 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     codFee = rules.cod.fee
   }
   const total = orderTotal(quote, codFee, giftFee)
-  const soldOut = await holdStock(quote.lines)
-  if (soldOut) return { status: 'sold_out', title: soldOut }
+  const publicId = randomBytes(9).toString('base64url')
+  const data = {
+    status: cod ? ('cod_pending_confirmation' as const) : ('pending_payment' as const),
+    paymentMode: cod ? ('cod' as const) : ('prepaid' as const),
+    publicId,
+    items: quote.lines.map((l) => ({
+      product: l.productId,
+      title: l.title,
+      variantId: l.variantId,
+      variantLabel: l.variantLabel,
+      frameLabel: l.frameLabel,
+      type: l.type,
+      unitPrice: l.unitPrice,
+      qty: l.qty,
+      lineTotal: l.lineTotal,
+    })),
+    subtotal: quote.subtotal,
+    shipping: quote.shipping,
+    codFee: cod ? codFee : undefined,
+    giftWrapFee: giftFee || undefined,
+    giftNote: clip(input.giftNote, GIFT_NOTE_MAX) || undefined,
+    total,
+    customer: { name: c.name, phone: c.phone!, email: c.email || undefined, gstin: gst?.gstin, businessName: gst?.businessName },
+    address: a,
+    note: clip(input.note, 500) || undefined,
+    reservedUntil: cod ? null : new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString(),
+    locale: isLocale(input.locale) ? input.locale : 'en',
+  }
 
-  let orderId: number | undefined
+  // The stock hold and the order are one transaction: a crash in between leaves neither.
+  let order: { id: number }
+  const transactionID = await payload.db.beginTransaction()
   try {
-    const publicId = randomBytes(9).toString('base64url')
-    const order = await payload.create({
-      collection: 'orders',
-      data: {
-        status: cod ? 'cod_pending_confirmation' : 'pending_payment',
-        paymentMode: cod ? 'cod' : 'prepaid',
-        publicId,
-        items: quote.lines.map((l) => ({
-          product: l.productId,
-          title: l.title,
-          variantId: l.variantId,
-          variantLabel: l.variantLabel,
-          frameLabel: l.frameLabel,
-          type: l.type,
-          unitPrice: l.unitPrice,
-          qty: l.qty,
-          lineTotal: l.lineTotal,
-        })),
-        subtotal: quote.subtotal,
-        shipping: quote.shipping,
-        codFee: cod ? codFee : undefined,
-        giftWrapFee: giftFee || undefined,
-        giftNote: clip(input.giftNote, GIFT_NOTE_MAX) || undefined,
-        total,
-        customer: { name: c.name, phone: c.phone!, email: c.email || undefined, gstin: gst?.gstin, businessName: gst?.businessName },
-        address: a,
-        note: clip(input.note, 500) || undefined,
-        reservedUntil: cod ? null : new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString(),
-        locale: isLocale(input.locale) ? input.locale : 'en',
-      },
-    })
-    orderId = order.id
-    const orderNumber = `ART-${10000 + order.id}`
-    if (cod) {
-      await payload.update({ collection: 'orders', id: order.id, data: { orderNumber } })
-      return { status: 'cod', orderNumber, publicId }
+    const tx = transactionID ? payload.db.sessions?.[transactionID]?.db : undefined
+    if (!transactionID || !tx) throw new Error('Checkout needs a database transaction')
+    const soldOut = await holdStock(tx as typeof payload.db.drizzle, quote.lines)
+    if (soldOut) {
+      await payload.db.rollbackTransaction(transactionID)
+      return { status: 'sold_out', title: soldOut }
     }
-    const rzpOrder = await createRazorpayOrder(total * 100, orderNumber)
-    await payload.update({ collection: 'orders', id: order.id, data: { orderNumber, razorpayOrderId: rzpOrder.id } })
-    return { status: 'ok', keyId: rzp!.keyId, razorpayOrderId: rzpOrder.id, amount: rzpOrder.amount, orderNumber, publicId }
+    order = await payload.create({ collection: 'orders', data, req: { transactionID } })
+    await payload.update({ collection: 'orders', id: order.id, data: { orderNumber: `ART-${10000 + order.id}` }, req: { transactionID } })
+    await payload.db.commitTransaction(transactionID)
   } catch (error) {
     console.error('Checkout failed', error)
-    await releaseStock(quote.lines)
-    if (orderId) await payload.update({ collection: 'orders', id: orderId, data: { status: 'cancelled' } })
+    if (transactionID) await payload.db.rollbackTransaction(transactionID).catch(() => {})
+    return { status: 'failed' }
+  }
+  await refreshProducts()
+  const orderNumber = `ART-${10000 + order.id}`
+  if (cod) return { status: 'cod', orderNumber, publicId }
+
+  try {
+    const rzpOrder = await createRazorpayOrder(total * 100, orderNumber)
+    await payload.update({ collection: 'orders', id: order.id, data: { razorpayOrderId: rzpOrder.id } })
+    return { status: 'ok', keyId: rzp!.keyId, razorpayOrderId: rzpOrder.id, amount: rzpOrder.amount, orderNumber, publicId }
+  } catch (error) {
+    // Razorpay slow or down: cancel the order and free its stock straight away.
+    console.error('Razorpay order failed', error)
+    await cancelOrder(order.id, 'pending_payment', cancelPlan('pending_payment', 'prepaid')!, data.items).catch((e) => console.error('Cancel failed; the maintenance job will expire it', e))
     return { status: 'failed' }
   }
 }
@@ -193,6 +210,8 @@ export async function confirmPayment(input: { razorpay_order_id: string; razorpa
   const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature } = input
   if (![orderId, paymentId, signature].every((s) => typeof s === 'string' && s.length < 200)) return { status: 'invalid' as const }
   if (!verifyPaymentSignature(orderId, paymentId, signature, rzp.keySecret)) return { status: 'invalid' as const }
-  const order = await markPaid(orderId, paymentId)
-  return order ? { status: 'paid' as const, publicId: order.publicId! } : { status: 'invalid' as const }
+  const paid = await markPaid(orderId, paymentId)
+  if (!paid) return { status: 'invalid' as const }
+  // Paid after the hold ran out and the piece sold meanwhile: the order page explains the refund.
+  return { status: paid.status === 'needs_refund' ? ('needs_refund' as const) : ('paid' as const), publicId: paid.order.publicId! }
 }

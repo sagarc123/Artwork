@@ -2,6 +2,7 @@
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { indiaToday } from '@/lib/dates'
 import { validateEnquiry, type EnquiryField } from '@/lib/enquiry'
 import { allow } from './rate-limit'
 
@@ -19,7 +20,8 @@ export async function submitEnquiry(_prev: EnquiryState, form: FormData): Promis
   // Honeypot: real people never fill the hidden "website" field. Bots get a fake success.
   if (form.get('website')) return { status: 'ok' }
 
-  const result = validateEnquiry(form, new Date().toISOString().slice(0, 10))
+  // Dates are checked against today in India (the server's clock is UTC: after midnight IST it would still be "yesterday").
+  const result = validateEnquiry(form, indiaToday())
   if (!result.ok) return { status: 'error', errors: result.errors }
   if (!(await allow('enquiry', 5, 10 * 60_000))) return { status: 'rate' }
 

@@ -21,7 +21,7 @@ export const ServicePrices: GlobalConfig = {
   slug: 'service-prices',
   label: 'Event & portrait prices',
   hooks: refreshGlobalOnChange('service-prices'),
-  admin: { group: 'Settings', hidden: hideFromHelpers, description: `Starting prices shown on Book an Event, Custom Portraits and the home page. ${SAMPLE}` },
+  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Starting prices shown on Book an Event, Custom Portraits and the home page.' },
   access: { read: anyone, update: isOwner },
   fields: [
     {

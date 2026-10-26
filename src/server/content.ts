@@ -7,6 +7,7 @@ import type { Artwork, Category, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
 import { pickMedium } from '@/lib/art'
 import { hashString } from '@/lib/seed'
+import { pickTestimonials } from '@/lib/testimonials'
 import { applySale, FREE_SHIPPING_FROM, nextSaleChange, SHIPPING_FEE } from '@/lib/cart'
 import { formatPrice, site } from '@/lib/site'
 import type { GalleryItem } from '@/components/Gallery'
@@ -202,18 +203,12 @@ export async function getServicePrices(locale: Locale) {
   return (await db()).findGlobal({ slug: 'service-prices', locale, depth: 0 })
 }
 
-/** Reviews the customer agreed to share, featured first. */
-export async function getTestimonials(locale: Locale) {
+/** Reviews the customer agreed to share, for one page (see pickTestimonials): home when no topic is given. */
+export async function getTestimonials(locale: Locale, topic?: 'event' | 'portrait' | 'shop') {
   'use cache'
   cacheLife('max')
   cacheTag('testimonials', 'media')
-  const { docs } = await (await db()).find({
-    collection: 'testimonials',
-    locale,
-    where: { permission: { equals: true } },
-    sort: ['-featured', '-createdAt'],
-    limit: 6,
-    depth: 1,
-  })
-  return docs
+  // ponytail: reads every shared review (a handful) and picks in code; query by language and topic if there are hundreds.
+  const { docs } = await (await db()).find({ collection: 'testimonials', locale, where: { permission: { equals: true } }, sort: '-createdAt', limit: 200, depth: 1 })
+  return pickTestimonials(docs, locale, topic)
 }

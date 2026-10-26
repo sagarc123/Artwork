@@ -12,7 +12,7 @@ export const Invoices: CollectionConfig = {
   labels: { singular: 'Invoice', plural: 'Invoices' },
   admin: {
     useAsTitle: 'number',
-    group: 'Orders',
+    group: 'Customers',
     defaultColumns: ['number', 'issuedAt', 'documentType', 'order'],
     description: 'Made automatically when an order is paid online, or when a cash-on-delivery order is delivered. They cannot be changed. Open one and tap the eye button for the PDF.',
     preview: (doc) => (doc.orderPublicId ? `/api/invoices/${doc.orderPublicId}` : null),

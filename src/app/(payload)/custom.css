@@ -149,6 +149,7 @@ h1,
   display: none;
 }
 /* Long role names and similar chips show in full. */
+.multi-value-label,
 .multi-value-label__text {
   max-width: none;
 }
@@ -218,6 +219,12 @@ h1,
 .brand-icon {
   width: 28px;
   height: 28px;
+}
+/* The breadcrumb's home link is a small box that clips: the mark fills it. */
+.step-nav__home .brand-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .locale-note {
   display: inline-flex;
@@ -388,9 +395,11 @@ h1,
   font-weight: 600;
 }
 .today__all {
-  margin: 2rem 0 0;
-  font-size: 1.2rem;
-  color: var(--theme-elevation-650);
+  margin: 2.5rem 0 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--theme-elevation-150);
+  font-size: 1.3rem;
+  color: var(--theme-text);
 }
 .today-nav {
   font-weight: 700;
@@ -403,6 +412,10 @@ h1,
   margin: 0 0 1rem;
   overflow-x: auto;
   padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+.quick-filters::-webkit-scrollbar {
+  display: none;
 }
 .quick-filters__tab {
   display: inline-flex;
@@ -587,6 +600,10 @@ h1,
   background: var(--action);
   color: #fff;
 }
+/* The last step is done, not urgent: leaf, not kumkum. */
+.order-steps li.is-now:last-child {
+  background: var(--color-leaf);
+}
 .order-steps li.is-now::before {
   color: var(--color-charcoal);
   background: #fff;
@@ -608,9 +625,15 @@ html[data-theme='dark'] .order-steps li.is-now::before {
 }
 .order-card {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  /* Customer and Send to share the row (an auto-fit grid left empty columns beside them on wide screens). */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+}
+@media (max-width: 640px) {
+  .order-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .order-card__block {
   padding: 1rem;
@@ -732,6 +755,68 @@ html[data-theme='dark'] .order-steps li.is-now::before {
   font-weight: 600;
 }
 
+/* List rows: every cell lines up in the middle (text cells sat at the top beside the thumbnails). */
+.table td {
+  vertical-align: middle;
+}
+/* "Add new" sits on the heading's line, centred with it. */
+.list-header__title-and-actions,
+.list-header .list-header__content {
+  align-items: center;
+}
+.list-header .btn {
+  display: inline-flex;
+  align-items: center;
+}
+/* Readable "Language:" label in the top bar (dark mode was faint). */
+.localizer-button__label {
+  color: var(--theme-elevation-700);
+}
+/* Web addresses fill themselves in from the title, so the box isn't "required" for the person typing. */
+label[for='field-slug'] .required {
+  display: none;
+}
+/* Account page: Unlock is for someone else's account (only the owner sees it there). Role chips show in full. */
+body:has(.payload-settings) #force-unlock {
+  display: none;
+}
+.rs__multi-value,
+.multi-value {
+  max-width: 100%;
+}
+/* Undo in the toast stays one word. */
+[data-sonner-toast] [data-button] {
+  white-space: nowrap;
+}
+/* Stock with Add / Remove buttons. */
+.stock-field {
+  margin-bottom: var(--spacing-field, 1.5rem);
+}
+.stock-field__now {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.4rem;
+}
+.stock-field__now small {
+  font-size: 0.9rem;
+  color: var(--theme-elevation-650);
+}
+.stock-field__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.stock-field__n {
+  width: 4.5rem;
+  min-height: 36px;
+  padding: 0 0.5rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
+  font: inherit;
+}
+
 /* Phones: the save buttons sit fixed along the bottom; the dates row is hidden so nothing scrolls sideways. */
 @media (max-width: 768px) {
   .doc-controls__value-wrap {
@@ -752,7 +837,11 @@ html[data-theme='dark'] .order-steps li.is-now::before {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 30;
+    /* Its padding used to add 14px of width: the page scrolled sideways and looked shifted after the menu opened. */
+    box-sizing: border-box;
+    width: auto;
+    /* Below the open menu. */
+    z-index: 10;
     padding: 0.5rem 1rem;
     background: var(--theme-bg);
     border-top: 1px solid var(--theme-elevation-150);
@@ -760,6 +849,47 @@ html[data-theme='dark'] .order-steps li.is-now::before {
   .doc-controls .btn {
     min-height: 48px;
     font-size: 1rem;
+    white-space: normal;
+  }
+  /* What stays behind once the buttons move to the bottom bar: no empty band. */
+  .doc-controls:not(:has(.doc-controls__value-wrap:not(:empty))) {
+    min-height: 0;
+  }
+  /* Language reminder: a full-width strip under the top bar (as a pill it covered the breadcrumb). */
+  .app-header:has(.locale-note) {
+    margin-bottom: 1.75rem;
+  }
+  .app-header:has(.locale-note) .app-header__actions-wrapper {
+    position: static;
+  }
+  .locale-note {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    justify-content: center;
+    min-height: 1.75rem;
+    border-radius: 0;
+  }
+  /* Orders and enquiries lists: the essentials only (number, status, total / name, status, phone), so nothing hides off the side. */
+  /* ponytail: by column position (header cells carry no field class); fine while the default columns stay. */
+  .collection-list--orders .table :is(th, td):is(:first-child, :nth-child(n + 5)),
+  .collection-list--enquiries .table :is(th, td):is(:first-child, :nth-child(n + 5)) {
+    display: none;
+  }
+  .collection-list .table .status-chip {
+    white-space: normal;
+  }
+  .collection-list .table :is(th, td) {
+    padding-inline: 0.4rem;
+  }
+  .collection-list .table .sort-column__buttons {
+    display: none;
+  }
+  /* Payload's menu header and selection bar poke past the edge: never let the page scroll sideways. */
+  html,
+  body {
+    overflow-x: clip;
   }
   body {
     padding-bottom: 5rem;
@@ -778,4 +908,9 @@ html[data-theme='dark'] .order-steps li.is-now::before {
     font-size: 0.8rem;
     padding: 0 0.5rem;
   }
+}
+/* The open menu wins over the bottom save bar (they sit in different stacking layers, so the bar steps aside). */
+.template-default--nav-open .doc-controls__controls-wrapper,
+body:has(.nav--nav-open) .doc-controls__controls-wrapper {
+  visibility: hidden;
 }

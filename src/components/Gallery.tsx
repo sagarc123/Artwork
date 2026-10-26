@@ -24,6 +24,8 @@ export type GalleryItem = {
   productHref?: string
 }
 
+const FILTER_FROM = 8
+
 /** Masonry wall with category tabs and a full-screen viewer (native <dialog>: Esc closes, focus stays inside). */
 export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t: Dictionary['gallery']; enquiryMessage: string }) {
   const [tab, setTab] = useState('all')
@@ -46,20 +48,22 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
 
   return (
     <>
-      {/* Filter buttons, not tabs: they filter one list rather than switching panels. */}
-      <div role="group" aria-label={t.filter} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
-        {[['all', t.all] as const, ...categories].map(([slug, name]) => (
-          <button
-            key={slug}
-            type="button"
-            aria-pressed={tab === slug}
-            onClick={() => setTab(slug)}
-            className="min-h-12 shrink-0 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
-          >
-            {name}
-          </button>
-        ))}
-      </div>
+      {/* Filter buttons, not tabs: they filter one list rather than switching panels. A short wall needs none. */}
+      {categories.length >= 2 && items.length >= FILTER_FROM && (
+        <div role="group" aria-label={t.filter} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">
+          {[['all', t.all] as const, ...categories].map(([slug, name]) => (
+            <button
+              key={slug}
+              type="button"
+              aria-pressed={tab === slug}
+              onClick={() => setTab(slug)}
+              className="min-h-12 shrink-0 rounded-full border-[1.5px] border-charcoal px-5 aria-pressed:bg-charcoal aria-pressed:text-paper"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
       <p aria-live="polite" className="mt-4 text-muted">
         {shown.length} {shown.length === 1 ? t.countOne : t.count}
       </p>

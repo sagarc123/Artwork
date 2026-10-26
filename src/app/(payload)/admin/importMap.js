@@ -8,6 +8,7 @@ import { ChoiceButtons as ChoiceButtons_1780d8ca05d1beedbfbada6acfac1a48 } from 
 import { ReplyCell as ReplyCell_4dce3c7f6604d66bca7fcb51855c485e } from '../../../payload/admin/EnquiryActions'
 import { ThumbCell as ThumbCell_6ad2bf8381d5a2730091b1470fced514 } from '../../../payload/admin/Cells'
 import { SoldCell as SoldCell_fe1548a6aabd821067f55d29114d399b } from '../../../payload/admin/SoldCell'
+import { StockField as StockField_398d2c08c7b7be7dc510b4169bf4c1d8 } from '../../../payload/admin/StockField'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -51,6 +52,7 @@ export const importMap = {
   "/payload/admin/EnquiryActions#ReplyCell": ReplyCell_4dce3c7f6604d66bca7fcb51855c485e,
   "/payload/admin/Cells#ThumbCell": ThumbCell_6ad2bf8381d5a2730091b1470fced514,
   "/payload/admin/SoldCell#SoldCell": SoldCell_fe1548a6aabd821067f55d29114d399b,
+  "/payload/admin/StockField#StockField": StockField_398d2c08c7b7be7dc510b4169bf4c1d8,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,

@@ -34,6 +34,3 @@ export function MediaImage({ media, alt, ratio, seed, medium, style, floor, size
   }
   return <PhotoPlaceholder ratio={ratio} seed={seed} medium={medium} style={style} floor={floor} alt={alt} slot={alt || seed} className={className} />
 }
-
-/** First image of a document's `images` field, if populated. */
-export const firstImage = (images: unknown) => (Array.isArray(images) && typeof images[0] === 'object' ? (images[0] as Media) : null)

@@ -72,3 +72,29 @@ export function validateVariants(type: unknown, rows: unknown): true | string {
   }
   return true
 }
+
+/** A localized name that is needed in English only: an empty Marathi or Hindi one shows the English name on the site. */
+export const englishRequired = ((value, { req }) =>
+  (req.locale && req.locale !== 'en') || (typeof value === 'string' && value.trim()) ? true : 'Please enter a name.') as TextFieldSingleValidation
+
+/**
+ * The English name, kept unlocalized for the admin's headings, breadcrumbs and pickers (use it as `useAsTitle`).
+ * The admin reads without language fallback, so a piece with no Marathi name yet would otherwise show as "26".
+ */
+export const adminTitleField = (from: string): Field => ({
+  name: 'adminTitle',
+  label: 'Name',
+  type: 'text',
+  admin: { hidden: true },
+  hooks: {
+    beforeChange: [
+      async ({ value, data, originalDoc, req, collection }) => {
+        if (!req.locale || req.locale === 'en') return data?.[from] ?? value
+        if (value || originalDoc?.adminTitle) return value || originalDoc.adminTitle
+        if (!originalDoc?.id || !collection) return data?.[from] ?? value
+        const en = await req.payload.findByID({ collection: collection.slug as 'products', id: originalDoc.id, locale: 'en', depth: 0, draft: true, req, disableErrors: true })
+        return (en as Record<string, unknown> | null)?.[from] ?? data?.[from] ?? value
+      },
+    ],
+  },
+})

@@ -25,7 +25,7 @@ export default async function EventsPage() {
   const t = await getDictionary()
   const e = t.eventsPage
   const h = t.home.events
-  const [prices, testimonials] = await Promise.all([getServicePrices(locale), getTestimonials(locale)])
+  const [prices, testimonials] = await Promise.all([getServicePrices(locale), getTestimonials(locale, 'event')])
   const from = (n: number) => e.prices.from.replace('{price}', formatPrice(n))
   const bands = EVENT_SIZES.flatMap((s) => (prices.events?.[s] ? [{ size: s, price: prices.events[s] }] : []))
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { hasRole } from '../access'
 import { listUrl, waited } from '../../lib/admin'
+import { indiaToday } from '../../lib/dates'
 import { formatPrice } from '../../lib/site'
 
 /** Statuses that count as a sale (paid online, or a COD order the customer confirmed). */
@@ -80,7 +81,7 @@ export async function Today({ payload, user }: ServerProps) {
       : null,
     content ? payload.find({ collection: 'products', where: { type: { equals: 'print' } }, pagination: false, depth: 0, draft: true, select: { title: true, variants: true } }) : null,
     // Only dates that have passed: festivals without a date (like weddings) are fine as they are.
-    content ? payload.find({ collection: 'festivals', where: { nextDate: { less_than: new Date(now).toISOString() } }, limit: 20, depth: 0, select: { name: true, nextDate: true } }) : null,
+    content ? payload.find({ collection: 'festivals', where: { nextDate: { less_than: indiaToday(new Date(now)) } }, limit: 20, depth: 0, select: { name: true, nextDate: true } }) : null,
   ])
   const replyHours = site.contact?.replyHours ?? 4
   const lowPrints = (prints?.docs ?? []).flatMap((p) => {

@@ -1,14 +1,15 @@
 'use client'
 
 import type { DefaultCellComponentProps, UIFieldClientComponent } from 'payload'
-import { toast, useConfig, useDocumentInfo, useForm, useFormFields } from '@payloadcms/ui'
+import { toast, useConfig, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { customerChat, enquiryReply, waited } from '../../lib/admin'
+import { useOneTap } from './one-tap'
 
 /** "Reply on WhatsApp" on an enquiry: opens the chat with a polite first message and marks it replied. */
 export const EnquiryActions: UIFieldClientComponent = () => {
-  const { submit } = useForm()
+  const save = useOneTap()
   const { initialData } = useDocumentInfo()
   const [openedAt] = useState(() => Date.now())
   const f = useFormFields(([fields]) => ({
@@ -27,7 +28,7 @@ export const EnquiryActions: UIFieldClientComponent = () => {
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => {
-          if (f.status === 'new') void submit({ overrides: { status: 'replied' } })
+          if (f.status === 'new') void save('replied', 'Marked replied', 'new')
         }}
       >
         Reply on WhatsApp

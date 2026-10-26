@@ -29,6 +29,8 @@ export async function createRazorpayOrder(amountPaise: number, receipt: string) 
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Basic ${Buffer.from(`${c.keyId}:${c.keySecret}`).toString('base64')}` },
     body: JSON.stringify({ amount: amountPaise, currency: 'INR', receipt }),
+    // A stuck call would keep the buyer waiting and the stock held; the caller cancels the order on any error.
+    signal: AbortSignal.timeout(10_000),
   })
   if (!res.ok) throw new Error(`Razorpay order failed: ${res.status} ${await res.text()}`)
   return (await res.json()) as { id: string; amount: number }

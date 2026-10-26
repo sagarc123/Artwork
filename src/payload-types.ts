@@ -158,7 +158,7 @@ export interface UserAuthOperations {
 export interface Order {
   id: number;
   /**
-   * The big buttons above change this for you. Change it here only to cancel or fix a mistake.
+   * The big buttons above change this for you. Change it here only to cancel or fix a mistake. Cancelling a paid order puts its stock back and marks it "Needs refund".
    */
   status:
     | 'pending_payment'
@@ -236,6 +236,9 @@ export interface Order {
  */
 export interface Product {
   id: number;
+  /**
+   * Needed in English. Marathi and Hindi are optional: when empty, the English name shows.
+   */
   title: string;
   type: 'original' | 'print' | 'digital';
   /**
@@ -250,6 +253,7 @@ export interface Product {
    * Tick when it has found a home. The page stays up with a "Sold" badge.
    */
   sold?: boolean | null;
+  soldSeen?: boolean | null;
   /**
    * One row per size you sell, e.g. "A4 print".
    */
@@ -333,6 +337,7 @@ export interface Product {
    */
   showInGallery?: boolean | null;
   featured?: boolean | null;
+  adminTitle?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -552,9 +557,9 @@ export interface Enquiry {
   notes?: string | null;
   wantsOffers?: boolean | null;
   /**
-   * en = English, mr = मराठी, hi = हिंदी. The WhatsApp reply is written in this language.
+   * The WhatsApp reply is written in this language.
    */
-  locale?: string | null;
+  locale?: ('en' | 'mr' | 'hi') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -566,6 +571,9 @@ export interface Enquiry {
  */
 export interface Artwork {
   id: number;
+  /**
+   * Needed in English. Marathi and Hindi are optional: when empty, the English name shows.
+   */
   title: string;
   /**
    * First photo is the main one.
@@ -599,12 +607,13 @@ export interface Artwork {
    * Smaller numbers come first.
    */
   order?: number | null;
+  adminTitle?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Kind words from customers, shown on the home page and service pages.
+ * Kind words from customers. Each page shows reviews in its own language (English ones only if it has none yet): the home page shows the ones marked for it, Book an Event and Custom Portraits show their own and general ones.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "testimonials".
@@ -623,6 +632,8 @@ export interface Testimonial {
    * In their own words and language.
    */
   quote: string;
+  language: 'en' | 'mr' | 'hi';
+  topic: 'event' | 'portrait' | 'shop' | 'general';
   rating?: number | null;
   photo?: (number | null) | Media;
   featured?: boolean | null;
@@ -1027,6 +1038,7 @@ export interface ProductsSelect<T extends boolean = true> {
   images?: T;
   originalPrice?: T;
   sold?: T;
+  soldSeen?: T;
   variants?:
     | T
     | {
@@ -1064,6 +1076,7 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   showInGallery?: T;
   featured?: T;
+  adminTitle?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1090,6 +1103,7 @@ export interface ArtworksSelect<T extends boolean = true> {
   forSale?: T;
   product?: T;
   order?: T;
+  adminTitle?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1116,6 +1130,8 @@ export interface TestimonialsSelect<T extends boolean = true> {
   name?: T;
   context?: T;
   quote?: T;
+  language?: T;
+  topic?: T;
   rating?: T;
   photo?: T;
   featured?: T;
@@ -1455,7 +1471,7 @@ export interface CommerceSetting {
   createdAt?: string | null;
 }
 /**
- * Starting prices shown on Book an Event, Custom Portraits and the home page. SAMPLE value from setup — owner to confirm before launch.
+ * Starting prices shown on Book an Event, Custom Portraits and the home page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-prices".

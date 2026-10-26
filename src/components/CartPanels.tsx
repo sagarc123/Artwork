@@ -330,7 +330,8 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
         handler: async (response: RazorpayResponse) => {
           try {
             const confirmed = await confirmPayment(response)
-            if (confirmed.status === 'paid') {
+            // "needs_refund": paid, but the piece sold while the hold had run out. The order page says it is being refunded.
+            if (confirmed.status === 'paid' || confirmed.status === 'needs_refund') {
               cartActions.clear()
               return router.push(`${orderPath}/${confirmed.publicId}`)
             }

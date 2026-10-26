@@ -10,7 +10,7 @@ export const Enquiries: CollectionConfig = {
   slug: 'enquiries',
   admin: {
     useAsTitle: 'name',
-    group: 'Enquiries',
+    group: 'Customers',
     defaultColumns: ['name', 'status', 'phone', 'type', 'eventDate', 'createdAt'],
     listSearchableFields: ['name', 'phone', 'city'],
     description: 'Requests from the website forms. Tap the green WhatsApp button to reply; it marks the enquiry as replied.',
@@ -42,7 +42,8 @@ export const Enquiries: CollectionConfig = {
       name: 'status',
       type: 'select',
       defaultValue: 'new',
-      admin: { components: { Field: '/payload/admin/ChoiceButtons#ChoiceButtons', Cell: '/payload/admin/Cells#StatusCell' } },
+      // Saves on tap (with Undo), like the order buttons.
+      admin: { components: { Field: { path: '/payload/admin/ChoiceButtons#ChoiceButtons', clientProps: { saveOnTap: true } }, Cell: '/payload/admin/Cells#StatusCell' } },
       options: [
         { label: 'New', value: 'new' },
         { label: 'Replied', value: 'replied' },
@@ -92,6 +93,16 @@ export const Enquiries: CollectionConfig = {
     { name: 'occasion', type: 'text', admin: only('event', 'portrait') },
     { name: 'message', label: 'Their message', type: 'textarea' },
     { name: 'notes', label: 'Your notes (private)', type: 'textarea', admin: { description: 'Price quoted, advance received, anything to remember.' } },
-    { type: 'row', fields: [{ name: 'wantsOffers', label: 'Agreed to WhatsApp offers', type: 'checkbox' }, { name: 'locale', label: 'Website language', type: 'text', admin: { readOnly: true, description: 'en = English, mr = मराठी, hi = हिंदी. The WhatsApp reply is written in this language.' } }] },
+    { type: 'row', fields: [{ name: 'wantsOffers', label: 'Agreed to WhatsApp offers', type: 'checkbox' }, {
+          name: 'locale',
+          label: 'Website language',
+          type: 'select',
+          options: [
+            { label: 'English', value: 'en' },
+            { label: 'मराठी', value: 'mr' },
+            { label: 'हिंदी', value: 'hi' },
+          ],
+          admin: { readOnly: true, description: 'The WhatsApp reply is written in this language.' },
+        }] },
   ],
 }

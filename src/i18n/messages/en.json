@@ -407,7 +407,9 @@
     "share": "Share with family",
     "shareText": "Look at this piece by Siddesh Mokashi:",
     "deliveredBy": "Delivered by {from} – {to}",
-    "codAvailable": "Cash on delivery available"
+    "codAvailable": "Cash on delivery available",
+    "soldSimilar": "Sold — ask me for something similar",
+    "similarMessage": "Namaste! I saw that this piece has sold. Could you make something similar?"
   },
   "cart": {
     "title": "Your cart",
@@ -535,6 +537,10 @@
       "packed": "Packed",
       "shipped": "Shipped",
       "delivered": "Delivered"
+    },
+    "stoppedTitle": {
+      "cancelled": "This order was cancelled",
+      "refund": "Your payment is being refunded"
     },
     "stopped": {
       "cancelled": "This order was cancelled. If you paid, the money comes back to you.",

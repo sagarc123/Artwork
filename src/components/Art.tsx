@@ -135,21 +135,24 @@ const BINDU_CSS = `
 @keyframes bm-drop{0%{opacity:0;transform:translateY(-9px) scale(.5)}55%{opacity:1;transform:translateY(.6px) scaleY(.85)}100%{opacity:1;transform:none}}
 @keyframes bm-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:no-preference){
-.bm .bm-reveal{animation:bm-draw .9s cubic-bezier(.65,0,.35,1) .15s both}
-.bm .bm-dot{animation:bm-drop .5s cubic-bezier(.22,1,.36,1) 1s both}
+.bm:not(.bm--still) .bm-reveal{animation:bm-draw .9s cubic-bezier(.65,0,.35,1) .15s both}
+.bm:not(.bm--still) .bm-dot{animation:bm-drop .5s cubic-bezier(.22,1,.36,1) 1s both}
 :is(a,button):is(:hover,:focus-visible) .bm .bm-orbit,.bm:hover .bm-orbit{animation:bm-spin 1s cubic-bezier(.65,0,.35,1)}
 :is(a,button):is(:hover,:focus-visible) .bm .bm-chase,.bm:hover .bm-chase{animation:bm-spin 1s cubic-bezier(.65,0,.35,1) .12s}
 }
 :root:is([data-motion=off],[data-fx=lite]) .bm *{animation:none!important}
 `
 
-/** Header and admin mark. The stroke takes the text colour (works on light and dark); the dot stays kumkum. Decorative. */
-export function BrandMark({ className = '' }: { className?: string }) {
+/**
+ * Header and admin mark. The stroke takes the text colour (works on light and dark); the dot stays kumkum. Decorative.
+ * `animate={false}`: no draw-in on load (the admin top bar re-mounts it on every page); the hover spin stays.
+ */
+export function BrandMark({ className = '', animate = true }: { className?: string; animate?: boolean }) {
   // The mark appears twice on a page (header and menu): each copy needs its own mask id.
   const uid = `bm${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (
     // viewBox starts at 0 so "50% 50%" is the centre in every browser; the shapes are drawn around 0,0 and moved in.
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 34 34" className={`bm ${className}`}>
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 34 34" className={`bm ${animate ? '' : 'bm--still '}${className}`}>
       <style>{BINDU_CSS}</style>
       <mask id={uid} maskUnits="userSpaceOnUse" x="-17" y="-17" width="34" height="34">
         {/* The stroke is revealed along its own arc, start to end, like powder being trickled. */}

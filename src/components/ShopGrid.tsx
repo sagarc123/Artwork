@@ -102,7 +102,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                     className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
                   />
-                  {item.sold && <span className="absolute top-4 left-4 rounded-ui bg-kumkum px-2 font-semibold text-white">{t.sold}</span>}
+                  {item.sold && <span className="absolute top-4 left-4 rounded-ui bg-charcoal/80 px-2 font-semibold text-paper">{t.sold}</span>}
                 </span>
                 <span className="font-heading text-h3-sm">{item.title}</span>
                 <span className="text-muted">{item.meta}</span>

@@ -96,7 +96,7 @@ export default async function HomePage() {
             <div className="relative mx-auto grid aspect-square w-[60vw] max-w-80 place-items-center bg-charcoal shadow-frame grain-dark lg:aspect-auto lg:h-full lg:min-h-[620px] lg:w-auto lg:max-w-none lg:shadow-none">
               <GenerativeRangoli seed="siddesh-home" style="sanskar" tone="dark" animate className="w-[84%] max-w-[560px] -translate-y-[3%]" />
               {/* Finale: a diya lights at the foot of the rangoli, then he signs it. */}
-              <span className="diya hero-diya absolute bottom-[3%] left-1/2 -translate-x-1/2 max-lg:scale-75" />
+              <span className="diya hero-diya absolute bottom-[5%] left-1/2 -translate-x-1/2 max-lg:scale-75 lg:bottom-[8%]" />
               <Signature draw="load" className="absolute right-[5%] bottom-[4%] text-paper/85" />
             </div>
           </div>

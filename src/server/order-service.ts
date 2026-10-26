@@ -3,6 +3,7 @@ import config from '@payload-config'
 import { sql } from '@payloadcms/db-postgres'
 import { getPayload, type Where } from 'payload'
 import type { QuoteLine } from '@/lib/cart'
+import { reservedFixes, type CancelPlan } from '@/lib/orders'
 import { issueInvoice } from './invoices'
 
 export const HOLD_MINUTES = 15
@@ -22,57 +23,40 @@ export async function refreshProducts() {
   }
 }
 
-/** Holds stock while someone pays. All-or-nothing; returns the title of the first item that ran out. */
-export async function holdStock(lines: QuoteLine[]): Promise<string | null> {
-  const { db } = await payloadDb()
-  let soldOut: string | null = null
-  try {
-    await db.transaction(async (tx) => {
-      for (const l of lines) {
-        if (l.type === 'digital') continue
-        const r = await tx.execute(
-          sql`UPDATE payload.products_variants SET reserved = reserved + ${l.qty} WHERE id = ${l.variantId} AND stock - reserved >= ${l.qty} RETURNING id`,
-        )
-        if (r.rows.length === 0) {
-          soldOut = l.title
-          throw new Error('sold out')
-        }
-      }
-    })
-  } catch (error) {
-    if (!soldOut) throw error
-  }
-  if (!soldOut) await refreshProducts()
-  return soldOut
-}
-
 type HeldItem = { variantId?: string | null; qty?: number | null; type?: string | null }
 type Tx = Parameters<Parameters<Awaited<ReturnType<typeof payloadDb>>['db']['transaction']>[0]>[0]
+type Sql = Pick<Tx, 'execute'>
 
-async function release(tx: Tx, items: HeldItem[]) {
+/**
+ * Holds stock while someone pays, inside the caller's transaction, so the hold and its order commit (or vanish) together.
+ * Returns the title of the first item that ran out; the caller then rolls back.
+ */
+export async function holdStock(tx: Sql, lines: QuoteLine[]): Promise<string | null> {
+  for (const l of lines) {
+    if (l.type === 'digital') continue
+    const r = await tx.execute(sql`UPDATE payload.products_variants SET reserved = reserved + ${l.qty} WHERE id = ${l.variantId} AND stock - reserved >= ${l.qty} RETURNING id`)
+    if (r.rows.length === 0) return l.title
+  }
+  return null
+}
+
+async function release(tx: Sql, items: HeldItem[]) {
   for (const it of items) {
     if (it.type === 'digital' || !it.variantId || !it.qty) continue
     await tx.execute(sql`UPDATE payload.products_variants SET reserved = GREATEST(reserved - ${it.qty}, 0) WHERE id = ${it.variantId}`)
   }
 }
 
-/** Gives held stock back (checkout failed before an order existed). */
-export async function releaseStock(items: HeldItem[]) {
-  const { db } = await payloadDb()
-  await db.transaction((tx) => release(tx, items))
-  await refreshProducts()
-}
-
 /** Held stock becomes sold (payment received, or COD order confirmed). */
-async function sell(tx: Tx, items: HeldItem[]) {
+async function sell(tx: Sql, items: HeldItem[]) {
   for (const it of items) {
     if (it.type === 'digital' || !it.variantId || !it.qty) continue
     await tx.execute(sql`UPDATE payload.products_variants SET stock = stock - ${it.qty}, reserved = GREATEST(reserved - ${it.qty}, 0) WHERE id = ${it.variantId}`)
   }
 }
 
-/** Sold stock comes back (a confirmed COD order was cancelled before delivery). */
-async function restock(tx: Tx, items: HeldItem[]) {
+/** Sold stock comes back (an order cancelled before delivery). */
+async function restock(tx: Sql, items: HeldItem[]) {
   for (const it of items) {
     if (it.type === 'digital' || !it.variantId || !it.qty) continue
     await tx.execute(sql`UPDATE payload.products_variants SET stock = stock + ${it.qty} WHERE id = ${it.variantId}`)
@@ -80,7 +64,7 @@ async function restock(tx: Tx, items: HeldItem[]) {
 }
 
 /** Moves an order to a new status together with its stock change, atomically. False if it was no longer in one of `from`. */
-async function transition(orderId: number, from: string[], to: string, items: HeldItem[], stock: (tx: Tx, items: HeldItem[]) => Promise<void>) {
+async function transition(orderId: number, from: string[], to: string, items: HeldItem[], stock: (tx: Sql, items: HeldItem[]) => Promise<void>, refresh = true) {
   const { db } = await payloadDb()
   const done = await db.transaction(async (tx) => {
     const r = await tx.execute(
@@ -89,33 +73,33 @@ async function transition(orderId: number, from: string[], to: string, items: He
     if (r.rows.length) await stock(tx, items)
     return r.rows.length > 0
   })
-  if (done) await refreshProducts()
+  if (done && refresh) await refreshProducts()
   return done
 }
-
-/** Cancels an order still waiting for payment or COD confirmation, and frees its held stock. */
-export const cancelPending = (orderId: number, items: HeldItem[]) =>
-  transition(orderId, ['pending_payment', 'cod_pending_confirmation'], 'cancelled', items, release)
 
 /** The customer confirmed a COD order (on WhatsApp): its held stock becomes sold. */
 export const confirmCod = (orderId: number, items: HeldItem[]) => transition(orderId, ['cod_pending_confirmation'], 'cod_confirmed', items, sell)
 
-/** A confirmed COD order is cancelled before delivery (or comes back unclaimed): its stock returns. */
+/** Cancels an order the way `cancelPlan` says: held stock is released, sold stock comes back, paid ones wait for a refund. */
 // ponytail: restocks as soon as staff cancel, even if the parcel is still on its way back.
-export const cancelConfirmedCod = (orderId: number, items: HeldItem[]) =>
-  transition(orderId, ['cod_confirmed', 'packed', 'shipped'], 'cancelled', items, restock)
+export const cancelOrder = (orderId: number, from: string, plan: CancelPlan, items: HeldItem[]) =>
+  transition(orderId, [from], plan.status, items, plan.stock === 'release' ? release : restock)
 
-/** Cancels checkouts not paid in time (and, optionally, earlier open checkouts from the same phone). */
+/** Cancels checkouts not paid in time (and, optionally, earlier open checkouts from the same phone). Returns how many. */
 export async function expireHolds(phone?: string) {
   const { payload } = await payloadDb()
   const now = new Date().toISOString()
   const or: Where[] = [{ reservedUntil: { less_than: now } }]
   if (phone) or.push({ 'customer.phone': { equals: phone } })
+  let n = 0
   for (;;) {
     const { docs } = await payload.find({ collection: 'orders', where: { and: [{ status: { equals: 'pending_payment' } }, { or }] }, limit: 50, depth: 0 })
-    for (const order of docs) await cancelPending(order.id, order.items ?? [])
+    // One cache refresh for the whole batch, not one per order.
+    for (const order of docs) if (await transition(order.id, ['pending_payment'], 'cancelled', order.items ?? [], release, false)) n++
     if (docs.length < 50) break
   }
+  if (n) await refreshProducts()
+  return n
 }
 
 /**
@@ -161,5 +145,80 @@ export async function markPaid(razorpayOrderId: string, paymentId: string) {
   })
   if (changed) await refreshProducts()
   if (changed === 'paid') await issueInvoice(order.id).catch((error) => console.error('Invoice not issued', order.id, error))
-  return order
+  // A repeat call (webhook after the browser, or a retry) reports where the order is now.
+  const status = changed ?? (await payload.findByID({ collection: 'orders', id: order.id, depth: 0, select: { status: true } })).status
+  return { order, status }
+}
+
+/** Paid orders without an invoice (the first try failed, e.g. the server stopped): issue them now. Returns how many. */
+async function retryInvoices() {
+  const { db } = await payloadDb()
+  const r = await db.execute(sql`
+    SELECT o.id FROM payload.orders o
+    WHERE ((o.payment_mode = 'prepaid' AND o.status IN ('paid', 'packed', 'shipped', 'delivered')) OR (o.payment_mode = 'cod' AND o.status = 'delivered'))
+      AND NOT EXISTS (SELECT 1 FROM payload.invoices i WHERE i.order_id = o.id)
+    ORDER BY o.id LIMIT 20`)
+  let n = 0
+  for (const { id } of r.rows as { id: number }[]) {
+    try {
+      await issueInvoice(id)
+      n++
+    } catch (error) {
+      console.error('Invoice retry failed', id, error)
+    }
+  }
+  return n
+}
+
+/**
+ * Safety net: each variant's held count should equal the qty in orders still waiting (payment or COD confirmation).
+ * Holds and orders now commit together, so drift means a bug or a hand edit. Read in one snapshot; a row that
+ * changed meanwhile makes the whole fix wait for the next run.
+ */
+async function reconcileReserved() {
+  const { db } = await payloadDb()
+  return db.transaction(
+    async (tx) => {
+      const variants = (await tx.execute(sql`SELECT id, reserved::int AS reserved FROM payload.products_variants`)).rows as { id: string; reserved: number | null }[]
+      const open = (
+        await tx.execute(sql`
+          SELECT i.variant_id AS "variantId", i.qty::int AS qty FROM payload.orders_items i JOIN payload.orders o ON o.id = i._parent_id
+          WHERE o.status IN ('pending_payment', 'cod_pending_confirmation') AND (i.type IS NULL OR i.type <> 'digital')`)
+      ).rows as { variantId: string | null; qty: number | null }[]
+      const fixes = reservedFixes(variants, open)
+      for (const f of fixes) {
+        console.warn(`Held stock for variant ${f.id} was ${f.from}, open orders hold ${f.to}: fixed`)
+        await tx.execute(sql`UPDATE payload.products_variants SET reserved = ${f.to} WHERE id = ${f.id}`)
+      }
+      return fixes.length
+    },
+    { isolationLevel: 'repeatable read' },
+  )
+}
+
+/** Every few minutes (see /api/cron/maintenance): free expired holds, issue missed invoices, check held stock. Safe to run twice. */
+export async function runMaintenance() {
+  const expired = await expireHolds()
+  const invoices = await retryInvoices()
+  const reserved = await reconcileReserved().catch((error) => (console.warn('Held stock check skipped (busy), next run retries', error), 0))
+  if (reserved) await refreshProducts()
+  return { expired, invoices, reserved }
+}
+
+/** Current stock and holds of a product's sizes, for the admin's stock buttons (the form's copy may be old). */
+export async function liveStock(productId: number) {
+  const { db } = await payloadDb()
+  const r = await db.execute(sql`SELECT id, stock::int AS stock, reserved::int AS reserved FROM payload.products_variants WHERE _parent_id = ${productId}`)
+  return r.rows as { id: string; stock: number; reserved: number | null }[]
+}
+
+/** Adds (or removes) stock in one statement, so a checkout running at the same moment is never overwritten. */
+export async function adjustStock(variantId: string, delta: number) {
+  const { db } = await payloadDb()
+  // Same rule as adjustedStock() in lib/orders.
+  const r = await db.execute(
+    sql`UPDATE payload.products_variants SET stock = GREATEST(stock + ${delta}, COALESCE(reserved, 0), 0) WHERE id = ${variantId} RETURNING id, stock::int AS stock, reserved::int AS reserved`,
+  )
+  if (r.rows.length) await refreshProducts()
+  return (r.rows[0] as { id: string; stock: number; reserved: number | null } | undefined) ?? null
 }

@@ -125,7 +125,7 @@ await payload.updateGlobal({ slug: 'service-prices', locale: 'hi', data: { event
 await payload.delete({ collection: 'testimonials', where: { name: { like: '(sample)' } } })
 const reviews = [
   {
-    name: 'Priya, Nashik (sample)', rating: 5, featured: true,
+    name: 'Priya, Nashik (sample)', rating: 5, featured: true, topic: 'event',
     context: { en: 'Wedding rangoli', mr: 'लग्नाची रांगोळी', hi: 'शादी की रंगोली' },
     quote: {
       en: 'The entrance rangoli was the first thing every guest photographed. He came early and finished before the baraat.',
@@ -134,7 +134,7 @@ const reviews = [
     },
   },
   {
-    name: 'Rohan, Pune (sample)', rating: 5, featured: true,
+    name: 'Rohan, Pune (sample)', rating: 5, featured: true, topic: 'portrait',
     context: { en: 'Charcoal portrait', mr: 'चारकोल पोर्ट्रेट', hi: 'चारकोल पोर्ट्रेट' },
     quote: {
       en: 'I only had one torn photo of my grandfather. The portrait looks just like him — my father was in tears.',
@@ -143,7 +143,7 @@ const reviews = [
     },
   },
   {
-    name: 'Sunita, Pune (sample)', rating: 5, featured: false,
+    name: 'Sunita, Pune (sample)', rating: 5, featured: false, topic: 'shop',
     context: { en: 'Diwali print, cash on delivery', mr: 'दिवाळी प्रिंट, कॅश ऑन डिलिव्हरी', hi: 'दिवाली प्रिंट, कैश ऑन डिलीवरी' },
     quote: {
       en: 'Ordered on WhatsApp, paid when it arrived. Packed so well, and it came before Diwali.',
@@ -152,7 +152,7 @@ const reviews = [
     },
   },
   {
-    name: 'Kulkarni family, Satara (sample)', rating: 4, featured: false,
+    name: 'Kulkarni family, Satara (sample)', rating: 4, featured: false, topic: 'event',
     context: { en: 'Society Ganesh festival', mr: 'सोसायटीचा गणेशोत्सव', hi: 'सोसायटी का गणेशोत्सव' },
     quote: {
       en: 'Quick reply, a clear price before the day, and a huge rangoli the children still talk about.',
@@ -163,7 +163,7 @@ const reviews = [
 ] as const
 // Reviews keep one language (the customer's own words): English samples here.
 for (const r of reviews) {
-  await payload.create({ collection: 'testimonials', data: { name: r.name, rating: r.rating, featured: r.featured, permission: true, context: r.context.en, quote: r.quote.en } })
+  await payload.create({ collection: 'testimonials', data: { name: r.name, rating: r.rating, featured: r.featured, topic: r.topic, language: 'en', permission: true, context: r.context.en, quote: r.quote.en } })
 }
 
 const productIds: Record<string, number> = {}

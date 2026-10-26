@@ -21,7 +21,7 @@ export type EnquiryData = {
   framing?: boolean
   message?: string
   wantsOffers: boolean
-  locale: string
+  locale: 'en' | 'mr' | 'hi'
 }
 
 type FormLike = { get(name: string): FormDataEntryValue | null; getAll(name: string): FormDataEntryValue[] }

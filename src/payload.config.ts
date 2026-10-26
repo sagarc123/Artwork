@@ -68,12 +68,20 @@ export default buildConfig({
           adminTheme: 'Colours',
           createNew: 'Add new',
           dashboard: 'Today',
+          backToDashboard: 'Back to Today',
+          noResultsFound: 'Nothing found.',
+          untitled: 'No name yet',
+          createdAt: 'Added',
+          updatedAt: 'Last changed',
+          lastModified: 'Last changed',
         },
         authentication: { forceUnlock: 'Unlock (after too many wrong passwords)', login: 'Sign in' },
+        // One short word fits a phone's bottom bar, and reads right on a brand-new piece too.
+        version: { publishChanges: 'Publish' },
       },
     },
   },
-  // Menu groups follow this order: Orders, Enquiries, Shop, Gallery & Festivals, (Courses, hidden), Settings.
+  // Menu groups follow this order: Customers (orders, invoices, enquiries), Shop, Gallery & Festivals, (Courses, hidden), Settings.
   collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users].map(noApiTab),
   globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {

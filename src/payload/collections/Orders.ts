@@ -2,6 +2,7 @@ import type { CollectionConfig, Field } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isOrderStaff, isOwner } from '../access'
 import { notifyOwner } from '../hooks'
+import { cancelPlan, stepBack } from '../../lib/orders'
 
 const locked = { update: () => false }
 
@@ -19,7 +20,7 @@ export const Orders: CollectionConfig = {
   slug: 'orders',
   admin: {
     useAsTitle: 'orderNumber',
-    group: 'Orders',
+    group: 'Customers',
     defaultColumns: ['orderNumber', 'status', 'total', 'paymentMode', 'createdAt'],
     listSearchableFields: ['orderNumber', 'customer.name', 'customer.phone'],
     description: 'Open an order and use the big buttons as you confirm, pack and ship it.',
@@ -35,7 +36,7 @@ export const Orders: CollectionConfig = {
               { label: 'To pack', values: ['paid', 'cod_confirmed'] },
               { label: 'Packed', values: ['packed'] },
               { label: 'Shipped', values: ['shipped'] },
-              { label: 'Needs refund', values: ['needs_refund'] },
+              { label: 'Needs refund', values: ['needs_refund'], ownerOnly: true },
               { label: 'All' },
             ],
           },
@@ -58,22 +59,31 @@ export const Orders: CollectionConfig = {
         if (operation !== 'update' || !req.user || !originalDoc || data.status === undefined || data.status === originalDoc.status) return data
         const from: string = originalDoc.status
         const to: string = data.status
-        // Money-related statuses are the owner's call; payments themselves are recorded by the checkout code (no user).
-        if (OWNER_ONLY_STATUSES.includes(to) && !hasRole(req.user, 'owner')) throw refuse('Only the owner can set this status.', 403)
-        if (to === 'pending_payment' || to === 'cod_pending_confirmation') throw refuse('An order cannot go back to waiting.')
-        if (to === 'cod_confirmed' && from !== 'cod_pending_confirmation') throw refuse('Only a cash-on-delivery order waiting for confirmation can be confirmed.')
-        if (to === 'shipped' && !((data.courier ?? originalDoc.courier) && (data.trackingNumber ?? originalDoc.trackingNumber)))
-          throw refuse('Add the courier and tracking number first.')
+        const owner = hasRole(req.user, 'owner')
         const svc = await import('@/server/order-service')
         const items = originalDoc.items ?? []
-        if (from === 'pending_payment' || from === 'cod_pending_confirmation') {
-          if (to !== 'cancelled' && to !== 'cod_confirmed') throw refuse('Confirm or cancel this order first.')
+        // "Undo" right after a one-tap button: one step back (packed → paid, shipped → packed), whoever tapped it.
+        const undo = to === stepBack(from, originalDoc.paymentMode)
+        if (to === 'cancelled') {
+          const plan = cancelPlan(from, originalDoc.paymentMode)
+          if (!plan) throw refuse('This order can no longer be cancelled.')
+          if (plan.ownerOnly && !owner) throw refuse('Only the owner can cancel a paid order (the money has to be refunded).', 403)
           // Stock changes with the status, atomically; false means someone else changed it first.
-          const ok = to === 'cancelled' ? await svc.cancelPending(originalDoc.id, items) : await svc.confirmCod(originalDoc.id, items)
-          if (!ok) throw refuse('This order was just changed by someone else. Please reload.', 409)
-        } else if (to === 'cancelled' && originalDoc.paymentMode === 'cod' && ['cod_confirmed', 'packed', 'shipped'].includes(from)) {
-          await svc.cancelConfirmedCod(originalDoc.id, items)
+          if (!(await svc.cancelOrder(originalDoc.id, from, plan, items))) throw refuse('This order was just changed by someone else. Please reload.', 409)
+          data.status = plan.status
+          return data
         }
+        // Money-related statuses are the owner's call; payments themselves are recorded by the checkout code (no user).
+        if (OWNER_ONLY_STATUSES.includes(to) && !owner && !undo) throw refuse('Only the owner can set this status.', 403)
+        if (to === 'pending_payment' || to === 'cod_pending_confirmation') throw refuse('An order cannot go back to waiting.')
+        if (from === 'pending_payment' || from === 'cod_pending_confirmation') {
+          if (to !== 'cod_confirmed' || from !== 'cod_pending_confirmation') throw refuse('Confirm or cancel this order first.')
+          if (!(await svc.confirmCod(originalDoc.id, items))) throw refuse('This order was just changed by someone else. Please reload.', 409)
+          return data
+        }
+        if (to === 'cod_confirmed' && !undo) throw refuse('Only a cash-on-delivery order waiting for confirmation can be confirmed.')
+        if (to === 'shipped' && !((data.courier ?? originalDoc.courier) && (data.trackingNumber ?? originalDoc.trackingNumber)))
+          throw refuse('Add the courier and tracking number first.')
         return data
       },
     ],
@@ -108,17 +118,26 @@ export const Orders: CollectionConfig = {
         { label: 'Needs refund', value: 'needs_refund' },
         { label: 'Refunded', value: 'refunded' },
       ],
-      // Only choices that can work: never back to "waiting", and no money statuses for helpers. The hook above still guards them.
+      // Lists, Today and the maintenance job all filter by status.
+      index: true,
+      // Only choices that can work: never back to "waiting", no money statuses for helpers, and Cancel only where it can be done.
+      // The hook above still guards them all.
       filterOptions: ({ options, req, data }) =>
         options.filter((o) => {
           const v = typeof o === 'string' ? o : o.value
+          const owner = hasRole(req.user, 'owner')
+          const back = stepBack(data?.status, data?.paymentMode) === v
           if (v === data?.status) return true
           if (v === 'pending_payment' || v === 'cod_pending_confirmation') return false
-          if (v === 'cod_confirmed') return data?.status === 'cod_pending_confirmation'
-          return hasRole(req.user, 'owner') || !OWNER_ONLY_STATUSES.includes(v)
+          if (v === 'cancelled') {
+            const plan = cancelPlan(data?.status, data?.paymentMode)
+            return !!plan && (owner || !plan.ownerOnly)
+          }
+          if (v === 'cod_confirmed') return data?.status === 'cod_pending_confirmation' || back
+          return owner || back || !OWNER_ONLY_STATUSES.includes(v)
         }),
       admin: {
-        description: 'The big buttons above change this for you. Change it here only to cancel or fix a mistake.',
+        description: 'The big buttons above change this for you. Change it here only to cancel or fix a mistake. Cancelling a paid order puts its stock back and marks it "Needs refund".',
         components: { Cell: '/payload/admin/Cells#StatusCell' },
       },
     },
@@ -178,7 +197,7 @@ export const Orders: CollectionConfig = {
           type: 'group',
           admin: { readOnly: true },
           fields: [
-            { type: 'row', fields: [{ name: 'name', type: 'text' }, { name: 'phone', type: 'text' }, { name: 'email', type: 'email' }] },
+            { type: 'row', fields: [{ name: 'name', type: 'text' }, { name: 'phone', type: 'text', index: true }, { name: 'email', type: 'email' }] },
             { type: 'row', fields: [{ name: 'businessName', label: 'Business name', type: 'text' }, { name: 'gstin', label: 'GSTIN', type: 'text' }] },
           ],
         },

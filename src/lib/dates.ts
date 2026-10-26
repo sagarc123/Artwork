@@ -5,6 +5,8 @@ const utc = (ymd: string) => Date.parse(`${ymd.slice(0, 10)}T00:00:00Z`)
 
 export const addDays = (ymd: string, days: number) => new Date(utc(ymd) + days * DAY).toISOString().slice(0, 10)
 export const daysBetween = (from: string, to: string) => Math.round((utc(to) - utc(from)) / DAY)
+/** Today in India (Asia/Kolkata) as YYYY-MM-DD: what the server means by "today" (its clock runs on UTC). */
+export const indiaToday = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(d)
 /** The browser's local date as YYYY-MM-DD. */
 export const localToday = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 

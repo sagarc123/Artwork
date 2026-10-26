@@ -8,7 +8,7 @@ import { OrderAgain } from '@/components/OrderAgain'
 import { localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { CartLine } from '@/lib/cart'
-import { deliveryRange } from '@/lib/dates'
+import { deliveryRange, indiaToday } from '@/lib/dates'
 import { orderProgress, TIMELINE } from '@/lib/track'
 import { formatPrice, whatsappLink } from '@/lib/site'
 
@@ -33,14 +33,16 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
   const locale = await getLocale()
   const o = t.order
   const awaitingCod = order.status === 'cod_pending_confirmation'
-  const paid = order.status !== 'pending_payment' && order.status !== 'cancelled' && !awaitingCod
+  const progress = orderProgress(order.status)
+  // Cancelled or refunding orders say so up top (not "confirmed", not "confirming your payment").
+  const stopped = 'stopped' in progress ? progress.stopped : null
+  const paid = !stopped && order.status !== 'pending_payment' && !awaitingCod
   const total = formatPrice(order.total ?? 0)
 
-  const progress = orderProgress(order.status)
   const physical = (order.items ?? []).some((it) => it.type !== 'digital')
   const day = (ymd: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${ymd}T00:00:00Z`))
   // ponytail: estimated from the order date (5–8 days); the courier's date replaces it with Shiprocket.
-  const [eta1, eta2] = deliveryRange(order.createdAt.slice(0, 10))
+  const [eta1, eta2] = deliveryRange(indiaToday(new Date(order.createdAt)))
   const showEta = physical && 'step' in progress && progress.step < 4
 
   // "Order again": the same pieces (by slug), with the frame matched back from its label.
@@ -61,8 +63,8 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
         <div className="mx-auto grid max-w-3xl gap-8 rounded-ui bg-surface p-6 shadow-frame lg:p-10">
           <div className="grid justify-items-start gap-3">
             {paid ? <CheckCircle2 aria-hidden="true" className="size-12 text-leaf" /> : <Clock aria-hidden="true" className="size-12 text-marigold" />}
-            <h1 className="font-heading text-h1">{paid ? o.thanks : awaitingCod ? o.codPlaced : o.pending}</h1>
-            {!paid && <p className="text-muted">{awaitingCod ? o.codPlacedBody : o.pendingBody}</p>}
+            <h1 className="font-heading text-h1">{stopped ? o.stoppedTitle[stopped] : paid ? o.thanks : awaitingCod ? o.codPlaced : o.pending}</h1>
+            {!paid && !stopped && <p className="text-muted">{awaitingCod ? o.codPlacedBody : o.pendingBody}</p>}
             {awaitingCod && (
               <a
                 href={whatsappLink(o.codConfirmMessage.replace('{number}', order.orderNumber ?? '').replace('{amount}', total))}

@@ -1,6 +1,6 @@
 import { BrandMark } from '../../components/Art'
 
-/** Login page: the site's kolam knot with the artist's name in English and Marathi. */
+/** Login page: the site's Bindu mark with the artist's name in English and Marathi. */
 export function Logo() {
   return (
     <div className="brand-logo">
@@ -15,7 +15,7 @@ export function Logo() {
   )
 }
 
-/** Small mark in the top bar and menu. */
+/** Small mark in the top bar and menu: drawn once on the login page, not on every admin page. */
 export function Icon() {
-  return <BrandMark className="brand-icon" />
+  return <BrandMark className="brand-icon" animate={false} />
 }

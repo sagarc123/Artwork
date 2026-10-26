@@ -1,9 +1,11 @@
 'use client'
 
-import { useForm, useFormFields, useFormProcessing } from '@payloadcms/ui'
+import { useFormFields, useFormProcessing } from '@payloadcms/ui'
 import { isLocale, localePath, type Locale } from '../../i18n/config'
 import { codConfirmAsk, customerChat, trackingMessage } from '../../lib/admin'
+import { stepBack } from '../../lib/orders'
 import { site } from '../../lib/site'
+import { useOneTap } from './one-tap'
 
 type Props = {
   id: number
@@ -33,6 +35,8 @@ const STEPS = {
   ],
 } as const
 
+const NOW: Record<string, string> = { cod_confirmed: 'COD confirmed', packed: 'Packed', shipped: 'Shipped', delivered: 'Delivered' }
+
 const STOPPED: Record<string, string> = {
   pending_payment: 'Waiting for the customer to pay. Nothing to do yet.',
   cancelled: 'This order was cancelled.',
@@ -59,9 +63,10 @@ function Timeline({ status, paymentMode }: { status?: string; paymentMode?: stri
 /**
  * Big buttons for the next step of an order. Each one saves the status through the normal order save,
  * so the stock, invoice and owner-only rules in the Orders hooks still apply (and their messages show as usual).
+ * Packed and Shipped can be undone for a few seconds; confirming COD (sells the stock) and Delivered (issues the invoice) can't.
  */
 export function OrderButtons({ id, publicId, orderNumber, name, phone, total, locale, paymentMode, hasInvoice }: Props) {
-  const { submit } = useForm()
+  const save = useOneTap()
   const busy = useFormProcessing()
   const { status, courier, trackingNumber } = useFormFields(([f]) => ({
     status: f.status?.value as string | undefined,
@@ -70,9 +75,13 @@ export function OrderButtons({ id, publicId, orderNumber, name, phone, total, lo
   }))
   const lang = isLocale(locale ?? undefined) ? (locale as Locale) : 'en'
   const info = { name, orderNumber, total, locale }
-  const set = (to: string) => void submit({ overrides: { status: to } })
   const step = (label: string, to: string, disabled = false) => (
-    <button type="button" className="one-tap__btn is-primary" disabled={busy || disabled} onClick={() => set(to)}>
+    <button
+      type="button"
+      className="one-tap__btn is-primary"
+      disabled={busy || disabled}
+      onClick={() => void save(to, `Saved: ${NOW[to] ?? to}`, stepBack(to, paymentMode) === status ? status : null)}
+    >
       {label}
     </button>
   )

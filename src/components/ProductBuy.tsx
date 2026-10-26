@@ -75,7 +75,20 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
       )}
 
       {soldOut ? (
-        <p className="rounded-ui bg-kumkum px-4 py-3 font-semibold text-white">{t.sold}</p>
+        // Sold: a calm note and a way to ask for a similar piece, instead of a red wall.
+        <div className="grid gap-3 justify-items-start">
+          <p className="rounded-full border-[1.5px] border-charcoal/30 px-4 py-1 font-semibold text-muted">{t.sold}</p>
+          <a
+            href={whatsappLink(`${t.similarMessage}
+${title}`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ink-link inline-flex min-h-11 items-center gap-2 font-semibold text-leaf"
+          >
+            <MessageCircle aria-hidden="true" className="size-5" />
+            {t.soldSimilar}
+          </a>
+        </div>
       ) : (
         <div className="grid gap-3">
           {promise}

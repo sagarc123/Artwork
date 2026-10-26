@@ -70,7 +70,7 @@ export async function ThumbCell({ cellData, rowData, collectionSlug, payload }: 
       {/* eslint-disable-next-line @next/next/no-img-element -- already-small admin thumbnails */}
       {src ? <img src={src} alt="" width={56} height={56} loading="lazy" /> : <span className="thumb-cell__empty" aria-hidden="true" />}
       <span className="title-cell">
-        <strong>{rowData.title ?? rowData.name ?? `#${rowData.id}`}</strong>
+        <strong>{rowData.title ?? rowData.adminTitle ?? rowData.name ?? `#${rowData.id}`}</strong>
         {price && <small>{price}</small>}
       </span>
     </Link>

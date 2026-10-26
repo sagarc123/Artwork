@@ -4,6 +4,7 @@ import * as migration_20261022_093043_orders from './20261022_093043_orders';
 import * as migration_20261022_113331_cod_invoices from './20261022_113331_cod_invoices';
 import * as migration_20261023_072100_service_prices_gift_wrap from './20261023_072100_service_prices_gift_wrap';
 import * as migration_20261023_084437_admin_simpler from './20261023_084437_admin_simpler';
+import * as migration_20261026_044300_round1_fixes from './20261026_044300_round1_fixes';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261023_084437_admin_simpler.up,
     down: migration_20261023_084437_admin_simpler.down,
-    name: '20261023_084437_admin_simpler'
+    name: '20261023_084437_admin_simpler',
+  },
+  {
+    up: migration_20261026_044300_round1_fixes.up,
+    down: migration_20261026_044300_round1_fixes.down,
+    name: '20261026_044300_round1_fixes'
   },
 ];
