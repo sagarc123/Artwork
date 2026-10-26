@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
-import { fillAlt } from '../gallery-sync'
+import { fillAlt } from '../product-hooks'
 import { canEditContent, hideFromHelpers, isOwner, publishedOrStaff } from '../access'
 import { adminTitleField, englishRequired, seoFields, slugField } from '../fields'
 import { sitePath } from '../../lib/admin'
@@ -13,17 +13,15 @@ export const Artworks: CollectionConfig = {
   labels: { singular: 'Gallery piece', plural: 'Gallery' },
   hooks: {
     afterDelete: refresh.afterDelete,
-    afterChange: [
-      ...(refresh.afterChange ?? []),
-      async ({ doc, req, context }) => (context.gallerySync ? doc : (await fillAlt(req, doc.images, doc.title), doc)),
-    ],
+    afterChange: [...(refresh.afterChange ?? []), fillAlt],
   },
   admin: {
     useAsTitle: 'adminTitle',
     group: 'Gallery & Festivals',
-    defaultColumns: ['images', 'category', 'forSale', '_status'],
-    description: 'Pieces shown on the Artwork page. Paintings added under Shop appear here by themselves; add only pieces that are not for sale.',
+    defaultColumns: ['images', 'category', '_status'],
+    description: 'Pieces for the gallery page that are not for sale (event rangoli, commissions, older work). Paintings & prints show in the gallery by themselves.',
     hidden: hideFromHelpers,
+    components: { beforeListTable: [{ path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No gallery pieces yet. Paintings & prints show in the gallery by themselves; add pieces here that are not for sale.' } }] },
     preview: (_doc, { locale }) => sitePath(locale, '/artwork'),
   },
   versions: { drafts: true },
@@ -35,6 +33,7 @@ export const Artworks: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
+            { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             {
               name: 'title',
               label: 'Name of the piece',
@@ -69,15 +68,13 @@ export const Artworks: CollectionConfig = {
         },
       ],
     },
-    { name: 'forSale', label: 'For sale in the shop', type: 'checkbox', admin: { position: 'sidebar', components: { Cell: '/payload/admin/Cells#YesNoCell' } } },
+    // ponytail: only for a gallery photo of something also sold as a print; shop pieces show in the gallery by themselves.
     {
       name: 'product',
-      label: 'Shop listing',
+      label: 'Also in the shop (optional)',
       type: 'relationship',
       relationTo: 'products',
-      admin: { position: 'sidebar', condition: (_, sibling) => Boolean(sibling?.forSale), description: 'The shop listing visitors can buy.' },
-      validate: (value: unknown, { siblingData }: { siblingData: Partial<{ forSale: boolean }> }) =>
-        siblingData?.forSale && !value ? 'Choose the shop listing for this piece, or untick "For sale".' : true,
+      admin: { position: 'sidebar', description: 'Pick the shop listing to add a "See it in the shop" button. Leave empty if it is not for sale.' },
     },
     { name: 'order', label: 'Position', type: 'number', defaultValue: 0, admin: { position: 'sidebar', description: 'Smaller numbers come first.' } },
     adminTitleField('title'),

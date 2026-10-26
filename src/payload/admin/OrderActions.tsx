@@ -1,4 +1,5 @@
 import type { UIFieldServerComponent } from 'payload'
+import { customerChat } from '../../lib/admin'
 import { formatPrice } from '../../lib/site'
 import { CopyButton } from './CopyButton'
 import { OrderButtons } from './OrderButtons'
@@ -44,8 +45,13 @@ export const OrderActions: UIFieldServerComponent = async ({ data, payload }) =>
           <h3>Customer</h3>
           <p className="order-card__big">{c.name || '—'}</p>
           {c.phone && (
-            <p>
-              <a href={`tel:${c.phone}`}>{c.phone}</a>
+            <p className="order-card__contact">
+              <a className="one-tap__btn is-small" href={`tel:${c.phone}`} aria-label={`Call ${c.phone}`}>
+                Call {c.phone}
+              </a>
+              <a className="one-tap__btn is-small is-whatsapp" href={customerChat(c.phone, '')} target="_blank" rel="noopener noreferrer">
+                WhatsApp
+              </a>
             </p>
           )}
           {c.email && <p className="order-card__muted">{c.email}</p>}

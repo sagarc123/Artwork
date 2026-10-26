@@ -188,6 +188,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     return { status: 'failed' }
   }
   await refreshProducts()
+  // ponytail: no owner alert yet; Today lists new orders. Email or WhatsApp alerts plug in here (COD) and in markPaid (online).
   const orderNumber = `ART-${10000 + order.id}`
   if (cod) return { status: 'cod', orderNumber, publicId }
 

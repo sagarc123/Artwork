@@ -1,6 +1,6 @@
 import type { DefaultServerCellComponentProps } from 'payload'
 import Link from 'next/link'
-import { waited } from '../../lib/admin'
+import { ago } from '../../lib/admin'
 import { formatPrice } from '../../lib/site'
 
 // List-view cells. Server components: they get the row and the Payload instance.
@@ -51,7 +51,7 @@ export function OrderCell({ cellData, rowData, collectionSlug }: DefaultServerCe
   return (
     <Link href={`/admin/collections/${collectionSlug}/${rowData.id}`} className="title-cell">
       <strong>{String(cellData ?? `#${rowData.id}`)}</strong>
-      <small>{[rowData.customer?.name, rowData.createdAt && `${waited(clock() - Date.parse(rowData.createdAt))} ago`].filter(Boolean).join(' · ')}</small>
+      <small>{[rowData.customer?.name, rowData.createdAt && ago(clock() - Date.parse(rowData.createdAt))].filter(Boolean).join(' · ')}</small>
     </Link>
   )
 }
@@ -80,4 +80,11 @@ export async function ThumbCell({ cellData, rowData, collectionSlug, payload }: 
 /** Yes/No instead of true/false. */
 export function YesNoCell({ cellData }: DefaultServerCellComponentProps) {
   return cellData ? <span className="status-chip is-done">Yes</span> : <span className="muted-cell">No</span>
+}
+
+/** Above an empty list: what this list is for and where new ones come from, instead of "Nothing found". */
+export function EmptyNote({ data, searchParams, text }: { data?: { totalDocs?: number }; searchParams?: Record<string, unknown>; text: string }) {
+  if (data?.totalDocs !== 0) return null
+  const filtered = Object.keys(searchParams ?? {}).some((k) => k.startsWith('where') || k === 'search')
+  return <p className="empty-note">{filtered ? 'None match this filter. Tap “All” or clear the search to see everything.' : text}</p>
 }

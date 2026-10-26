@@ -1,6 +1,5 @@
 import type { CollectionConfig } from 'payload'
 import { isOrderStaff, isOwner, isStaff } from '../access'
-import { notifyOwner } from '../hooks'
 
 /** Show a field only for these kinds of enquiry. */
 const only = (...types: string[]) => ({ condition: (data: Partial<{ type: string }>) => types.includes(data?.type ?? '') })
@@ -29,13 +28,13 @@ export const Enquiries: CollectionConfig = {
             ],
           },
         },
+        { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No enquiries yet. Messages from the website forms appear here and on Today.' } },
       ],
     },
   },
   access: { read: isOrderStaff, create: isStaff, update: isOrderStaff, delete: isOwner },
   disableDuplicate: true,
   defaultSort: '-createdAt',
-  hooks: { afterChange: [notifyOwner('enquiry')] },
   fields: [
     { name: 'reply', type: 'ui', admin: { components: { Field: '/payload/admin/EnquiryActions#EnquiryActions' } } },
     {
@@ -69,6 +68,7 @@ export const Enquiries: CollectionConfig = {
           label: 'Asking about',
           type: 'select',
           required: true,
+          admin: { isClearable: false },
           options: [
             { label: 'Event rangoli', value: 'event' },
             { label: 'Custom portrait', value: 'portrait' },

@@ -229,7 +229,7 @@ export interface Order {
   createdAt: string;
 }
 /**
- * Add a painting, drawing, print or download. It also appears in the gallery (untick "Show in gallery" to keep it shop-only).
+ * Paintings, drawings, prints and downloads for sale. Each one also shows in the gallery unless you untick "Show in gallery".
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
@@ -271,30 +271,13 @@ export interface Product {
      */
     stock: number;
     compareAtPrice?: number | null;
-    sku?: string | null;
     reserved?: number | null;
-    weightGrams?: number | null;
     id?: string | null;
   }[];
   /**
    * The story behind this piece, in your own words. Shown on the shop page and in the gallery.
    */
   story?: string | null;
-  description?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
   category: number | Category;
   medium?: (number | null) | Medium;
   widthCm?: number | null;
@@ -333,7 +316,7 @@ export interface Product {
     description?: string | null;
   };
   /**
-   * Also shows this piece on the Artwork gallery page.
+   * Also shows this piece on the gallery page, with a "See it in the shop" button.
    */
   showInGallery?: boolean | null;
   featured?: boolean | null;
@@ -374,26 +357,10 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
   };
 }
 /**
- * The groups pieces are sorted into in the shop and gallery menus.
+ * The groups pieces are sorted into: the tabs in the shop and gallery.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
@@ -417,7 +384,7 @@ export interface Category {
   createdAt: string;
 }
 /**
- * Pencil, charcoal, acrylic, watercolour, rangoli colours…
+ * What a piece is made with (pencil, charcoal, acrylic, rangoli colours…). Shown under its name.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "mediums".
@@ -462,7 +429,7 @@ export interface Festival {
   createdAt: string;
 }
 /**
- * GST rates per kind of product. Ask your CA before changing these.
+ * GST rate and HSN code for each kind of product (used on invoices). Ask your CA before changing these.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tax-classes".
@@ -564,7 +531,7 @@ export interface Enquiry {
   createdAt: string;
 }
 /**
- * Pieces shown on the Artwork page. Paintings added under Shop appear here by themselves; add only pieces that are not for sale.
+ * Pieces for the gallery page that are not for sale (event rangoli, commissions, older work). Paintings & prints show in the gallery by themselves.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "artworks".
@@ -598,9 +565,8 @@ export interface Artwork {
     title?: string | null;
     description?: string | null;
   };
-  forSale?: boolean | null;
   /**
-   * The shop listing visitors can buy.
+   * Pick the shop listing to add a "See it in the shop" button. Leave empty if it is not for sale.
    */
   product?: (number | null) | Product;
   /**
@@ -1046,13 +1012,10 @@ export interface ProductsSelect<T extends boolean = true> {
         price?: T;
         stock?: T;
         compareAtPrice?: T;
-        sku?: T;
         reserved?: T;
-        weightGrams?: T;
         id?: T;
       };
   story?: T;
-  description?: T;
   category?: T;
   medium?: T;
   widthCm?: T;
@@ -1100,7 +1063,6 @@ export interface ArtworksSelect<T extends boolean = true> {
         title?: T;
         description?: T;
       };
-  forSale?: T;
   product?: T;
   order?: T;
   adminTitle?: T;
@@ -1160,26 +1122,6 @@ export interface MediaSelect<T extends boolean = true> {
     | T
     | {
         thumb?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        large?:
           | T
           | {
               url?: T;
@@ -1430,7 +1372,7 @@ export interface CommerceSetting {
     blockedPincodes?: string | null;
   };
   /**
-   * Added when a buyer ticks "Gift wrap". SAMPLE value — owner to confirm.
+   * Added when a buyer ticks "Gift wrap". Sample price: please confirm.
    */
   giftWrapFee?: number | null;
   /**
@@ -1479,7 +1421,7 @@ export interface CommerceSetting {
 export interface ServicePrice {
   id: number;
   /**
-   * SAMPLE value from setup — owner to confirm before launch.
+   * Sample prices from setup. Please check them before the website goes live.
    */
   events?: {
     /**
@@ -1500,7 +1442,7 @@ export interface ServicePrice {
     travelNote?: string | null;
   };
   /**
-   * SAMPLE value from setup — owner to confirm before launch.
+   * Sample prices from setup. Please check them before the website goes live.
    */
   portraits?: {
     pencil?: {

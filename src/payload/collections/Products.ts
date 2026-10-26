@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
 import { canEditContent, hideFromHelpers, isOwner, publishedOrStaff, staffOnlyField } from '../access'
 import { adminTitleField, englishRequired, rupeesField, seoFields, slugField, validateVariants } from '../fields'
-import { keepLiveStock, originalFromSimpleFields, syncGallery, unlinkGallery } from '../gallery-sync'
+import { fillAlt, keepLiveStock, originalFromSimpleFields } from '../product-hooks'
 import { sitePath } from '../../lib/admin'
 
 const refresh = refreshOnChange('products')!
@@ -15,15 +15,16 @@ export const Products: CollectionConfig = {
   hooks: {
     beforeValidate: [originalFromSimpleFields],
     beforeChange: [keepLiveStock],
-    afterChange: [...(refresh.afterChange ?? []), syncGallery],
-    afterDelete: [...(refresh.afterDelete ?? []), unlinkGallery],
+    afterChange: [...(refresh.afterChange ?? []), fillAlt],
+    afterDelete: refresh.afterDelete,
   },
   admin: {
     useAsTitle: 'adminTitle',
     group: 'Shop',
-    defaultColumns: ['images', 'type', 'sold', '_status', 'updatedAt'],
-    description: 'Add a painting, drawing, print or download. It also appears in the gallery (untick "Show in gallery" to keep it shop-only).',
+    defaultColumns: ['images', 'sold', '_status', 'type'],
+    description: 'Paintings, drawings, prints and downloads for sale. Each one also shows in the gallery unless you untick "Show in gallery".',
     hidden: hideFromHelpers,
+    components: { beforeListTable: [{ path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No paintings or prints yet. Tap “Add new” to put your first piece in the shop.' } }] },
     // "View on site" button: the live shop page in the language being edited.
     preview: (doc, { locale }) => (doc.slug ? sitePath(locale, `/shop/p/${doc.slug}`) : null),
   },
@@ -36,6 +37,7 @@ export const Products: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
+            { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             {
               name: 'title',
               label: 'Name of the piece',
@@ -131,7 +133,7 @@ export const Products: CollectionConfig = {
                   required: true,
                   minRows: 1,
                   labels: { singular: 'Size', plural: 'Sizes' },
-                  admin: { description: 'One row per size you sell, e.g. "A4 print".' },
+                  admin: { description: 'One row per size you sell, e.g. "A4 print".', components: { RowLabel: '/payload/admin/PriceRowLabel#PriceRowLabel' } },
                   validate: (rows: unknown, { data }: { data: Partial<{ type: string }> }) => validateVariants(data?.type, rows),
                   fields: [
                     {
@@ -152,9 +154,8 @@ export const Products: CollectionConfig = {
                         },
                       ],
                     },
-                    // Kept for existing data; the festival sale replaces "was" prices.
-                    { name: 'compareAtPrice', type: 'number', min: 0, admin: { hidden: true } },
-                    { name: 'sku', type: 'text', admin: { hidden: true } },
+                    // Never stored: the festival sale fills in the crossed-out "was" price as the shop reads it (applySale).
+                    { name: 'compareAtPrice', type: 'number', virtual: true, admin: { hidden: true } },
                     // Held for 15 minutes while someone pays; only checkout changes it.
                     {
                       name: 'reserved',
@@ -165,7 +166,6 @@ export const Products: CollectionConfig = {
                       admin: { hidden: true },
                       hooks: { beforeDuplicate: [() => 0] },
                     },
-                    { name: 'weightGrams', label: 'Packed weight (grams)', type: 'number', min: 0, admin: { hidden: true } },
                   ],
                 },
               ],
@@ -176,8 +176,6 @@ export const Products: CollectionConfig = {
           label: 'Story & details',
           fields: [
             { name: 'story', type: 'textarea', localized: true, admin: { rows: 5, description: 'The story behind this piece, in your own words. Shown on the shop page and in the gallery.' } },
-            // Older long descriptions still show on the site; new pieces use the story only.
-            { name: 'description', type: 'richText', localized: true, admin: { hidden: true } },
             {
               type: 'row',
               fields: [
@@ -199,7 +197,7 @@ export const Products: CollectionConfig = {
               label: 'Frame options',
               type: 'array',
               labels: { singular: 'Frame option', plural: 'Frame options' },
-              admin: { description: 'Optional. Leave empty if the piece is sold unframed only.', initCollapsed: true },
+              admin: { description: 'Optional. Leave empty if the piece is sold unframed only.', initCollapsed: true, components: { RowLabel: '/payload/admin/PriceRowLabel#PriceRowLabel' } },
               fields: [{ type: 'row', fields: [{ name: 'label', label: 'Frame', type: 'text', required: true }, rupeesField('extraPrice', true, 'Extra ₹ on top of the price.')] }],
             },
           ],
@@ -221,7 +219,7 @@ export const Products: CollectionConfig = {
         },
       ],
     },
-    { name: 'showInGallery', label: 'Show in gallery', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar', description: 'Also shows this piece on the Artwork gallery page.' } },
+    { name: 'showInGallery', label: 'Show in gallery', type: 'checkbox', defaultValue: true, admin: { position: 'sidebar', description: 'Also shows this piece on the gallery page, with a "See it in the shop" button.' } },
     { name: 'featured', label: 'Show on home page', type: 'checkbox', admin: { position: 'sidebar' } },
     adminTitleField('title'),
   ],

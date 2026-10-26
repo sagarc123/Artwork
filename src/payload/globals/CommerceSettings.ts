@@ -38,7 +38,7 @@ export const CommerceSettings: GlobalConfig = {
       type: 'number',
       defaultValue: 49,
       min: 0,
-      admin: { description: 'Added when a buyer ticks "Gift wrap". SAMPLE value — owner to confirm.' },
+      admin: { description: 'Added when a buyer ticks "Gift wrap". Sample price: please confirm.' },
     },
     {
       name: 'tax',

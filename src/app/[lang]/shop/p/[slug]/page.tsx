@@ -1,4 +1,3 @@
-import { RichText } from '@payloadcms/richtext-lexical/react'
 import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -166,11 +165,10 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
           ))}
         </div>
 
-        {(product.story || product.description) && (
+        {product.story && (
           <section className="grid max-w-[65ch] gap-4 md:col-span-12 lg:col-span-7">
             <h2 className="font-heading text-h2">{s.story}</h2>
-            {product.story && <p className="font-heading text-h3 leading-relaxed">“{product.story}”</p>}
-            {product.description && <RichText data={product.description} className="grid gap-4" />}
+            <p className="font-heading text-h3 leading-relaxed">“{product.story}”</p>
           </section>
         )}
       </div>

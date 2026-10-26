@@ -3,9 +3,10 @@ import config from '@payload-config'
 import { cacheLife, cacheTag } from 'next/cache'
 import { getPayload } from 'payload'
 import type { Locale } from '@/i18n/config'
-import type { Artwork, Category, Media, Product } from '@/payload-types'
+import type { Category, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
 import { pickMedium } from '@/lib/art'
+import { galleryDocs, type GalleryDoc } from '@/lib/gallery'
 import { hashString } from '@/lib/seed'
 import { pickTestimonials } from '@/lib/testimonials'
 import { applySale, FREE_SHIPPING_FROM, nextSaleChange, SHIPPING_FEE } from '@/lib/cart'
@@ -33,7 +34,7 @@ export function festivalLook(slug: string) {
   return { kind: 'diwali', floor: 'bg-charcoal', heroFloor: 'charcoal' } as const
 }
 
-export function toShopItem(p: Product, locale: Locale): ShopItem {
+export function toShopItem(p: ListedProduct, locale: Locale): ShopItem {
   const prices = p.variants.map((v) => v.price)
   const size = p.widthCm && p.heightCm ? `${p.widthCm}×${p.heightCm} cm` : undefined
   return {
@@ -54,25 +55,22 @@ export function toShopItem(p: Product, locale: Locale): ShopItem {
   }
 }
 
-export function toGalleryItem(a: Artwork, locale: Locale): GalleryItem {
+export function toGalleryItem(a: GalleryDoc, locale: Locale): GalleryItem {
   const cat = a.category && typeof a.category === 'object' ? a.category : null
-  const product = a.forSale && a.product && typeof a.product === 'object' ? a.product : null
+  const photo = firstMedia(a.images)
   return {
     id: a.id,
     title: a.title,
     story: a.story,
     meta: [a.year, relName(a.medium)].filter(Boolean).join(' · '),
     category: cat ? { slug: cat.slug, name: cat.name } : undefined,
-    image: firstMedia(a.images),
+    image: photo,
     seed: a.slug,
     medium: mediumOf(a),
     floor: pickBy(FLOORS, a.slug),
     // Real photos keep their own shape; stand-ins vary so the wall looks hand-hung.
-    ratio: (() => {
-      const m = firstMedia(a.images)
-      return m?.width && m.height ? `${m.width}/${m.height}` : pickBy(RATIOS, a.slug)
-    })(),
-    productHref: product ? localePath(locale, `/shop/p/${product.slug}`) : undefined,
+    ratio: photo?.width && photo.height ? `${photo.width}/${photo.height}` : pickBy(RATIOS, a.slug),
+    productHref: a.shopSlug ? localePath(locale, `/shop/p/${a.shopSlug}`) : undefined,
   }
 }
 
@@ -89,12 +87,16 @@ export async function getCategories(locale: Locale, scope: Exclude<Category['sco
   return docs
 }
 
-export async function getArtworks(locale: Locale) {
+/** The gallery wall: published artworks plus published shop pieces ticked "Show in gallery". */
+export async function getGallery(locale: Locale) {
   'use cache'
   cacheLife('max')
   cacheTag('artworks', 'categories', 'mediums', 'media', 'festivals', 'products')
-  const { docs } = await (await db()).find({ collection: 'artworks', locale, where: published, sort: ['order', '-createdAt'], limit: 300, depth: 1 })
-  return docs
+  const [{ docs }, products] = await Promise.all([
+    (await db()).find({ collection: 'artworks', locale, where: published, sort: ['order', '-createdAt'], limit: 300, depth: 1 }),
+    getProducts(locale),
+  ])
+  return galleryDocs(docs, products)
 }
 
 /** The festival sale as of now, and how long that stays true (so cached pages switch prices when it starts or ends). */
@@ -105,12 +107,32 @@ async function saleNow() {
   return { sale: festivalSale, now, seconds: wait === null ? null : Math.max(60, Math.ceil(wait / 1000)) }
 }
 
+/** What shop listings, search and the gallery read (the product page reads everything), so the cached copy stays small. */
+const listed = {
+  title: true,
+  slug: true,
+  type: true,
+  variants: true,
+  images: true,
+  category: true,
+  medium: true,
+  festival: true,
+  widthCm: true,
+  heightCm: true,
+  year: true,
+  story: true,
+  featured: true,
+  showInGallery: true,
+  createdAt: true,
+} as const
+export type ListedProduct = Pick<Product, 'id' | keyof typeof listed>
+
 /** Published products, with any festival sale already in the prices (the old price becomes the crossed-out one). */
-export async function getProducts(locale: Locale) {
+export async function getProducts(locale: Locale): Promise<ListedProduct[]> {
   'use cache'
   cacheTag('products', 'categories', 'mediums', 'media', 'festivals', 'commerce-settings')
   const [{ docs }, { sale, now, seconds }] = await Promise.all([
-    (await db()).find({ collection: 'products', locale, where: published, sort: '-createdAt', limit: 500, depth: 1 }),
+    (await db()).find({ collection: 'products', locale, where: published, sort: '-createdAt', limit: 500, depth: 1, select: listed }),
     saleNow(),
   ])
   if (seconds) cacheLife({ revalidate: seconds })

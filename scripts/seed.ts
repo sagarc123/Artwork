@@ -206,7 +206,6 @@ const artworks = [
   ['portrait-aaji', 'Aaji, from a photo', artCats.commissions, undefined],
 ] as const
 for (const [i, [slug, title, category, festival]] of artworks.entries()) {
-  const forSale = slug === 'peacock'
   await payload.create({
     collection: 'artworks',
     locale: 'en',
@@ -218,8 +217,8 @@ for (const [i, [slug, title, category, festival]] of artworks.entries()) {
       festival,
       year: 2020 + (i % 6),
       story: 'Sample story: a few lines about the day this was drawn, the colours chosen and who it was for.',
-      forSale,
-      product: forSale ? productIds['peacock-rangoli'] : undefined,
+      // The peacock is also sold as a shop piece: its gallery entry links there.
+      product: slug === 'peacock' ? productIds['peacock-rangoli'] : undefined,
       order: i,
       _status: 'published',
     },

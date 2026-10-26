@@ -1,7 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { Artworks } from './payload/collections/Artworks'
@@ -69,19 +68,37 @@ export default buildConfig({
           createNew: 'Add new',
           dashboard: 'Today',
           backToDashboard: 'Back to Today',
-          noResultsFound: 'Nothing found.',
+          // Lists with their own empty line (orders, paintings…) hide these; the rest show them.
+          noResultsFound: 'Nothing here yet.',
+          noResultsDescription: 'If you searched or picked a filter, clear it to see everything.',
           untitled: 'No name yet',
           createdAt: 'Added',
           updatedAt: 'Last changed',
           lastModified: 'Last changed',
         },
         authentication: { forceUnlock: 'Unlock (after too many wrong passwords)', login: 'Sign in' },
-        // One short word fits a phone's bottom bar, and reads right on a brand-new piece too.
-        version: { publishChanges: 'Publish' },
+        // Drafts stay (a half-done piece can wait off the website), in plain words: "Save for later" keeps it off the
+        // website, "Put on website" makes it live, "History" lists earlier saves.
+        version: {
+          saveDraft: 'Save for later',
+          draftSavedSuccessfully: 'Saved for later. The website still shows what you last put on it.',
+          publish: 'Put on website',
+          publishChanges: 'Put on website',
+          publishIn: 'Put on website ({{locale}} only)',
+          published: 'On website',
+          draft: 'Not on website',
+          draftHasPublishedVersion: 'On website, with changes saved for later',
+          unpublish: 'Take off website',
+          confirmUnpublish: 'Take off website',
+          aboutToUnpublish: 'This takes it off the website. You can put it back any time.',
+          unpublishedSuccessfully: 'Taken off the website.',
+          versions: 'History',
+          preview: 'See it on the website',
+        },
       },
     },
   },
-  // Menu groups follow this order: Customers (orders, invoices, enquiries), Shop, Gallery & Festivals, (Courses, hidden), Settings.
+  // Menu groups follow this order: Customers (orders, invoices, enquiries), Shop, Gallery & Festivals, (Courses, hidden), Lists (categories, mediums, GST classes), Settings.
   collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users].map(noApiTab),
   globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {
@@ -93,7 +110,6 @@ export default buildConfig({
     defaultLocale: 'en',
     fallback: true,
   },
-  editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET,
   graphQL: { disable: true },
   telemetry: false,

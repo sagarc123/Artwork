@@ -1,7 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isOrderStaff, isOwner } from '../access'
-import { notifyOwner } from '../hooks'
 import { cancelPlan, stepBack } from '../../lib/orders'
 
 const locked = { update: () => false }
@@ -41,6 +40,7 @@ export const Orders: CollectionConfig = {
             ],
           },
         },
+        { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No orders yet. New orders appear here and on Today.' } },
       ],
     },
     // Opens the invoice PDF once one is issued, otherwise the customer's order page.
@@ -88,7 +88,6 @@ export const Orders: CollectionConfig = {
       },
     ],
     afterChange: [
-      notifyOwner('order'),
       async ({ doc, previousDoc, req }) => {
         // Prepaid orders get their invoice when paid; COD orders on delivery (this also retries a missed one).
         if (doc.status === 'delivered' && previousDoc?.status !== 'delivered') {
@@ -137,6 +136,7 @@ export const Orders: CollectionConfig = {
           return owner || back || !OWNER_ONLY_STATUSES.includes(v)
         }),
       admin: {
+        isClearable: false,
         description: 'The big buttons above change this for you. Change it here only to cancel or fix a mistake. Cancelling a paid order puts its stock back and marks it "Needs refund".',
         components: { Cell: '/payload/admin/Cells#StatusCell' },
       },

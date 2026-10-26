@@ -7,9 +7,9 @@ export const TaxClasses: CollectionConfig = {
   labels: { singular: 'GST class', plural: 'GST classes' },
   admin: {
     useAsTitle: 'name',
-    group: 'Settings',
+    group: 'Lists',
     defaultColumns: ['name', 'hsn', 'rate'],
-    description: 'GST rates per kind of product. Ask your CA before changing these.',
+    description: 'GST rate and HSN code for each kind of product (used on invoices). Ask your CA before changing these.',
     hidden: hideFromNonOwners,
   },
   access: { read: isStaff, create: isOwner, update: isOwner, delete: isOwner },

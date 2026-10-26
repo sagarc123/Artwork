@@ -54,13 +54,14 @@ export function trackingMessage(o: OrderInfo & { courier?: string | null; tracki
   }[l]
 }
 
-/** "40 min", "5 h", "3 days": how long something has been waiting. */
-export function waited(ms: number) {
-  const min = Math.max(0, Math.floor(ms / 60_000))
-  if (min < 60) return `${min} min`
+/** "just now", "40 min ago", "5 h ago", "3 days ago": how long ago something came in. */
+export function ago(ms: number) {
+  const min = Math.floor(ms / 60_000)
+  if (min < 1) return 'just now'
+  if (min < 60) return `${min} min ago`
   const h = Math.floor(min / 60)
-  if (h < 48) return `${h} h`
-  return `${Math.floor(h / 24)} days`
+  if (h < 48) return `${h} h ago`
+  return `${Math.floor(h / 24)} days ago`
 }
 
 /** Admin list link with a filter, e.g. listUrl('orders', 'status', ['paid', 'cod_confirmed']). */

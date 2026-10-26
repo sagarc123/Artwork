@@ -15,6 +15,7 @@ export const Invoices: CollectionConfig = {
     group: 'Customers',
     defaultColumns: ['number', 'issuedAt', 'documentType', 'order'],
     description: 'Made automatically when an order is paid online, or when a cash-on-delivery order is delivered. They cannot be changed. Open one and tap the eye button for the PDF.',
+    components: { beforeListTable: [{ path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No invoices yet. One is made for each order once it is paid (cash on delivery: once delivered).' } }] },
     preview: (doc) => (doc.orderPublicId ? `/api/invoices/${doc.orderPublicId}` : null),
   },
   access: { read: isOrderStaff, create: () => false, update: () => false, delete: () => false },

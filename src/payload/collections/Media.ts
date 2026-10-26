@@ -22,12 +22,11 @@ export const Media: CollectionConfig = {
     mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
     focalPoint: true,
     adminThumbnail: 'thumb',
+    // The site resizes on the fly (next/image) from the original, so only the admin's thumbnail is made here.
+    // Uploads are capped at 2400 px wide: a phone photo of 4000+ px adds weight, not detail.
+    resizeOptions: { width: 2400, withoutEnlargement: true },
     formatOptions: { format: 'webp', options: { quality: 82 } },
-    imageSizes: [
-      { name: 'thumb', width: 400 },
-      { name: 'card', width: 800 },
-      { name: 'large', width: 1600 },
-    ],
+    imageSizes: [{ name: 'thumb', width: 400 }],
   },
   fields: [
     {

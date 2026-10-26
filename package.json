@@ -11,7 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node --test \"src/**/*.test.ts\"",
     "icons": "node scripts/make-icons.mjs",
-    "payload": "node node_modules/payload/bin.js --use-swc",
+    "payload": "node node_modules/payload/bin.js",
     "generate": "npm run payload -- generate:importmap && npm run payload -- generate:types",
     "migrate:create": "npm run payload -- migrate:create",
     "migrate": "npm run payload -- migrate",
@@ -24,7 +24,6 @@
   "dependencies": {
     "@payloadcms/db-postgres": "^3.91.0",
     "@payloadcms/next": "^3.91.0",
-    "@payloadcms/richtext-lexical": "^3.91.0",
     "@payloadcms/ui": "^3.91.0",
     "@react-pdf/renderer": "^4.9.0",
     "graphql": "^16.14.2",
@@ -37,8 +36,6 @@
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@swc-node/register": "^1.12.1",
-    "@swc/core": "^1.16.18",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.20.0",

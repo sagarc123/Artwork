@@ -9,7 +9,7 @@ import { alternates, localePath, type Locale } from '@/i18n/config'
 import { getDictionary, getLocale, type Dictionary } from '@/i18n/dictionaries'
 import { cleanQuery, MAX_QUERY, searchById } from '@/lib/search'
 import { whatsappLink } from '@/lib/site'
-import { festivalLook, getArtworks, getFestivals, getProducts, toGalleryItem, toShopItem } from '@/server/content'
+import { festivalLook, getGallery, getFestivals, getProducts, toGalleryItem, toShopItem } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary()
@@ -74,8 +74,8 @@ async function Results({ searchParams, locale, t }: { searchParams: Promise<Reco
   const [products, productsEn, artworks, artworksEn, festivals, festivalsEn] = await Promise.all([
     getProducts(locale),
     getProducts('en'),
-    getArtworks(locale),
-    getArtworks('en'),
+    getGallery(locale),
+    getGallery('en'),
     getFestivals(locale),
     getFestivals('en'),
   ])

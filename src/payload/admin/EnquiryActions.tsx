@@ -4,7 +4,7 @@ import type { DefaultCellComponentProps, UIFieldClientComponent } from 'payload'
 import { toast, useConfig, useDocumentInfo, useFormFields } from '@payloadcms/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { customerChat, enquiryReply, waited } from '../../lib/admin'
+import { ago, customerChat, enquiryReply } from '../../lib/admin'
 import { useOneTap } from './one-tap'
 
 /** "Reply on WhatsApp" on an enquiry: opens the chat with a polite first message and marks it replied. */
@@ -23,7 +23,7 @@ export const EnquiryActions: UIFieldClientComponent = () => {
   return (
     <div className="one-tap">
       <a
-        className="one-tap__btn is-whatsapp"
+        className="one-tap__btn is-whatsapp is-solid"
         href={customerChat(f.phone, enquiryReply(f))}
         target="_blank"
         rel="noopener noreferrer"
@@ -33,7 +33,7 @@ export const EnquiryActions: UIFieldClientComponent = () => {
       >
         Reply on WhatsApp
       </a>
-      {f.status === 'new' && initialData?.createdAt && <p className="one-tap__note">Waiting {waited(openedAt - Date.parse(initialData.createdAt))}</p>}
+      {f.status === 'new' && initialData?.createdAt && <p className="one-tap__note">Came in {ago(openedAt - Date.parse(initialData.createdAt))}</p>}
     </div>
   )
 }

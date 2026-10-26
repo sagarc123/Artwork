@@ -9,7 +9,7 @@ const access = { read: anyone, create: canEditContent, update: canEditContent, d
 export const Categories: CollectionConfig = {
   slug: 'categories',
   hooks: refreshOnChange('categories'),
-  admin: { useAsTitle: 'name', group: 'Settings', defaultColumns: ['name', 'scope', 'order'], description: 'The groups pieces are sorted into in the shop and gallery menus.', hidden: hideFromHelpers },
+  admin: { useAsTitle: 'name', group: 'Lists', defaultColumns: ['name', 'scope', 'order'], description: 'The groups pieces are sorted into: the tabs in the shop and gallery.', hidden: hideFromHelpers },
   access,
   fields: [
     { name: 'name', type: 'text', required: true, localized: true },
@@ -34,7 +34,7 @@ export const Categories: CollectionConfig = {
 export const Mediums: CollectionConfig = {
   slug: 'mediums',
   hooks: refreshOnChange('mediums'),
-  admin: { useAsTitle: 'name', group: 'Settings', description: 'Pencil, charcoal, acrylic, watercolour, rangoli colours…', hidden: hideFromHelpers },
+  admin: { useAsTitle: 'name', group: 'Lists', description: 'What a piece is made with (pencil, charcoal, acrylic, rangoli colours…). Shown under its name.', hidden: hideFromHelpers },
   access,
   fields: [{ name: 'name', type: 'text', required: true, localized: true }, slugField('name')],
 }

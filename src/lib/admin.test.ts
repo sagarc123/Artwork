@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { codConfirmAsk, customerChat, enquiryReply, listUrl, sitePath, trackingMessage, waited } from './admin.ts'
+import { codConfirmAsk, customerChat, enquiryReply, listUrl, sitePath, trackingMessage, ago } from './admin.ts'
 
 test('enquiry reply is in the customer language, with their name and what they asked about', () => {
   assert.match(enquiryReply({ name: 'Priya', type: 'event', locale: 'en' }), /^Namaste Priya!.*rangoli for your event/)
@@ -24,10 +24,11 @@ test('order messages carry the number, amount, courier, tracking and link', () =
 })
 
 test('waiting time reads naturally', () => {
-  assert.equal(waited(25 * 60_000), '25 min')
-  assert.equal(waited(5 * 3_600_000), '5 h')
-  assert.equal(waited(50 * 3_600_000), '2 days')
-  assert.equal(waited(-1), '0 min')
+  assert.equal(ago(25 * 60_000), '25 min ago')
+  assert.equal(ago(5 * 3_600_000), '5 h ago')
+  assert.equal(ago(50 * 3_600_000), '2 days ago')
+  assert.equal(ago(30_000), 'just now')
+  assert.equal(ago(-1), 'just now')
 })
 
 test('list links filter by one or several values', () => {

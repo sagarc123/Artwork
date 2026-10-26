@@ -86,7 +86,7 @@ export const cancelOrder = (orderId: number, from: string, plan: CancelPlan, ite
   transition(orderId, [from], plan.status, items, plan.stock === 'release' ? release : restock)
 
 /** Cancels checkouts not paid in time (and, optionally, earlier open checkouts from the same phone). Returns how many. */
-export async function expireHolds(phone?: string) {
+export async function expireHolds(phone?: string, refresh = true) {
   const { payload } = await payloadDb()
   const now = new Date().toISOString()
   const or: Where[] = [{ reservedUntil: { less_than: now } }]
@@ -98,7 +98,7 @@ export async function expireHolds(phone?: string) {
     for (const order of docs) if (await transition(order.id, ['pending_payment'], 'cancelled', order.items ?? [], release, false)) n++
     if (docs.length < 50) break
   }
-  if (n) await refreshProducts()
+  if (n && refresh) await refreshProducts()
   return n
 }
 
@@ -198,10 +198,11 @@ async function reconcileReserved() {
 
 /** Every few minutes (see /api/cron/maintenance): free expired holds, issue missed invoices, check held stock. Safe to run twice. */
 export async function runMaintenance() {
-  const expired = await expireHolds()
+  const expired = await expireHolds(undefined, false)
   const invoices = await retryInvoices()
   const reserved = await reconcileReserved().catch((error) => (console.warn('Held stock check skipped (busy), next run retries', error), 0))
-  if (reserved) await refreshProducts()
+  // One cache refresh for the whole run.
+  if (expired || reserved) await refreshProducts()
   return { expired, invoices, reserved }
 }
 

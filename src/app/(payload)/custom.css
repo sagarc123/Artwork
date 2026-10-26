@@ -63,6 +63,7 @@
   --chip-done-fg: #1e4929;
   --chip-off-bg: var(--theme-elevation-100);
   --chip-off-fg: var(--theme-elevation-700);
+  --whatsapp: #1f7a3a;
 
   --font-body: var(--admin-font, 'Mukta'), system-ui, sans-serif;
   --style-radius-s: 6px;
@@ -90,6 +91,7 @@ html[data-theme='dark'] {
   --chip-busy-fg: #ffd9a0;
   --chip-done-bg: #1a3f23;
   --chip-done-fg: #c3e6cb;
+  --whatsapp: #7fd99a;
 }
 
 /* Larger base text so the artist can read comfortably on a phone. */
@@ -104,12 +106,22 @@ h1,
   font-weight: 400;
 }
 
-/* Field help text: darker than Payload's pale grey (WCAG AA on paper and charcoal). */
+/* Field help text: darker than Payload's pale grey (WCAG AA on paper and charcoal), and at least 16 px. */
 .field-description,
 .view-description,
+.custom-view-description,
 .collection-list__sub-header,
 .list-header__description {
   color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.field-label .localized {
+  font-size: 0.95rem;
+}
+/* A collection's description belongs on its list; on every edit page it was the same paragraph again. */
+.template-default:has(.collection-edit) .doc-header__after-header {
+  display: none;
 }
 .field-label {
   font-size: 0.95rem;
@@ -121,28 +133,63 @@ h1,
   font-size: 1.3rem;
 }
 
-/* Primary buttons (Save, Publish) in kumkum. */
-.btn--style-primary {
+/* One filled kumkum button per screen for the main action (Put on website, Save, Add new); the rest are outlined. */
+.btn--style-primary,
+.list-create-new-doc__create-new-button {
   --bg-color: var(--action);
   --hover-bg: var(--action-hover);
   --color: #fff;
   --hover-color: #fff;
 }
-/* Unlayered rules beat Payload's at any specificity, so its disabled look is restated here. */
+/* Nothing changed yet: still the kumkum button, faded, so it reads "not yet" rather than "broken" (beige on beige did).
+   Unlayered rules beat Payload's at any specificity, so its disabled look is restated here. */
 .btn--style-primary.btn--disabled {
-  --bg-color: var(--theme-elevation-200);
-  --hover-bg: var(--theme-elevation-200);
-  --color: var(--theme-elevation-800);
-  --hover-color: var(--theme-elevation-800);
+  --bg-color: var(--action);
+  --hover-bg: var(--action);
+  --color: #fff;
+  --hover-color: #fff;
+}
+.btn.btn--style-primary.btn--disabled {
+  opacity: 0.45;
+}
+.btn--style-secondary {
+  --bg-color: var(--theme-input-bg, transparent);
+  --color: var(--theme-text);
+  --hover-color: var(--theme-text);
+  --btn-border: 2px solid var(--theme-elevation-700);
+  --hover-btn-border: 2px solid var(--action);
+}
+.btn--style-secondary.btn--disabled {
+  --color: var(--theme-elevation-500);
+  --hover-color: var(--theme-elevation-500);
+  --btn-border: 2px solid var(--theme-elevation-300);
+  --hover-btn-border: 2px solid var(--theme-elevation-300);
 }
 :focus-visible {
   outline: 3px solid var(--color-marigold);
   outline-offset: 2px;
 }
 
-/* Tabs (Basics / Story & details / Advanced): Payload fades inactive ones to 50%, too faint to read. */
+/* Tabs (Basics / Story & details / Advanced): big, readable, and the open one underlined in kumkum. */
 .tabs-field__tab-button {
-  opacity: 0.8;
+  opacity: 1;
+  min-height: 48px;
+  padding: 0 1rem;
+  border-bottom: 3px solid transparent;
+  color: var(--theme-elevation-650);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.tabs-field__tab-button::after {
+  display: none;
+}
+.tabs-field__tab-button--active {
+  color: var(--theme-text);
+  border-bottom-color: var(--color-kumkum);
+}
+.tabs-field__tabs {
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--theme-elevation-150);
 }
 /* A single "Edit" tab is just noise. */
 .doc-tabs:not(:has(.doc-tab ~ .doc-tab)) {
@@ -178,12 +225,59 @@ h1,
   line-height: 1.3;
 }
 
-/* Bigger tap targets for buttons, menu links and checkboxes. */
+/* Bigger tap targets (44 px) for buttons, menu links, tabs and the small icon buttons in the top bar and menu. */
 .btn,
 .nav__link,
+.nav-group__toggle,
 .choice-buttons__btn,
-.one-tap__btn {
+.one-tap__btn,
+.doc-tab,
+.pill,
+.localizer-button {
   min-height: 44px;
+}
+.nav__log-out,
+.app-header__account,
+.preview-btn,
+.array-actions__button,
+.doc-controls__popup .popup-button,
+.upload-relationship-details__actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+.app-header__account img {
+  width: 32px;
+  height: 32px;
+}
+/* Payload places the language menu by the size of its 25 px avatar; the 44 px one needs 19 px more room. */
+.app-header__localizer.localizer {
+  right: 109px;
+}
+/* Icon-only buttons get a word: "+ New" beside a list (category, medium...), "+ Add" on the collection cards. */
+.relationship-add-new__add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 0.6rem;
+  font-weight: 600;
+}
+.relationship-add-new__add-button::after {
+  content: 'New';
+}
+.card__actions .btn {
+  width: auto;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+}
+.card__actions .btn .btn__content::after {
+  content: 'Add';
+  margin-left: 0.3rem;
+  font-weight: 600;
 }
 .nav__link {
   display: flex;
@@ -220,11 +314,14 @@ h1,
   width: 28px;
   height: 28px;
 }
-/* The breadcrumb's home link is a small box that clips: the mark fills it. */
+/* The breadcrumb's home link: the mark at a fixed size, never squeezed by a long title. */
+.step-nav__home {
+  flex-shrink: 0;
+}
 .step-nav__home .brand-icon {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 24px;
+  height: 24px;
 }
 .locale-note {
   display: inline-flex;
@@ -270,7 +367,6 @@ h1,
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.today__add,
 .today__link {
   display: inline-flex;
   align-items: center;
@@ -281,16 +377,8 @@ h1,
   font-weight: 600;
   text-decoration: none;
 }
-.today__add {
-  background: var(--action);
-  color: #fff;
-  font-size: 1.1rem;
-}
-.today__add:hover {
-  background: var(--action-hover);
-}
 .today__link {
-  border: 1px solid var(--theme-elevation-250);
+  border: 2px solid var(--theme-elevation-700);
   background: var(--theme-input-bg, var(--theme-elevation-50));
   color: var(--theme-text);
 }
@@ -298,6 +386,37 @@ h1,
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
   gap: 1rem;
+}
+/* What's waiting on you comes first, bigger, before the news. */
+.today__grid--urgent {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  margin-bottom: 1rem;
+}
+.today__grid--urgent .today-card {
+  border-width: 2px;
+  border-top-width: 6px;
+  border-color: var(--color-kumkum);
+}
+.today__grid--urgent .today-card__head h2 {
+  font-size: 1.3rem;
+}
+.today__grid--urgent .today-card__count {
+  font-size: 2.2rem;
+}
+.today__clear {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--style-radius-l);
+  background: var(--chip-done-bg);
+  color: var(--chip-done-fg);
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+.today__clear svg {
+  flex-shrink: 0;
 }
 .today-card {
   border: 1px solid var(--theme-elevation-150);
@@ -373,6 +492,7 @@ h1,
 }
 .today-card small {
   color: var(--theme-elevation-650);
+  font-size: 0.95rem;
 }
 .today-card small.is-late,
 .today-card__warn {
@@ -441,7 +561,7 @@ h1,
   padding: 0.15rem 0.65rem;
   border-radius: 999px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   white-space: nowrap;
 }
 .status-chip.is-urgent {
@@ -481,6 +601,7 @@ h1,
 }
 .title-cell small {
   color: var(--theme-elevation-650);
+  font-size: 0.95rem;
 }
 .thumb-cell {
   display: flex;
@@ -539,15 +660,19 @@ h1,
 .one-tap__btn.is-primary:hover {
   background: var(--action-hover);
 }
+/* WhatsApp: an outlined green button beside the one filled next step. */
 .one-tap__btn.is-whatsapp {
+  border: 2px solid var(--whatsapp);
+  color: var(--whatsapp);
+}
+.one-tap__btn.is-whatsapp.is-solid {
   background: #1f7a3a;
   border-color: #1f7a3a;
   color: #fff;
 }
 .one-tap__btn.is-small {
-  min-height: 36px;
   padding: 0 0.9rem;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 .one-tap__btn:disabled {
   opacity: 0.5;
@@ -558,13 +683,13 @@ h1,
   color: var(--theme-elevation-650);
 }
 
-/* Order: progress steps and the summary card */
+/* Order: where it is (a quiet progress line, not buttons) and the summary card */
 .order-steps {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.35rem 1rem;
   list-style: none;
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
   padding: 0;
   counter-reset: step;
 }
@@ -573,42 +698,40 @@ h1,
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.3rem 0.8rem 0.3rem 0.35rem;
-  border-radius: 999px;
-  background: var(--theme-elevation-100);
-  color: var(--theme-elevation-700);
-  font-weight: 600;
+  color: var(--theme-elevation-650);
 }
 .order-steps li::before {
   content: counter(step);
   display: inline-grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 2px solid var(--theme-elevation-300);
   border-radius: 999px;
-  background: var(--theme-elevation-0);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 .order-steps li.is-done {
-  background: var(--chip-done-bg);
   color: var(--chip-done-fg);
 }
 .order-steps li.is-done::before {
-  content: '✓';
-}
-.order-steps li.is-now {
-  background: var(--action);
+  content: '\2713';
+  border-color: var(--color-leaf);
+  background: var(--color-leaf);
   color: #fff;
 }
-/* The last step is done, not urgent: leaf, not kumkum. */
-.order-steps li.is-now:last-child {
-  background: var(--color-leaf);
+.order-steps li.is-now {
+  color: var(--theme-text);
+  font-weight: 700;
 }
 .order-steps li.is-now::before {
-  color: var(--color-charcoal);
-  background: #fff;
+  border-color: var(--color-peacock);
+  background: var(--color-peacock);
+  color: #fff;
 }
 html[data-theme='dark'] .order-steps li.is-now::before {
+  border-color: #5fb3c7;
+  background: #5fb3c7;
   color: #1e1b18;
 }
 .order-stopped {
@@ -643,7 +766,7 @@ html[data-theme='dark'] .order-steps li.is-now::before {
 }
 .order-card__block h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--theme-elevation-650);
@@ -687,6 +810,12 @@ html[data-theme='dark'] .order-steps li.is-now::before {
 }
 .order-card__items li small {
   color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.order-card__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 .order-card__items img,
 .order-card__noimg {
@@ -797,7 +926,7 @@ body:has(.payload-settings) #force-unlock {
   font-size: 1.4rem;
 }
 .stock-field__now small {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--theme-elevation-650);
 }
 .stock-field__row {
@@ -808,7 +937,7 @@ body:has(.payload-settings) #force-unlock {
 }
 .stock-field__n {
   width: 4.5rem;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 0.5rem;
   border: 1px solid var(--theme-elevation-250);
   border-radius: var(--style-radius-s);
@@ -819,6 +948,15 @@ body:has(.payload-settings) #force-unlock {
 
 /* Phones: the save buttons sit fixed along the bottom; the dates row is hidden so nothing scrolls sideways. */
 @media (max-width: 768px) {
+  /* Payload shows or hides the two menu buttons itself, so they only get a size (on a laptop their column is narrow). */
+  .nav-toggler,
+  .nav__mobile-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .app-header__localizer.localizer {
+    right: 60px;
+  }
   .doc-controls__value-wrap {
     display: none;
   }
@@ -848,8 +986,34 @@ body:has(.payload-settings) #force-unlock {
   }
   .doc-controls .btn {
     min-height: 48px;
+    padding-inline: 0.5rem;
     font-size: 1rem;
+    line-height: 1.2;
     white-space: normal;
+  }
+  /* The bar's buttons share its width (they were squeezed to one word per line). */
+  .doc-controls__controls {
+    flex: 1;
+    min-width: 0;
+    padding-left: 0;
+  }
+  .doc-controls__controls::after {
+    display: none;
+  }
+  .doc-controls__controls > .form-submit {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .doc-controls__controls > .form-submit .btn,
+  .doc-controls__controls > .form-submit > .btn--withPopup {
+    width: 100%;
+  }
+  .doc-controls__controls > .form-submit > .btn--withPopup {
+    display: flex;
+  }
+  .doc-controls__controls > .form-submit > .btn--withPopup > .btn {
+    flex: 1;
+    min-width: 0;
   }
   /* What stays behind once the buttons move to the bottom bar: no empty band. */
   .doc-controls:not(:has(.doc-controls__value-wrap:not(:empty))) {
@@ -897,20 +1061,118 @@ body:has(.payload-settings) #force-unlock {
   .today__top h1 {
     font-size: 2.2rem;
   }
-  .today__quick {
+  .locale-note {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+  /* Breadcrumb on a phone: the home mark and the page above this one ("< Paintings & prints"). The current page's name is
+     the heading right below, so it isn't repeated (squeezed, it garbled into "Paintings & p..., G..."). */
+  .step-nav {
+    gap: 0.25rem;
+  }
+  .step-nav > span:not([class]),
+  .step-nav > .step-nav__last {
+    display: none;
+  }
+  .step-nav > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .step-nav:has(> a:not(.step-nav__home)) > .step-nav__home {
+    display: none;
+  }
+  .step-nav > a:not(.step-nav__home)::before {
+    content: '\2039';
+    margin-right: 0.3rem;
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+  /* Edit tabs: a little tighter so Basics / Story & details / Advanced fit across a phone. */
+  .tabs-field__tab-button {
+    padding: 0 0.55rem;
+  }
+}
+/* Up to tablet width (the type column was cut off at 820 px). */
+@media (max-width: 900px) {
+  /* Paintings & prints and Gallery lists: one card per piece (photo, name, price; sold and status under
+     it) instead of a table that scrolls sideways. */
+  :is(.collection-list--products, .collection-list--artworks) .table :is(table, tbody, tr, td) {
+    display: block;
     width: 100%;
   }
-  .today__add {
-    flex: 1 1 100%;
-    justify-content: center;
+  :is(.collection-list--products, .collection-list--artworks) .table thead,
+  :is(.collection-list--products, .collection-list--artworks) .table :is(.cell-_select, .cell-updatedAt, .cell-createdAt) {
+    display: none;
   }
-  .locale-note {
-    font-size: 0.8rem;
-    padding: 0 0.5rem;
+  :is(.collection-list--products, .collection-list--artworks) .table tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--theme-elevation-150);
+    background: none;
+  }
+  :is(.collection-list--products, .collection-list--artworks) .table td {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  :is(.collection-list--products, .collection-list--artworks) .table td.cell-images {
+    flex: 1 1 100%;
+  }
+  :is(.collection-list--products, .collection-list--artworks) .table td:not(.cell-images) {
+    color: var(--theme-elevation-650);
   }
 }
 /* The open menu wins over the bottom save bar (they sit in different stacking layers, so the bar steps aside). */
 .template-default--nav-open .doc-controls__controls-wrapper,
 body:has(.nav--nav-open) .doc-controls__controls-wrapper {
   visibility: hidden;
+}
+
+/* Empty lists: our own line about what the list is for replaces Payload's "Nothing found" (its Add button stays). */
+.empty-note {
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px dashed var(--theme-elevation-300);
+  border-radius: var(--style-radius-m);
+  font-size: 1.05rem;
+}
+.collection-list:has(.empty-note) .no-results > :not(.no-results__actions) {
+  display: none;
+}
+
+/* "Write in English / Marathi / Hindi" above the name on painting and gallery pages. */
+.locale-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  color: var(--theme-elevation-650);
+}
+.locale-switch__btn {
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 999px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  color: var(--theme-text);
+  font: inherit;
+  cursor: pointer;
+}
+.locale-switch__btn[aria-pressed='true'] {
+  border-color: var(--theme-elevation-800);
+  background: var(--theme-elevation-800);
+  color: var(--theme-elevation-0);
+  font-weight: 600;
 }

@@ -34,6 +34,7 @@ export async function submitEnquiry(_prev: EnquiryState, form: FormData): Promis
     })
     if (totalDocs >= MAX_PER_HOUR) return { status: 'rate' }
     await payload.create({ collection: 'enquiries', data: result.data })
+    // ponytail: no alert yet; the Today page lists new enquiries. Email (Resend) or WhatsApp (MSG91) plugs in here.
     return { status: 'ok' }
   } catch (error) {
     console.error('Enquiry could not be saved', error)

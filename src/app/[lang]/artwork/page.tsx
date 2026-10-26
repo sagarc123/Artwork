@@ -3,7 +3,7 @@ import { Gallery } from '@/components/Gallery'
 import { PageHero } from '@/components/PageHero'
 import { alternates } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { getArtworks, toGalleryItem } from '@/server/content'
+import { getGallery, toGalleryItem } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary()
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ArtworkPage() {
   const locale = await getLocale()
   const t = await getDictionary()
-  const items = (await getArtworks(locale)).map((a) => toGalleryItem(a, locale))
+  const items = (await getGallery(locale)).map((a) => toGalleryItem(a, locale))
 
   return (
     <>

@@ -2,7 +2,7 @@ import type { Field, GlobalConfig } from 'payload'
 import { anyone, hideFromHelpers, isOwner } from '../access'
 import { refreshGlobalOnChange } from '../hooks'
 
-const SAMPLE = 'SAMPLE value from setup — owner to confirm before launch.'
+const SAMPLE = 'Sample prices from setup. Please check them before the website goes live.'
 const rupees = (name: string, label: string): Field => ({ name, label, type: 'number', min: 0, admin: { description: 'Starting price in ₹. Leave empty to hide it.' } })
 
 /** One row of the portrait price table: A4 / A3 / A2 and how long it takes. */

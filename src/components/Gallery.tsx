@@ -32,8 +32,9 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
   const [open, setOpen] = useState<number | null>(null)
   const dialog = useRef<HTMLDialogElement>(null)
 
-  const categories = [...new Map(items.filter((i) => i.category).map((i) => [i.category!.slug, i.category!.name]))]
-  const shown = tab === 'all' ? items : items.filter((i) => i.category?.slug === tab)
+  // By name: a shop piece's category and the gallery's one of the same name are one tab.
+  const categories = [...new Set(items.flatMap((i) => (i.category ? [i.category.name] : [])))].map((name) => [name, name] as const)
+  const shown = tab === 'all' ? items : items.filter((i) => i.category?.name === tab)
   const current = open === null ? null : shown[open]
   // Neighbouring rangoli stand-ins never share a style.
   const styles = noRepeat(shown.map((i) => styleFor(i.seed)))

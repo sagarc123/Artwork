@@ -1,9 +1,9 @@
 import type { ServerProps } from 'payload'
-import { CalendarClock, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Plus, ShoppingBag, Truck, type LucideIcon } from 'lucide-react'
+import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Plus, Truck, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { hasRole } from '../access'
-import { listUrl, waited } from '../../lib/admin'
+import { ago, listUrl } from '../../lib/admin'
 import { indiaToday } from '../../lib/dates'
 import { formatPrice } from '../../lib/site'
 
@@ -19,7 +19,9 @@ type Item = { id: number; label: string; note?: string; alert?: boolean; href: s
 /** urgent = waiting on you (kumkum), calm = nothing to do (leaf), info = just numbers. */
 type Tone = 'urgent' | 'calm' | 'info'
 
-function Card({ title, icon: Icon, count, href, items, empty, tone, children }: { title: string; icon: LucideIcon; count?: number; href: string; items?: Item[]; empty: string; tone: Tone; children?: ReactNode }) {
+type CardProps = { title: string; icon: LucideIcon; count?: number; href: string; items?: Item[]; empty: string; tone: Tone; children?: ReactNode }
+
+function Card({ title, icon: Icon, count, href, items, empty, tone, children }: CardProps) {
   return (
     <section className={`today-card is-${tone}`}>
       <Link href={href} className="today-card__head">
@@ -60,11 +62,11 @@ export async function Today({ payload, user }: ServerProps) {
   const content = hasRole(user, 'owner', 'editor')
   const orders = hasRole(user, 'owner', 'staff')
   const now = clock()
-  const ago = (iso: string) => waited(now - Date.parse(iso))
+  const since = (iso: string) => ago(now - Date.parse(iso))
   const orderItem = (o: { id: number; orderNumber?: string | null; customer?: { name?: string | null } | null; total?: number | null; createdAt: string }): Item => ({
     id: o.id,
     label: `${o.orderNumber ?? `#${o.id}`} · ${o.customer?.name ?? ''} · ${formatPrice(o.total ?? 0)}`,
-    note: ago(o.createdAt) + ' ago',
+    note: since(o.createdAt),
     href: edit('orders', o.id),
   })
   const findOrders = (status: string[]) =>
@@ -90,10 +92,45 @@ export async function Today({ payload, user }: ServerProps) {
   })
   const oldestNew = enquiries?.docs[0]
   const lateEnquiry = oldestNew ? now - Date.parse(oldestNew.createdAt) > replyHours * 3_600_000 : false
-  const tone = (n: number | undefined): Tone => (n ? 'urgent' : 'calm')
   const firstName = String((user as { name?: string }).name ?? '').split(' ')[0]
   const today = new Intl.DateTimeFormat('en-IN', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' }).format(now)
   const waiting = (enquiries?.totalDocs ?? 0) + (cod?.totalDocs ?? 0) + (toPack?.totalDocs ?? 0)
+
+  // Cards with something in them come first (waiting on you, then just news); empty ones fold into one "All clear" line.
+  const cards: (CardProps & { key: string })[] = [
+    enquiries && {
+      key: 'enquiries',
+      title: 'New enquiries',
+      icon: Inbox,
+      count: enquiries.totalDocs,
+      href: listUrl('enquiries', 'status', ['new']),
+      tone: 'urgent' as const,
+      empty: 'no new enquiries',
+      items: enquiries.docs.map((e) => {
+        const late = now - Date.parse(e.createdAt) > replyHours * 3_600_000
+        return { id: e.id, label: `${e.name} · ${ASKING[e.type] ?? e.type}`, note: since(e.createdAt), alert: late, href: edit('enquiries', e.id) }
+      }),
+      children: lateEnquiry && <p className="today-card__warn">The oldest came in {since(oldestNew!.createdAt)}: past your {replyHours} h reply promise.</p>,
+    },
+    cod && { key: 'cod', title: 'COD orders to confirm', icon: MessageCircle, count: cod.totalDocs, href: listUrl('orders', 'status', ['cod_pending_confirmation']), tone: 'urgent' as const, empty: 'no COD orders to confirm', items: cod.docs.map(orderItem) },
+    toPack && { key: 'pack', title: 'Orders to pack', icon: Package, count: toPack.totalDocs, href: listUrl('orders', 'status', ['paid', 'cod_confirmed']), tone: 'urgent' as const, empty: 'nothing to pack', items: toPack.docs.map(orderItem) },
+    prints && { key: 'prints', title: 'Prints running out', icon: PackageCheck, count: lowPrints.length, href: listUrl('products', 'type', ['print']), tone: 'urgent' as const, empty: 'all prints in stock', items: lowPrints.slice(0, 5) },
+    festivals && {
+      key: 'festivals',
+      title: 'Festival dates to update',
+      icon: CalendarClock,
+      count: festivals.totalDocs,
+      href: '/admin/collections/festivals',
+      tone: 'urgent' as const,
+      empty: 'festival dates are up to date',
+      items: festivals.docs.map((f) => ({ id: f.id, label: f.name, note: 'date has passed', href: edit('festivals', f.id) })),
+    },
+    shipped && { key: 'shipped', title: 'On the way', icon: Truck, count: shipped.totalDocs, href: listUrl('orders', 'status', ['shipped']), tone: 'info' as const, empty: 'nothing on the way', items: shipped.docs.map(orderItem) },
+  ].filter((c) => !!c)
+  const urgent = cards.filter((c) => c.count && c.tone === 'urgent')
+  const info = cards.filter((c) => c.count && c.tone !== 'urgent')
+  const clear = cards.filter((c) => !c.count)
+  const card = ({ key, ...c }: CardProps & { key: string }) => <Card key={key} {...c} />
 
   return (
     <div className="today">
@@ -111,18 +148,8 @@ export async function Today({ payload, user }: ServerProps) {
         </div>
         <nav className="today__quick" aria-label="Quick links">
           {content && (
-            <Link href="/admin/collections/products/create" className="today__add">
+            <Link href="/admin/collections/products/create" className="today__link">
               <Plus size={20} aria-hidden="true" /> Add a painting
-            </Link>
-          )}
-          {orders && (
-            <Link href="/admin/collections/orders" className="today__link">
-              <ShoppingBag size={18} aria-hidden="true" /> Orders
-            </Link>
-          )}
-          {orders && (
-            <Link href="/admin/collections/enquiries" className="today__link">
-              <MessageCircle size={18} aria-hidden="true" /> Enquiries
             </Link>
           )}
           <a href="/" target="_blank" rel="noopener noreferrer" className="today__link">
@@ -130,47 +157,28 @@ export async function Today({ payload, user }: ServerProps) {
           </a>
         </nav>
       </header>
-      <div className="today__grid">
-        {enquiries && (
-          <Card
-            title="New enquiries"
-            icon={Inbox}
-            count={enquiries.totalDocs}
-            href={listUrl('enquiries', 'status', ['new'])}
-            tone={tone(enquiries.totalDocs)}
-            empty="No new enquiries."
-            items={enquiries.docs.map((e) => {
-              const late = now - Date.parse(e.createdAt) > replyHours * 3_600_000
-              return { id: e.id, label: `${e.name} · ${ASKING[e.type] ?? e.type}`, note: `waiting ${ago(e.createdAt)}`, alert: late, href: edit('enquiries', e.id) }
-            })}
-          >
-            {lateEnquiry && <p className="today-card__warn">Oldest has waited {ago(oldestNew!.createdAt)}: past your {replyHours} h reply promise.</p>}
-          </Card>
-        )}
-        {cod && <Card title="COD orders to confirm" icon={MessageCircle} count={cod.totalDocs} href={listUrl('orders', 'status', ['cod_pending_confirmation'])} tone={tone(cod.totalDocs)} empty="Nothing to confirm." items={cod.docs.map(orderItem)} />}
-        {toPack && <Card title="Orders to pack" icon={Package} count={toPack.totalDocs} href={listUrl('orders', 'status', ['paid', 'cod_confirmed'])} tone={tone(toPack.totalDocs)} empty="Nothing to pack." items={toPack.docs.map(orderItem)} />}
-        {shipped && <Card title="On the way" icon={Truck} count={shipped.totalDocs} href={listUrl('orders', 'status', ['shipped'])} tone="info" empty="No parcels on the way." items={shipped.docs.map(orderItem)} />}
-        {week && (
-          <Card title="Sales, last 7 days" icon={IndianRupee} href={listUrl('orders', 'status', SOLD)} tone="info" empty="">
-            <p className="today-card__big">{formatPrice(week.docs.reduce((sum, o) => sum + (o.total ?? 0), 0))}</p>
-            <p className="today-card__empty">
-              {week.docs.length} {week.docs.length === 1 ? 'order' : 'orders'}
-            </p>
-          </Card>
-        )}
-        {prints && <Card title="Prints running out" icon={PackageCheck} count={lowPrints.length} href={listUrl('products', 'type', ['print'])} tone={lowPrints.length ? 'urgent' : 'calm'} empty="All prints in stock." items={lowPrints.slice(0, 5)} />}
-        {festivals && (
-          <Card
-            title="Festival dates to update"
-            icon={CalendarClock}
-            count={festivals.totalDocs}
-            href="/admin/collections/festivals"
-            tone={festivals.totalDocs ? 'urgent' : 'calm'}
-            empty="All festival dates are ahead."
-            items={festivals.docs.map((f) => ({ id: f.id, label: f.name, note: 'date has passed', href: edit('festivals', f.id) }))}
-          />
-        )}
-      </div>
+      {urgent.length > 0 && <div className="today__grid today__grid--urgent">{urgent.map(card)}</div>}
+      {clear.length > 0 && (
+        <p className="today__clear">
+          <CheckCircle2 size={22} aria-hidden="true" />
+          <span>
+            <strong>All clear:</strong> {clear.map((c) => c.empty).join(', ')}.
+          </span>
+        </p>
+      )}
+      {(info.length > 0 || week) && (
+        <div className="today__grid">
+          {info.map(card)}
+          {week && (
+            <Card title="Sales, last 7 days" icon={IndianRupee} href={listUrl('orders', 'status', SOLD)} tone="info" empty="">
+              <p className="today-card__big">{formatPrice(week.docs.reduce((sum, o) => sum + (o.total ?? 0), 0))}</p>
+              <p className="today-card__empty">
+                {week.docs.length} {week.docs.length === 1 ? 'order' : 'orders'}
+              </p>
+            </Card>
+          )}
+        </div>
+      )}
       <h2 className="today__all">Everything else</h2>
     </div>
   )

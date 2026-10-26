@@ -7,7 +7,7 @@ import { PageHero } from '@/components/PageHero'
 import { ShopGrid } from '@/components/ShopGrid'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { festivalLook, getArtworks, getFestivals, getProducts, getSlugs, toGalleryItem, toShopItem } from '@/server/content'
+import { festivalLook, getGallery, getFestivals, getProducts, getSlugs, toGalleryItem, toShopItem } from '@/server/content'
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
@@ -38,7 +38,7 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
   const { festival, locale } = await load(params)
   const t = await getDictionary()
   const look = festivalLook(festival.slug)
-  const [artworks, products] = await Promise.all([getArtworks(locale), getProducts(locale)])
+  const [artworks, products] = await Promise.all([getGallery(locale), getProducts(locale)])
   const gallery = artworks.filter((a) => idOf(a.festival) === festival.id).map((a) => toGalleryItem(a, locale))
   const shop = products.filter((p) => idOf(p.festival) === festival.id).map((p) => toShopItem(p, locale))
   const date = festival.nextDate ? new Intl.DateTimeFormat(`${locale}-IN`, { dateStyle: 'long' }).format(new Date(festival.nextDate)) : null

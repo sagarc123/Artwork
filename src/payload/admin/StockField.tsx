@@ -46,7 +46,8 @@ export const StockField: NumberFieldClientComponent = (props) => {
     setLive({ stock: row.stock, reserved: row.reserved ?? 0 })
     // Keep the form's copy in step without marking it unsaved (the save ignores it anyway).
     dispatchFields({ type: 'UPDATE', path, value: row.stock })
-    if (delta < 0 && row.stock > (live?.stock ?? 0) + delta) toast.info(`Kept ${row.stock}: some are held for people paying right now.`)
+    if (delta < 0 && row.stock > (live?.stock ?? 0) + delta) toast.info(`Saved ✓ Kept ${row.stock}: some are held for people paying right now.`)
+    else toast.success(`Saved ✓ ${row.stock} in stock`)
   }
 
   return (
@@ -65,7 +66,7 @@ export const StockField: NumberFieldClientComponent = (props) => {
           − Remove
         </button>
       </div>
-      <p className="field-description">Changes straight away; no need to save.</p>
+      <p className="field-description">Saved as soon as you tap. No need to press Save.</p>
     </div>
   )
 }
