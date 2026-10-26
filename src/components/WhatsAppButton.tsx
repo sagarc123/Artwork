@@ -17,7 +17,7 @@ export function WhatsAppButton({ label, aria, message }: { label: string; aria: 
       target="_blank"
       rel="noopener noreferrer"
       aria-label={aria}
-      className="wa-nudge fixed right-6 bottom-6 z-45 hidden h-13 items-center gap-2 rounded-full bg-leaf px-5 font-semibold text-white shadow-md hover:bg-leaf/90 xl:inline-flex"
+      className="wa-nudge fixed right-6 bottom-6 z-45 hidden h-13 items-center gap-2 rounded-full bg-leaf px-5 font-semibold text-white shadow-md hover:bg-leaf/90 lg:inline-flex"
     >
       <MessageCircle aria-hidden="true" className="size-6" />
       {label}

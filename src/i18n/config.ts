@@ -78,3 +78,16 @@ export function resolveLocaleRoute(pathname: string, cookieLocale?: string, acce
   if (browser !== defaultLocale) return { action: 'redirect', to: localePath(browser, pathname), remember: browser }
   return { action: 'rewrite', to: pathname === '/' ? '/en' : `/en${pathname}` }
 }
+
+/** localStorage key for the first-visit language choice (the cookie can be cleared or blocked on its own). */
+export const LOCALE_STORE = 'lang-chosen'
+
+/**
+ * Whether to show the one-time language chooser: no choice in the cookie or this browser yet, and not a crawler.
+ * A browser that prefers Marathi/Hindi already got its language from the proxy (which sets the cookie), so it never sees it.
+ */
+export function offerLanguageChoice(cookie: string, stored: string | null, userAgent = ''): boolean {
+  if (isLocale(stored ?? undefined)) return false
+  if (cookie.split(/;\s*/).some((c) => c.startsWith(`${LOCALE_COOKIE}=`) && isLocale(c.slice(LOCALE_COOKIE.length + 1)))) return false
+  return !/bot|crawl|spider|slurp|lighthouse|headlesschrome|preview/i.test(userAgent)
+}

@@ -2,13 +2,16 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
-import { getCategories, getProducts, toShopItem } from '@/server/content'
+import { FREE_SHIPPING_FROM } from '@/lib/cart'
+import { formatPrice } from '@/lib/site'
+import { getBusiness, getCategories, getProducts, toShopItem } from '@/server/content'
+import { GenerativeRangoli } from './GenerativeRangoli'
 import { PageHero } from './PageHero'
 import { ShopGrid } from './ShopGrid'
 
 /** Shop listing for /shop and /shop/[category]. */
 export async function ShopView({ locale, t, categorySlug }: { locale: Locale; t: Dictionary; categorySlug?: string }) {
-  const [products, categories] = await Promise.all([getProducts(locale), getCategories(locale, 'shop')])
+  const [products, categories, { cod }] = await Promise.all([getProducts(locale), getCategories(locale, 'shop'), getBusiness()])
   const current = categorySlug ? categories.find((c) => c.slug === categorySlug) : undefined
   if (categorySlug && !current) notFound()
 
@@ -19,7 +22,14 @@ export async function ShopView({ locale, t, categorySlug }: { locale: Locale; t:
 
   return (
     <>
-      <PageHero title={current?.name ?? t.shop.title} sub={t.shop.intro} word="दुकान" />
+      <PageHero
+        title={current?.name ?? t.shop.title}
+        sub={t.shop.intro}
+        artOnPhones={false}
+        art={<GenerativeRangoli seed="shop-hero" style="phool" className="ml-auto w-56 xl:w-64" />}
+      >
+        <p className="font-semibold">{(cod.enabled ? t.shop.trust : t.shop.trustNoCod).replace('{free}', formatPrice(FREE_SHIPPING_FROM))}</p>
+      </PageHero>
       <section className="bg-paper pb-20 lg:pb-28">
         <div className="wrap grid gap-8">
           <nav aria-label={t.shop.type} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2">

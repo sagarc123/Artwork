@@ -20,10 +20,12 @@ type Props = {
   children?: ReactNode
   /** Illustration on the right (desktop) / below (phone). */
   art?: ReactNode
+  /** false: the illustration is desktop-only decoration. */
+  artOnPhones?: boolean
 }
 
 /** Top section for inner pages, on a coloured "floor". */
-export function PageHero({ floor = 'paper', kicker, title, sub, word, children, art }: Props) {
+export function PageHero({ floor = 'paper', kicker, title, sub, word, children, art, artOnPhones = true }: Props) {
   const dark = floor !== 'paper'
   return (
     <section className={`relative overflow-hidden ${FLOORS[floor]}`}>
@@ -46,7 +48,7 @@ export function PageHero({ floor = 'paper', kicker, title, sub, word, children, 
             </div>
           )}
         </div>
-        {art && <div className="lg:col-span-6">{art}</div>}
+        {art && <div className={`lg:col-span-6 ${artOnPhones ? '' : 'max-lg:hidden'}`}>{art}</div>}
       </div>
     </section>
   )

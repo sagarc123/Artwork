@@ -1,19 +1,20 @@
 import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, PowderHeap, StepList, Threshold } from '@/components/Art'
+import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, StepList, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { MediaImage } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
+import { SoldBadge } from '@/components/SoldBadge'
 import { Testimonials } from '@/components/Testimonials'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { eventFrom, fromText, portraitFrom } from '@/lib/prices'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
-import { festivalLook, getCategories, getFestivals, getProducts, getServicePrices, getTestimonials, toShopItem } from '@/server/content'
+import { festivalLook, getFestivals, getProducts, getServicePrices, getTestimonials, toShopItem } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: alternates(await getLocale(), '/') }
@@ -26,26 +27,13 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
-  const [products, categories, festivalDocs, prices, testimonials] = await Promise.all([
+  const [products, festivalDocs, prices, testimonials] = await Promise.all([
     getProducts(locale),
-    getCategories(locale, 'shop'),
     getFestivals(locale),
     getServicePrices(locale),
     getTestimonials(locale),
   ])
 
-  // Each heap opens its own shop category (matched by slug, which doesn't change with the language).
-  const shopFor = (word: string) => {
-    const c = categories.find((x) => x.slug.includes(word))
-    return p(c ? `/shop/${c.slug}` : '/shop')
-  }
-  const heaps = [
-    { href: shopFor('drawing'), label: h.categories.drawings, color: '#ece4d6' },
-    { href: shopFor('painting'), label: h.categories.paintings, color: 'var(--color-marigold)' },
-    { href: shopFor('rangoli'), label: h.categories.rangoli, color: '#d0473b' },
-    { href: p('/custom-portraits'), label: h.categories.portraits, color: 'var(--color-turmeric)' },
-    ...(site.coursesLive ? [{ href: p('/courses'), label: h.categories.courses, color: '#5aa16a' }] : []),
-  ]
   // Latest pieces, the ones marked "featured" first.
   const featured = [...products]
     .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
@@ -148,28 +136,6 @@ export default async function HomePage() {
 
       <Threshold />
 
-      {/* 4 · Categories as heaps of rangoli powder. */}
-      <section className="bg-charcoal grain-dark py-16 text-paper lg:py-24">
-        <div className="wrap grid gap-10">
-          <h2 className="font-heading text-h1">{h.categories.title}</h2>
-          <ul className={`grid gap-2 sm:grid-cols-3 lg:gap-6 ${heaps.length > 4 ? 'lg:grid-cols-5' : 'sm:grid-cols-4'}`}>
-            {heaps.map((c) => (
-              <li key={c.label}>
-                <Link
-                  href={c.href}
-                  className="card flex min-h-16 items-center gap-4 rounded-ui p-3 hover:bg-paper/5 sm:grid sm:justify-items-center sm:gap-4 sm:p-6 sm:text-center"
-                >
-                  <PowderHeap color={c.color} className="w-20 shrink-0 sm:w-28" />
-                  <span className="text-h3">{c.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <Threshold />
-
       {/* 5 · New from the studio: framed, taped, different sizes. */}
       <section className="bg-paper grain py-16 lg:py-28">
         <div className="wrap grid gap-10">
@@ -200,18 +166,17 @@ export default async function HomePage() {
                         sizes={i === 0 ? '(min-width: 1024px) 50vw, 100vw' : '(min-width: 1024px) 25vw, 50vw'}
                         className={f.sold ? 'opacity-70 grayscale-[.3]' : ''}
                       />
+                      {f.sold && <SoldBadge label={t.shop.sold} className="absolute top-5 left-5 lg:top-6 lg:left-6" />}
                     </div>
                     <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.title}</span>
-                    <span className="font-semibold">
-                      {f.sold ? (
-                        t.shop.sold
-                      ) : (
-                        <>
-                          {f.hasMorePrices && <span className="font-normal text-muted">{t.shop.from} </span>}
-                          {formatPrice(f.price)}
-                        </>
-                      )}
-                    </span>
+                    {f.sold ? (
+                      <s className="text-muted">{formatPrice(f.price)}</s>
+                    ) : (
+                      <span className="font-semibold">
+                        {f.hasMorePrices && <span className="font-normal text-muted">{t.shop.from} </span>}
+                        {formatPrice(f.price)}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}
@@ -228,10 +193,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Threshold />
+      {/* Phones skip the artist section (About is one tap away in the menu) to keep the home page short. */}
+      <Threshold className="max-lg:hidden" />
 
       {/* 6 · Meet the artist on a charcoal floor. */}
-      <section className="relative overflow-hidden bg-charcoal grain-dark py-20 text-paper lg:py-32">
+      <section className="relative overflow-hidden bg-charcoal max-lg:hidden grain-dark py-20 text-paper lg:py-32">
         <DisplayWord className="absolute top-2 -left-6 text-paper/[0.07]">सिद्धेश</DisplayWord>
         <div className="wrap relative grid gap-14 lg:grid-cols-12 lg:items-center">
           <div className="relative mx-4 lg:col-span-5 lg:mx-0">

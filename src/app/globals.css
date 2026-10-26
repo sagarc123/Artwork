@@ -161,11 +161,15 @@ dialog.drawer[open] {
     radial-gradient(circle, var(--color-paper) 1.5px, #0000 2px) 0 8px / 16px 8px repeat-x,
     var(--color-kumkum);
 }
-.powder-dots {
-  height: 14px;
+/* Threshold between floors: the same border over a row of powder dots, on one empty element. */
+.threshold {
+  height: 30px;
   background:
-    radial-gradient(circle, var(--color-marigold) 2.2px, #0000 2.8px) 0 50% / 26px 14px repeat-x,
-    radial-gradient(circle, var(--color-peacock) 1.6px, #0000 2.2px) 13px 50% / 26px 14px repeat-x;
+    conic-gradient(from 135deg at 50% 0, var(--color-turmeric) 90deg, #0000 0) 0 0 / 16px 8px repeat-x,
+    radial-gradient(circle, var(--color-paper) 1.5px, #0000 2px) 0 8px / 16px 8px repeat-x,
+    linear-gradient(var(--color-kumkum), var(--color-kumkum)) 0 0 / 100% 16px no-repeat,
+    radial-gradient(circle, var(--color-marigold) 2.2px, #0000 2.8px) 0 16px / 26px 14px repeat-x,
+    radial-gradient(circle, var(--color-peacock) 1.6px, #0000 2.2px) 13px 16px / 26px 14px repeat-x;
 }
 /* Mango-leaf toran over a doorway. */
 .toran {
@@ -198,6 +202,10 @@ dialog.drawer[open] {
   font-size: clamp(5rem, 3rem + 8vw, 11rem);
   line-height: 0.9;
   white-space: nowrap;
+  /* Texture for wide screens only: on phones and tablets it just crowds the heading. */
+  @media (width < 64rem) {
+    display: none;
+  }
 }
 .brush {
   display: block;
@@ -209,17 +217,6 @@ dialog.drawer[open] {
   stroke: var(--color-marigold);
   stroke-width: 6;
   stroke-linecap: round;
-}
-/* A heap of rangoli powder. */
-.powder-heap {
-  display: block;
-  width: 6.5rem;
-  height: 3.5rem;
-  background:
-    radial-gradient(circle, var(--heap) 1.4px, #0000 2px) 50% 100% / 11px 9px,
-    radial-gradient(ellipse 50% 80% at 50% 100%, var(--heap) 62%, color-mix(in oklab, var(--heap), black 28%) 86%, #0000 88%);
-  -webkit-mask: radial-gradient(ellipse 60% 100% at 50% 100%, #000 70%, #0000 72%);
-  mask: radial-gradient(ellipse 60% 100% at 50% 100%, #000 70%, #0000 72%);
 }
 .tilt-left {
   rotate: -3deg;

@@ -2,18 +2,19 @@
 
 import { MessageCircle, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode, type RefObject } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { formatPrice, whatsappLink } from '@/lib/site'
 import { cartActions } from './cart-store'
 import { pinch } from './pinch'
+import { SoldBadge } from './SoldBadge'
 
 type Variant = { id: string; label: string; price: number; compareAtPrice?: number | null; stock: number }
 type Frame = { id: string; label: string; extraPrice: number }
 type Props = {
   slug: string
   title: string
-  /** Prints and originals get WhatsApp as an equal second button; downloads keep it as a link. */
+  /** Prints and originals get WhatsApp as a second (outline) button; downloads keep it as a link. */
   physical: boolean
   variants: Variant[]
   framing: Frame[]
@@ -24,25 +25,59 @@ type Props = {
   promise?: ReactNode
 }
 
+const btn = 'press inline-flex items-center justify-center gap-2 rounded-ui font-semibold'
+const primary = `${btn} text-white`
+const outline = `${btn} border-[1.5px] border-leaf text-leaf hover:bg-leaf hover:text-white`
+
+/** True once `ref` has scrolled up past the top of the screen (not while it is still below). */
+function useScrolledPast(ref: RefObject<HTMLElement | null>) {
+  const [past, setPast] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    // The root reaches far below the screen, so only "above the top" counts as out: a jump straight past it (anchor, fling) still flips it.
+    const io = new IntersectionObserver(([e]) => setPast(!e.isIntersecting), { rootMargin: '0px 0px 100000px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [ref])
+  return past
+}
+
 /** Size and frame choice with a live price; buy here or on WhatsApp, whichever the buyer trusts. */
 export function ProductBuy({ slug, title, physical, variants, framing, t, cart, cartHref, promise }: Props) {
   const [added, setAdded] = useState(false)
   const [v, setV] = useState(Math.max(0, variants.findIndex((x) => x.stock > 0)))
   const [f, setF] = useState(-1)
+  const actions = useRef<HTMLDivElement>(null)
+  const barShown = useScrolledPast(actions)
   const variant = variants[v]
   const frame = f >= 0 ? framing[f] : null
   const total = variant.price + (frame?.extraPrice ?? 0)
+  const was = variant.compareAtPrice && variant.compareAtPrice > variant.price ? variant.compareAtPrice + (frame?.extraPrice ?? 0) : null
   const soldOut = variants.every((x) => x.stock <= 0)
   const message = `${t.waOrder}: ${title} — ${variant.label}${frame ? `, ${frame.label}` : ''} (${formatPrice(total)})`
+  const similarHref = whatsappLink(`${t.similarMessage}\n${title}`)
+  const add = (e: MouseEvent<HTMLButtonElement>) => {
+    cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
+    pinch(e.currentTarget, 'cart')
+    setAdded(true)
+  }
 
   const option = 'flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-ui border-[1.5px] border-border px-4 has-checked:border-charcoal has-checked:bg-charcoal/5 has-disabled:opacity-50'
 
   return (
     <div className="grid gap-6">
-      <p className="text-h2 font-semibold">
-        {formatPrice(total)}
-        {variant.compareAtPrice && variant.compareAtPrice > variant.price && <s className="ml-3 text-h3 font-normal text-muted">{formatPrice(variant.compareAtPrice)}</s>}
-      </p>
+      {soldOut ? (
+        <p className="flex flex-wrap items-center gap-3">
+          <s className="text-h2 text-muted">{formatPrice(total)}</s>
+          <SoldBadge label={t.sold} />
+        </p>
+      ) : (
+        <p className="text-h2 font-semibold">
+          {formatPrice(total)}
+          {was && <s className="ml-3 text-h3 font-normal text-muted">{formatPrice(was)}</s>}
+        </p>
+      )}
 
       {variants.length > 1 && (
         <fieldset className="grid gap-2">
@@ -59,7 +94,7 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
         </fieldset>
       )}
 
-      {framing.length > 0 && (
+      {framing.length > 0 && !soldOut && (
         <fieldset className="grid gap-2">
           <legend className="mb-2 font-semibold">{t.frame}</legend>
           {[{ id: '', label: t.noFrame, extraPrice: 0 }, ...framing].map((x, i) => (
@@ -75,43 +110,25 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
       )}
 
       {soldOut ? (
-        // Sold: a calm note and a way to ask for a similar piece, instead of a red wall.
-        <div className="grid gap-3 justify-items-start">
-          <p className="rounded-full border-[1.5px] border-charcoal/30 px-4 py-1 font-semibold text-muted">{t.sold}</p>
-          <a
-            href={whatsappLink(`${t.similarMessage}
-${title}`)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ink-link inline-flex min-h-11 items-center gap-2 font-semibold text-leaf"
-          >
-            <MessageCircle aria-hidden="true" className="size-5" />
+        // Sold: a calm note, and asking for a similar piece becomes the main action.
+        <div ref={actions} className="grid gap-3">
+          <p className="font-heading text-h3-sm">{t.soldHome}</p>
+          <a href={similarHref} target="_blank" rel="noopener noreferrer" className={`${primary} h-13 bg-leaf px-6 hover:bg-leaf/90`}>
+            <MessageCircle aria-hidden="true" className="size-6" />
             {t.soldSimilar}
           </a>
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div ref={actions} className="grid gap-3">
           {promise}
-          <div className={`grid gap-3 ${physical ? 'sm:grid-cols-2' : ''}`}>
-            <button
-              type="button"
-              onClick={(e) => {
-                cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
-                pinch(e.currentTarget, 'cart')
-                setAdded(true)
-              }}
-              className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90"
-            >
+          {/* One primary per view: Add to cart is filled; WhatsApp is the outline alternative. */}
+          <div className={`grid gap-3 ${physical ? 'sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2' : ''}`}>
+            <button type="button" onClick={add} className={`${primary} h-13 bg-kumkum px-6 hover:bg-kumkum/90`}>
               <ShoppingCart aria-hidden="true" className="size-6" />
               {cart.add}
             </button>
             {physical && (
-              <a
-                href={whatsappLink(message)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-leaf px-6 font-semibold text-white hover:bg-leaf/90"
-              >
+              <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={`${outline} h-13 px-6`}>
                 <MessageCircle aria-hidden="true" className="size-6" />
                 {t.order}
               </a>
@@ -133,6 +150,43 @@ ${title}`)}
           )}
         </div>
       )}
+
+      {/* Phones and tablets: price and the main action stay in reach once the buy box above has scrolled away. Sits on the tab bar. */}
+      <div
+        role="region"
+        aria-label={t.buyBar}
+        inert={!barShown}
+        className={`fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 border-t border-border/25 bg-surface/95 backdrop-blur transition-[translate,opacity] duration-200 lg:hidden ${barShown ? '' : 'pointer-events-none translate-y-4 opacity-0'}`}
+      >
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-5 py-2">
+          {soldOut ? (
+            <>
+              <SoldBadge label={t.sold} />
+              <a href={similarHref} target="_blank" rel="noopener noreferrer" className={`${outline} min-h-12 px-4 py-2 text-left`}>
+                <MessageCircle aria-hidden="true" className="size-5 shrink-0" />
+                {t.soldSimilar}
+              </a>
+            </>
+          ) : (
+            <>
+              <p className="grid leading-tight">
+                <span className="text-h3-sm font-semibold">{formatPrice(total)}</span>
+                {was && <s className="text-muted">{formatPrice(was)}</s>}
+              </p>
+              {added ? (
+                <Link href={cartHref} className="press inline-flex h-12 items-center justify-center rounded-ui border-[1.5px] border-charcoal px-5 font-semibold">
+                  {cart.view}
+                </Link>
+              ) : (
+                <button type="button" onClick={add} className={`${primary} h-12 bg-kumkum px-5 hover:bg-kumkum/90`}>
+                  <ShoppingCart aria-hidden="true" className="size-5" />
+                  {cart.add}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

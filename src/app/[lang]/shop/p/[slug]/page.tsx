@@ -85,15 +85,17 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
-      <div className="wrap grid gap-10 pt-6 lg:grid-cols-12 lg:gap-12 lg:pt-10">
-        <Link href={localePath(locale, '/shop')} className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-peacock lg:col-span-12">
+      {/* Two columns from tablets up, so price and Add to cart sit beside the photo instead of a screen below it. */}
+      <div className="wrap grid gap-6 pt-4 md:grid-cols-12 md:gap-8 lg:gap-12 lg:pt-10">
+        <Link href={localePath(locale, '/shop')} className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-peacock md:col-span-12">
           <ArrowLeft aria-hidden="true" className="size-5" />
           {s.back}
         </Link>
 
-        <div className="grid content-start gap-4 lg:col-span-7">
-          <div className="tape relative bg-surface p-3 shadow-frame lg:p-5">
-            <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, 100vw" priority />
+        <div className="grid content-start gap-4 md:col-span-6 lg:col-span-7">
+          {/* Phones: capped so the price peeks in on the first screen. */}
+          <div className="tape relative mx-auto w-full max-w-[calc(48svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
+            <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 100vw" priority />
           </div>
           {images.length > 1 && (
             <ul className="grid grid-cols-3 gap-3">
@@ -106,7 +108,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
           )}
         </div>
 
-        <div className="grid content-start gap-6 lg:sticky lg:top-32 lg:col-span-5">
+        <div className="grid content-start gap-6 md:col-span-6 lg:sticky lg:top-32 lg:col-span-5">
           <div className="flex items-center justify-between gap-4">
             <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
             <div className="flex flex-wrap justify-end gap-2">
@@ -165,7 +167,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
         </div>
 
         {(product.story || product.description) && (
-          <section className="grid gap-4 lg:col-span-7">
+          <section className="grid max-w-[65ch] gap-4 md:col-span-12 lg:col-span-7">
             <h2 className="font-heading text-h2">{s.story}</h2>
             {product.story && <p className="font-heading text-h3 leading-relaxed">“{product.story}”</p>}
             {product.description && <RichText data={product.description} className="grid gap-4" />}

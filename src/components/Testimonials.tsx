@@ -4,6 +4,8 @@ import { MediaImage } from './MediaImage'
 
 type Labels = { title: string; rating: string }
 
+const COLS = ['', 'mx-auto w-full max-w-2xl', 'md:grid-cols-2', 'lg:grid-cols-3']
+
 /** Quote cards from happy customers (only ones who agreed to be shown). Nothing at all when there are none. */
 export function Testimonials({ items, t, className = 'bg-paper' }: { items: Testimonial[]; t: Labels; className?: string }) {
   if (items.length === 0) return null
@@ -14,15 +16,19 @@ export function Testimonials({ items, t, className = 'bg-paper' }: { items: Test
           <h2 className="font-heading text-h1">{t.title}</h2>
           <BrushUnderline className="brush--view mt-2 w-48" />
         </div>
-        <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {/* Columns follow the count, so one or two quotes never leave an empty slot. */}
+        <ul className={`grid gap-6 ${COLS[Math.min(items.length, 3)]}`}>
           {items.map((q) => {
             const rating = Math.min(5, Math.max(1, Math.round(q.rating ?? 5)))
             return (
               <li key={q.id}>
                 <figure className="grid h-full content-start gap-4 rounded-ui bg-surface p-6 shadow-frame">
-                  <p role="img" aria-label={t.rating.replace('{n}', String(rating))} className="text-h3-sm tracking-widest text-kumkum">
-                    {'★'.repeat(rating)}
-                    <span className="text-charcoal/25">{'★'.repeat(5 - rating)}</span>
+                  <p className="text-h3-sm tracking-widest text-kumkum">
+                    <span className="sr-only">{t.rating.replace('{n}', String(rating))}</span>
+                    <span aria-hidden="true">
+                      {'★'.repeat(rating)}
+                      <span className="text-charcoal/25">{'★'.repeat(5 - rating)}</span>
+                    </span>
                   </p>
                   <blockquote className="font-heading text-h3-sm leading-relaxed">“{q.quote}”</blockquote>
                   <figcaption className="mt-auto flex items-center gap-3">

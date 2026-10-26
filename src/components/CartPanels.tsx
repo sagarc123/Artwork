@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, Minus, Plus, Trash2 } from 'lucide-react'
+import { ChevronDown, LockKeyhole, MessageCircle, Minus, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
@@ -359,31 +359,73 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   const c = t.checkout
   const input = 'h-13 w-full rounded-ui border border-border bg-surface px-4 aria-invalid:border-2 aria-invalid:border-kumkum'
   const option = 'flex cursor-pointer gap-3 rounded-ui border border-border bg-surface p-4 has-checked:border-2 has-checked:border-kumkum has-disabled:cursor-not-allowed has-disabled:opacity-60'
-  const field = (name: CheckoutField | 'line2' | 'note', label: string, props: Record<string, unknown> = {}) => (
+  const field = (name: CheckoutField | 'line2' | 'note', label: string, props: Record<string, unknown> = {}, prefix?: string) => {
+    const box = <input id={name} name={name} className={`${input} ${prefix ? 'rounded-l-none' : ''}`} aria-invalid={errors.includes(name as CheckoutField)} aria-describedby={errors.includes(name as CheckoutField) ? `${name}-error` : undefined} {...props} />
+    return (
     <div className="grid gap-2">
       <label htmlFor={name} className="font-semibold">
         {label}
       </label>
-      <input id={name} name={name} className={input} aria-invalid={errors.includes(name as CheckoutField)} aria-describedby={errors.includes(name as CheckoutField) ? `${name}-error` : undefined} {...props} />
+      {prefix ? (
+        // Same +91 box as the enquiry forms: the buyer types only the 10 digits.
+        <div className="flex">
+          <span aria-hidden="true" className="grid h-13 place-items-center rounded-l-ui border border-r-0 border-border bg-placeholder px-3 font-semibold">
+            {prefix}
+          </span>
+          {box}
+        </div>
+      ) : (
+        box
+      )}
       {errors.includes(name as CheckoutField) && (
         <p id={`${name}-error`} className="font-semibold text-kumkum">
           {c.errors[name as CheckoutField]}
         </p>
       )}
     </div>
+    )
+  }
+  // Step label above each section heading, so the buyer always knows how far along they are.
+  const legend = (step: number, title: string, size = 'text-h2') => (
+    <legend className="mb-2">
+      <span className="block font-semibold text-kumkum">{c.steps[step]}</span>
+      <span className={`block font-heading ${size}`}>{title}</span>
+    </legend>
+  )
+  const summary = (
+    <>
+      {failed && (pending || !quote) && <QuoteError t={c.errors} retry={retry} />}
+      {quote ? (
+        <>
+          <Lines quote={quote} t={t.cart} editable={false} />
+          <Totals quote={quote} t={t.cart} extras={extras} />
+          {physical && <DeliveryPromise locale={locale} deliveredBy={t.shop.deliveredBy} cod={cod && !codReason ? t.shop.codAvailable : null} />}
+        </>
+      ) : (
+        !failed && <p className="text-muted">{t.cart.loading}</p>
+      )}
+    </>
   )
 
   return (
-    <div className="grid gap-10 lg:grid-cols-12">
+    <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
+      {/* Phones and tablets: the total first, the full order one tap away. */}
+      <details className="group rounded-ui bg-surface px-5 shadow-frame lg:hidden">
+        <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-3 font-semibold">
+          <span>{quote ? c.showSummary.replace('{total}', formatPrice(toPay)) : c.summary}</span>
+          <ChevronDown aria-hidden="true" className="size-5 shrink-0 transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="grid gap-6 pb-5">{summary}</div>
+      </details>
       <form ref={formRef} onSubmit={submit} noValidate className="grid content-start gap-8 lg:col-span-7">
         <fieldset className="grid gap-5">
-          <legend className="mb-2 font-heading text-h2">{c.details}</legend>
+          {legend(0, c.details)}
+          {field('phone', `${t.forms.phone} ${t.forms.required}`, { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', required: true, onChange: () => setCodRefused(null) }, '+91')}
           {field('name', `${t.forms.name} ${t.forms.required}`, { autoComplete: 'name', required: true })}
-          {field('phone', `${t.forms.phone} ${t.forms.required}`, { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', required: true, onChange: () => setCodRefused(null) })}
           {field('email', `${t.forms.email} ${t.forms.optional}`, { type: 'email', autoComplete: 'email' })}
         </fieldset>
         <fieldset className="grid gap-5">
-          <legend className="mb-2 font-heading text-h2">{c.address}</legend>
+          {legend(1, c.address)}
           {field('pincode', `${c.pincode} (${c.pincodeHint})`, { inputMode: 'numeric', maxLength: 6, autoComplete: 'postal-code', required: true, onChange: (e: { target: HTMLInputElement }) => setPincode(e.target.value.trim()) })}
           {filledFrom && filledFrom === pin && (
             <p role="status" className="-mt-3 text-muted">
@@ -436,12 +478,19 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           )}
         </details>
         <fieldset className="grid gap-4">
-          <legend className="mb-2 font-heading text-h2">{c.payment}</legend>
+          {legend(2, c.payment)}
           <label className={option}>
             <input type="radio" name="paymentMode" value="prepaid" checked={payMode === 'prepaid'} disabled={!online} onChange={() => setMode('prepaid')} className="mt-1 size-5 accent-kumkum" />
             <span className="grid gap-1">
               <span className="font-semibold">{c.payOnline}</span>
-              <span className="text-muted">{online ? c.safe : c.payOnlineOff}</span>
+              {online ? (
+                <span className="flex gap-2 text-muted">
+                  <LockKeyhole aria-hidden="true" className="mt-1 size-4 shrink-0" />
+                  {c.safe}
+                </span>
+              ) : (
+                <span className="text-muted">{c.payOnlineOff}</span>
+              )}
             </span>
           </label>
           {cod && (
@@ -483,18 +532,9 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           )}
         </fieldset>
       </form>
-      <aside className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
+      <aside className="hidden content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:grid lg:self-start">
         <h2 className="font-heading text-h2">{c.summary}</h2>
-        {failed && (pending || !quote) && <QuoteError t={c.errors} retry={retry} />}
-        {quote ? (
-          <>
-            <Lines quote={quote} t={t.cart} editable={false} />
-            <Totals quote={quote} t={t.cart} extras={extras} />
-            {physical && <DeliveryPromise locale={locale} deliveredBy={t.shop.deliveredBy} cod={cod && !codReason ? t.shop.codAvailable : null} />}
-          </>
-        ) : (
-          !failed && <p className="text-muted">{t.cart.loading}</p>
-        )}
+        {summary}
       </aside>
     </div>
   )

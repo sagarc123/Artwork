@@ -5,11 +5,11 @@ import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MotionToggle } from './MotionSettings'
 import { Signature } from './Signature'
-import { getCategories } from '@/server/content'
+import { getBusiness, getCategories } from '@/server/content'
 
 export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   const p = (path: string) => localePath(locale, path)
-  const categories = await getCategories(locale, 'shop')
+  const [categories, b] = await Promise.all([getCategories(locale, 'shop'), getBusiness()])
   const columns = [
     {
       title: t.footer.shop,
@@ -47,23 +47,26 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   ].filter((s) => s.href)
 
   return (
-    <footer className="bg-charcoal pb-40 text-paper grain-dark xl:pb-20">
+    <footer className="bg-charcoal pb-40 text-paper grain-dark lg:pb-20">
       <div aria-hidden="true" className="paithani" />
-      <div className="wrap grid gap-10 py-16 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+      <div className="wrap grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
         <div className="grid content-start gap-4">
           <p className="font-heading text-h2-sm">{t.brand}</p>
           <p className="max-w-[40ch] text-paper/85">{t.footer.brandLine}</p>
-          <Signature draw="scroll" className="text-marigold" />
+          {/* Desktop only: on phones the empty space before it draws in read as a gap. */}
+          <div className="max-lg:hidden">
+            <Signature draw="scroll" className="text-marigold" />
+          </div>
           <ul className="grid gap-2">
             <li>
               <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 items-center">
                 {t.footer.whatsapp}
               </a>
             </li>
-            {site.phone && (
+            {b.phone && (
               <li>
-                <a href={`tel:${site.phone}`} className="footer-link inline-flex min-h-11 items-center">
-                  {t.footer.call}: {site.phone}
+                <a href={`tel:${b.phone}`} className="footer-link inline-flex min-h-11 items-center">
+                  {t.footer.call}: {b.phone}
                 </a>
               </li>
             )}

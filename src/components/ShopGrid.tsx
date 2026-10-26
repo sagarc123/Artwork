@@ -9,6 +9,7 @@ import { formatPrice } from '@/lib/site'
 import { MediaImage } from './MediaImage'
 import type { Floor } from './PhotoPlaceholder'
 import { SaveButton } from './SaveButton'
+import { SoldBadge } from './SoldBadge'
 
 export type ShopItem = {
   slug: string
@@ -102,15 +103,19 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                     className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
                   />
-                  {item.sold && <span className="absolute top-4 left-4 rounded-ui bg-charcoal/80 px-2 font-semibold text-paper">{t.sold}</span>}
+                  {item.sold && <SoldBadge label={t.sold} className="absolute top-4 left-4" />}
                 </span>
                 <span className="font-heading text-h3-sm">{item.title}</span>
                 <span className="text-muted">{item.meta}</span>
-                <span className="font-semibold">
-                  {item.hasMorePrices && <span className="font-normal text-muted">{t.from} </span>}
-                  {formatPrice(item.price)}
-                  {item.compareAt && item.compareAt > item.price && <s className="ml-2 font-normal text-muted">{formatPrice(item.compareAt)}</s>}
-                </span>
+                {item.sold ? (
+                  <s className="text-muted">{formatPrice(item.price)}</s>
+                ) : (
+                  <span className="font-semibold">
+                    {item.hasMorePrices && <span className="font-normal text-muted">{t.from} </span>}
+                    {formatPrice(item.price)}
+                    {item.compareAt && item.compareAt > item.price && <s className="ml-2 font-normal text-muted">{formatPrice(item.compareAt)}</s>}
+                  </span>
+                )}
               </Link>
               {/* Outside the link (a button can't sit inside one); over the photo's top-right corner. */}
               <SaveButton slug={item.slug} title={item.title} labels={t} className="absolute top-3 right-3 lg:top-4 lg:right-4" />

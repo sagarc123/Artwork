@@ -75,14 +75,6 @@
       "drawing": "Drawn by hand",
       "from": "Portraits from {price}"
     },
-    "categories": {
-      "title": "Explore my work",
-      "drawings": "Drawings",
-      "paintings": "Paintings",
-      "rangoli": "Rangoli Designs",
-      "portraits": "Custom Portraits",
-      "courses": "Courses"
-    },
     "featured": {
       "title": "Fresh from the studio",
       "seeAll": "See all art →",
@@ -120,7 +112,7 @@
     },
     "help": {
       "title": "New to buying online?",
-      "body": "Picture-by-picture guides show you how to order, pay with UPI and watch a lesson. Or just message me on WhatsApp.",
+      "body": "Short guides show you how to order and pay with UPI. Or just message me on WhatsApp.",
       "cta": "See how it works"
     }
   },
@@ -408,8 +400,12 @@
     "shareText": "Look at this piece by Siddesh Mokashi:",
     "deliveredBy": "Delivered by {from} – {to}",
     "codAvailable": "Cash on delivery available",
-    "soldSimilar": "Sold — ask me for something similar",
-    "similarMessage": "Namaste! I saw that this piece has sold. Could you make something similar?"
+    "soldSimilar": "Ask me to make one like it",
+    "similarMessage": "Namaste! I saw that this piece has sold. Could you make something similar?",
+    "soldHome": "This one has found a home.",
+    "trust": "Free delivery above {free} · Cash on delivery",
+    "trustNoCod": "Free delivery above {free}",
+    "buyBar": "Quick buy"
   },
   "cart": {
     "title": "Your cart",
@@ -438,9 +434,9 @@
   },
   "checkout": {
     "title": "Almost there",
-    "details": "1. Your details",
-    "address": "2. Delivery address",
-    "payment": "3. Payment",
+    "details": "Your details",
+    "address": "Delivery address",
+    "payment": "Payment",
     "line1": "House / flat, building",
     "line2": "Area, street, landmark",
     "city": "City",
@@ -449,9 +445,9 @@
     "pincodeHint": "6 digits",
     "note": "Note for delivery (optional)",
     "paying": "Opening payment…",
-    "safe": "Safe payment by Razorpay — UPI, cards, net banking or wallets. You will get a confirmation as soon as it is done.",
+    "safe": "Paid securely through Razorpay. I never see your card details or UPI PIN.",
     "summary": "Your order",
-    "notReady": "Online payment is being switched on. For now, send your order on WhatsApp and I will confirm it with you.",
+    "notReady": "UPI and card payment are coming soon. For now, send your order on WhatsApp and I will confirm it with you.",
     "sendWhatsapp": "Send order on WhatsApp",
     "errors": {
       "name": "Please write your name.",
@@ -472,8 +468,8 @@
       "gstin": "This GSTIN does not look right. Please check the 15 characters.",
       "businessName": "Please write the business name."
     },
-    "payOnline": "Pay online",
-    "payOnlineOff": "Online payment is being switched on. For now, please choose cash on delivery.",
+    "payOnline": "UPI, card or net banking",
+    "payOnlineOff": "UPI and card payment are coming soon. For now, pay cash when your parcel arrives.",
     "cod": "Cash on delivery",
     "codHint": "+{fee} COD fee · for orders up to {max} · prints and originals only. I will confirm your order on WhatsApp before packing.",
     "codFee": "Cash on delivery fee",
@@ -496,7 +492,13 @@
     "giftWrap": "Gift wrap it (+{fee})",
     "giftNote": "Message for the card (optional)",
     "giftNoteHint": "Up to 200 characters. Written on a card inside the parcel — not on the invoice.",
-    "pincodeFilled": "City and state filled in from your pincode. Change them if needed."
+    "pincodeFilled": "City and state filled in from your pincode. Change them if needed.",
+    "steps": [
+      "Step 1 of 3",
+      "Step 2 of 3",
+      "Step 3 of 3"
+    ],
+    "showSummary": "Your order · {total}"
   },
   "order": {
     "metaTitle": "Your order",
@@ -994,7 +996,12 @@
   },
   "langStrip": {
     "label": "भाषा निवडा · भाषा चुनें · Choose your language",
-    "close": "Close"
+    "close": "Not now",
+    "choices": {
+      "mr": "मराठीत पाहा",
+      "hi": "हिंदी में देखें",
+      "en": "Continue in English"
+    }
   },
   "testimonials": {
     "title": "What families say",

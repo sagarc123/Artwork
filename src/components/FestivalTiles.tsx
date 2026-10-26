@@ -32,9 +32,12 @@ export function FestivalTiles({ festivals, t, locale }: { festivals: FestivalTil
             {i === 0 ? <span className="relative z-10 self-start rounded-full bg-turmeric px-3 font-semibold text-charcoal">{t.next}</span> : <span />}
             <FestivalMotif
               kind={f.kind}
-              className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-52 lg:w-64' : 'w-28'}`}
+              className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-32 sm:w-44 lg:w-52' : 'w-28'}`}
             />
-            <span className="relative z-10 grid gap-2">
+            {/* Scrim so the countdown stays readable where it runs over the art. */}
+            {i === 0 && <span aria-hidden="true" className="absolute inset-0 bg-linear-to-tr from-charcoal/70 via-charcoal/20 to-transparent" />}
+            {/* The big tile keeps its text clear of the art on the right. */}
+            <span className={`relative z-10 grid gap-2 ${i === 0 ? 'pr-24 sm:pr-36 lg:pr-44' : ''}`}>
               <span className={`font-heading ${i === 0 ? 'text-h1' : 'text-h3'}`}>{f.name}</span>
               {i === 0 && countdown && (
                 <span className="grid max-w-[34ch] gap-1 font-semibold">

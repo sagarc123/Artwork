@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { localePath, preferredLocale, resolveLocaleRoute, stripLocale } from './config.ts'
+import { localePath, offerLanguageChoice, preferredLocale, resolveLocaleRoute, stripLocale } from './config.ts'
 
 test('localePath keeps English unprefixed and prefixes mr/hi', () => {
   assert.equal(localePath('en', '/shop'), '/shop')
@@ -41,4 +41,14 @@ test('first visit follows the browser language; a remembered choice wins', () =>
   assert.deepEqual(resolveLocaleRoute('/shop', 'en', 'mr-IN'), { action: 'rewrite', to: '/en/shop' })
   assert.deepEqual(resolveLocaleRoute('/shop', undefined, 'en-GB'), { action: 'rewrite', to: '/en/shop' })
   assert.deepEqual(resolveLocaleRoute('/hi/shop', undefined, 'mr'), { action: 'next' })
+})
+
+test('offerLanguageChoice: once, never to crawlers', () => {
+  const chrome = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/141.0 Mobile Safari/537.36'
+  assert.equal(offerLanguageChoice('', null, chrome), true)
+  assert.equal(offerLanguageChoice('theme=x; lang=mr', null, chrome), false)
+  assert.equal(offerLanguageChoice('lang=xx', null, chrome), true)
+  assert.equal(offerLanguageChoice('', 'en', chrome), false)
+  assert.equal(offerLanguageChoice('', 'junk', chrome), true)
+  assert.equal(offerLanguageChoice('', null, 'Mozilla/5.0 (compatible; Googlebot/2.1)'), false)
 })

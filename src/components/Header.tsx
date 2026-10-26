@@ -9,6 +9,7 @@ import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
 import { SavedCount } from './SavedCount'
 import { BrandMark } from './Art'
+import { getBusiness } from '@/server/content'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
@@ -21,8 +22,9 @@ function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   )
 }
 
-export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
+export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
   const p = (path: string) => localePath(locale, path)
+  const { phone } = await getBusiness()
   const commissions = [
     { href: p('/events'), label: t.nav.events, sub: t.menu.eventsSub },
     { href: p('/custom-portraits'), label: t.nav.portraits, sub: t.menu.portraitsSub },
@@ -39,8 +41,8 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
   return (
     <header className="sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
       {/* Desktop utility row */}
-      <div className="hidden border-b border-border/20 xl:block">
-        <div className="wrap flex h-12 items-center justify-between text-muted [&_button]:min-h-10">
+      <div className="hidden border-b border-border/20 lg:block">
+        <div className="wrap flex h-12 items-center justify-between text-muted [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
           <LanguageSwitcher current={locale} label={t.nav.language} />
           <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="hover:text-leaf">
             {t.header.replyPromise}
@@ -52,10 +54,10 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
       </div>
 
       {/* Desktop main row */}
-      <div className="wrap hidden h-20 items-center justify-between gap-6 xl:flex">
+      <div className="wrap hidden h-20 items-center justify-between gap-4 lg:flex xl:gap-6">
         <Logo locale={locale} brand={t.brand} />
         <nav aria-label={t.nav.mainNav}>
-          <ul className="flex items-center gap-6">
+          <ul className="flex items-center gap-4 xl:gap-6">
             {commissions.map((item) => (
               <li key={item.href}>
                 <NavLink href={item.href} className={navClass}>
@@ -74,7 +76,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <Link href={p('/search')} className={iconLink}>
             <Search aria-hidden="true" className="size-6" />
             {t.nav.search}
@@ -99,14 +101,14 @@ export function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
       </div>
 
       {/* Phone/tablet row: menu · logo · search (cart lives in the bottom tab bar) */}
-      <div className="wrap grid h-16 grid-cols-[auto_1fr_auto] items-center gap-2 xl:hidden">
+      <div className="wrap grid h-16 grid-cols-[auto_1fr_auto] items-center gap-2 lg:hidden">
         <MobileMenu
           locale={locale}
           labels={{ ...t.nav, needHelp: t.menu.needHelp, call: t.menu.call }}
           featured={commissions}
           links={[{ href: p('/'), label: t.nav.home }, ...sections, { href: p('/wishlist'), label: t.nav.saved }, { href: p('/help'), label: t.nav.help }, { href: p('/contact'), label: t.nav.contact }]}
           whatsappHref={whatsappLink(t.whatsapp.message)}
-          phone={site.phone}
+          phone={phone}
         />
         <div className="flex justify-center">
           <Logo locale={locale} brand={t.brand} />

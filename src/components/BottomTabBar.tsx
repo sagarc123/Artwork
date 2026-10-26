@@ -27,9 +27,9 @@ export function BottomTabBar({ locale, labels, navLabel, itemsLabel, whatsappHre
     <nav
       aria-label={navLabel}
       style={{ viewTransitionName: 'tabbar' }}
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border/25 bg-surface pb-[env(safe-area-inset-bottom)] xl:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border/25 bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <ul className="grid h-16 grid-cols-5">
+      <ul className="mx-auto grid h-16 max-w-lg grid-cols-5">
         {TABS.map((t) => {
           const { href, key, Icon } = t
           const active = under(href) || ('also' in t && under(t.also))

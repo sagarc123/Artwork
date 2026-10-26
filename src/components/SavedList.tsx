@@ -11,6 +11,7 @@ import { MediaImage } from './MediaImage'
 import { pinch } from './pinch'
 import { ShareButton } from './ShareButton'
 import type { ShopItem } from './ShopGrid'
+import { SoldBadge } from './SoldBadge'
 
 /** A saved product. `variantId` is set when it can go straight into the cart (one size, in stock). */
 export type SavedProduct = ShopItem & { variantId?: string }
@@ -62,13 +63,17 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
                   sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                   className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
                 />
-                {item.sold && <span className="absolute top-4 left-4 rounded-ui bg-kumkum px-2 font-semibold text-white">{shop.sold}</span>}
+                {item.sold && <SoldBadge label={shop.sold} className="absolute top-4 left-4" />}
               </span>
               <span className="font-heading text-h3-sm">{item.title}</span>
-              <span className="font-semibold">
-                {item.hasMorePrices && <span className="font-normal text-muted">{shop.from} </span>}
-                {formatPrice(item.price)}
-              </span>
+              {item.sold ? (
+                <s className="text-muted">{formatPrice(item.price)}</s>
+              ) : (
+                <span className="font-semibold">
+                  {item.hasMorePrices && <span className="font-normal text-muted">{shop.from} </span>}
+                  {formatPrice(item.price)}
+                </span>
+              )}
             </Link>
             {item.sold ? (
               <Link href={similarHref} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
