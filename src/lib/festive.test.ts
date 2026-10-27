@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { festiveKindOf, festiveLook } from './festive.ts'
+import { festiveKindOf, festiveLook, festiveWindows, fixedSeason, pickWindow, siteSeason } from './festive.ts'
 
 const festivals = [
   { slug: 'diwali', nextDate: '2026-11-08T12:00:00.000Z' },
@@ -32,4 +32,27 @@ test('automatic picks the soonest festival', () => {
 test('a chosen look always shows; off never does', () => {
   assert.equal(festiveLook('ganesh', festivals, '2026-01-01'), 'ganesh')
   assert.equal(festiveLook('off', festivals, '2026-11-08'), null)
+})
+
+test('site look: fixed choices win, a picked decoration keeps auto festive', () => {
+  assert.equal(fixedSeason('everyday', 'diwali'), 'everyday')
+  assert.equal(fixedSeason('festive', 'off'), 'festive')
+  assert.equal(fixedSeason('auto', 'ganesh'), 'festive')
+  assert.equal(fixedSeason('auto', 'auto'), null)
+  assert.equal(fixedSeason(null, 'off'), null)
+})
+
+test('site look auto: festive in the three weeks before a festival, everyday otherwise (decoration off too)', () => {
+  assert.equal(siteSeason('auto', 'auto', festivals, '2026-10-27'), 'festive')
+  assert.equal(siteSeason('auto', 'off', festivals, '2026-10-27'), 'festive')
+  assert.equal(siteSeason('auto', 'auto', festivals, '2026-06-01'), 'everyday')
+  assert.equal(siteSeason('everyday', 'auto', festivals, '2026-10-27'), 'everyday')
+  assert.equal(siteSeason('festive', 'auto', festivals, '2026-06-01'), 'festive')
+})
+
+test('festival windows are soonest first and match the head script check', () => {
+  const w = festiveWindows(festivals)
+  assert.deepEqual(w[0], ['diwali', '2026-10-18', '2026-11-08'])
+  assert.equal(pickWindow(w, '2026-10-17'), null)
+  assert.equal(pickWindow(w, '2026-11-08'), 'diwali')
 })

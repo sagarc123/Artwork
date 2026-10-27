@@ -1,7 +1,9 @@
+import type { CSSProperties } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { FestivalMotif, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
+import { EmptyState } from '@/components/EmptyState'
 import { Gallery } from '@/components/Gallery'
 import { photoSrc } from '@/components/MediaImage'
 import { PageHero } from '@/components/PageHero'
@@ -48,12 +50,20 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
 
   return (
     <>
+      {/* Wedding: a marigold garland sways in across the top of the page, once. */}
+      {look.kind === 'wedding' && (
+        <div aria-hidden="true" className="floor floor-keep floor-leaf overflow-hidden">
+          <div className="garland" />
+        </div>
+      )}
+      {/* Festival pages keep their colour floor all year: a festival page is a festive moment. */}
       <PageHero
+        keepColour
         floor={look.heroFloor}
         kicker={date ? `${t.festivalsPage.nextDate}: ${date}` : undefined}
         title={festival.name}
         sub={festival.intro ?? undefined}
-        art={<FestivalMotif kind={look.kind} className="mx-auto w-64 lg:w-80" />}
+        art={<FestivalMotif kind={look.kind} live="load" className="mx-auto w-64 lg:w-80" />}
       >
         <ButtonLink href={localePath(locale, '/events')} variant="light">
           {t.festivalsPage.book}
@@ -73,6 +83,16 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
           onDark
         />
       </PageHero>
+      {/* Diwali: diyas along the doorstep under the hero light one by one. */}
+      {look.kind === 'diwali' && (
+        <div aria-hidden="true" className="floor floor-keep floor-charcoal">
+          <div className="diya-row wrap flex justify-between pt-6 pb-4">
+            {Array.from({ length: 9 }, (_, i) => (
+              <span key={i} className={`diya ${i % 2 ? 'max-sm:hidden' : ''}`} style={{ '--i': i } as CSSProperties} />
+            ))}
+          </div>
+        </div>
+      )}
       <Threshold />
       <section className="bg-paper py-16 lg:py-24">
         <div className="wrap grid gap-8">
@@ -80,7 +100,7 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
           {gallery.length ? (
             <Gallery items={gallery} t={t.gallery} enquiryMessage={`${t.forms.waIntro} ${t.gallery.enquire}:`} />
           ) : (
-            <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.festivalsPage.emptyGallery}</p>
+            <EmptyState title={t.festivalsPage.emptyGallery} />
           )}
         </div>
       </section>

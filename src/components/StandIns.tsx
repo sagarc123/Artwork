@@ -102,11 +102,13 @@ function hatch([bx, by, bw, bh]: Box, rand: () => number, gap: number) {
 }
 
 /** Charcoal sketch on cream paper: a face (portraits) or a still life, each line gone over a few times, shadows hatched and smudged. */
-export function SketchStandIn({ seed, subject }: { seed: string; subject: 'face' | 'still' }) {
+// `scribble={false}`: no loose background scribble (the home hero, where every KB of HTML counts twice).
+export function SketchStandIn({ seed, subject, scribble = true }: { seed: string; subject: 'face' | 'still'; scribble?: boolean }) {
   const id = `k${useId().replace(/[^\w-]/g, '')}`
   const { rand, bun, transform } = pose(seed)
   const s: Subject = subject === 'face' && bun ? { ...FACE, lines: FACE.lines + BUN_LINE, dark: FACE.dark + BUN } : subject === 'face' ? FACE : STILL
   const ink = '#2a2522'
+  const bg = hatch(s.bg, rand, 3) // worked out even when not drawn, so the rest keeps the same hand
   return (
     <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false" className="size-[86%]">
       <defs>
@@ -116,7 +118,8 @@ export function SketchStandIn({ seed, subject }: { seed: string; subject: 'face'
       </defs>
       <g transform={transform} fill="none" stroke={ink} strokeLinecap="round" strokeLinejoin="round">
         {/* Loose scribble behind the subject, the way a sketch is blocked in. */}
-        <path d={hatch(s.bg, rand, 3)} strokeWidth={0.35} opacity={0.18} pathLength={1} />
+        {/* Always there, maybe empty: the draw-in CSS counts children. */}
+        <path d={scribble ? bg : undefined} strokeWidth={0.35} opacity={0.18} pathLength={1} />
         <g className="fx" filter="url(#smudge)" stroke="none" fill={ink}>
           <path d={s.dark} opacity={0.62} />
           <path d={s.soft} opacity={0.3} />

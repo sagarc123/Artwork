@@ -8,7 +8,7 @@ export function CartCount({ label }: { label: string }) {
   if (!count) return null
   return (
     // Keyed by the count so the badge presses in again each time it changes.
-    <span key={count} className="tab-bloom absolute -top-1 -right-2 grid min-w-6 place-items-center rounded-full bg-kumkum px-1.5 text-base leading-6 font-semibold text-white">
+    <span key={count} className="tab-bloom absolute -top-1 -right-2 grid min-w-6 place-items-center rounded-full bg-accent px-1.5 text-base leading-6 font-semibold text-white">
       {count}
       <span className="sr-only"> {label}</span>
     </span>

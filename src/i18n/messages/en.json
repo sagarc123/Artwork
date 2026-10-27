@@ -52,6 +52,15 @@
       "ctaShop": "Shop Art",
       "ctaLearn": "Learn with me"
     },
+    "studio": {
+      "title": "Portraits, Paintings and Rangoli, Drawn by Hand",
+      "sub": "Hi, I'm Siddesh. In my studio in Maharashtra I draw charcoal portraits, paint watercolours and design rangoli for your doorstep.",
+      "labels": {
+        "portrait": "Charcoal portrait",
+        "painting": "Watercolour",
+        "rangoli": "Ink rangoli"
+      }
+    },
     "events": {
       "title": "Let me colour your celebration",
       "sub": "Weddings, festivals, housewarmings and office events across Maharashtra. Tell me the date — I reply within {hours} hours.",
@@ -337,7 +346,7 @@
     "title": "Everything I have made — sold, kept and still waiting",
     "intro": "Some of these live in homes across India now. Some I could not part with. Tap any piece to hear its story.",
     "all": "All",
-    "empty": "The gallery is being filled with photos. Please check back soon.",
+    "empty": "New photos are on their way",
     "close": "Close",
     "prev": "Previous",
     "next": "Next",
@@ -350,7 +359,8 @@
     "countOne": "piece",
     "filter": "Category",
     "share": "Share",
-    "shareText": "Look at this by Siddesh Mokashi:"
+    "shareText": "Look at this by Siddesh Mokashi:",
+    "emptyBody": "I'm photographing the latest pieces. Please check back in a few days."
   },
   "festivalsPage": {
     "metaTitle": "Rangoli through the festivals",
@@ -454,7 +464,8 @@
     "items": "items",
     "giftWrap": "Gift wrap",
     "removedOne": "1 piece was taken out of your cart because it is no longer in the shop.",
-    "removedMany": "{n} pieces were taken out of your cart because they are no longer in the shop."
+    "removedMany": "{n} pieces were taken out of your cart because they are no longer in the shop.",
+    "emptyBody": "Pick a print or an original from the shop. It will wait here until you are ready to pay."
   },
   "checkout": {
     "title": "Almost there",
@@ -788,14 +799,15 @@
     "metaTitle": "Saved pieces",
     "title": "Pieces you loved",
     "sub": "Saved on this phone or computer. Come back any time.",
-    "empty": "Nothing saved yet. Tap “Save” on any piece to keep it here.",
+    "empty": "Nothing saved yet",
     "browse": "Browse the shop",
     "remove": "Remove",
     "choose": "Choose a size",
     "similar": "Ask for something similar",
     "loading": "Loading your saved pieces…",
     "count": "saved",
-    "shareText": "Pieces I liked by Siddesh Mokashi:"
+    "shareText": "Pieces I liked by Siddesh Mokashi:",
+    "emptyBody": "Tap “Save” on any piece and it stays here, on this phone or computer."
   },
   "policies": {
     "draft": "Draft — have this reviewed by a lawyer before launch. (Only shown while developing.)",

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { formatPrice } from '@/lib/site'
 import { cartActions, savedActions, useSaved } from './cart-store'
+import { EmptyState, Loading } from './EmptyState'
 import { useHydrated } from './local-store'
 import { MediaImage } from './MediaImage'
 import { pinch } from './pinch'
@@ -23,7 +24,7 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
   const slugs = useSaved()
   const hydrated = useHydrated()
   const [added, setAdded] = useState<string | null>(null)
-  if (!hydrated) return <p className="text-muted">{t.loading}</p>
+  if (!hydrated) return <Loading label={t.loading} />
 
   const bySlug = new Map(products.map((p) => [p.slug, p]))
   // Pieces taken off the shop since they were saved simply drop out.
@@ -31,12 +32,11 @@ export function SavedList({ products, t, shop, cart, shopHref, cartHref, similar
 
   if (items.length === 0)
     return (
-      <div className="grid justify-items-center gap-5 rounded-ui bg-surface p-10 text-center">
-        <p className="font-heading text-h3">{t.empty}</p>
-        <Link href={shopHref} className="press inline-flex h-13 items-center rounded-ui border-[1.5px] border-charcoal px-6 font-semibold hover:bg-charcoal hover:text-paper">
+      <EmptyState title={t.empty} body={t.emptyBody}>
+        <Link href={shopHref} className="press mt-2 inline-flex h-13 items-center rounded-ui border-[1.5px] border-charcoal px-6 font-semibold hover:bg-charcoal hover:text-paper">
           {t.browse}
         </Link>
-      </div>
+      </EmptyState>
     )
 
   const btn = 'press inline-flex min-h-12 items-center justify-center gap-2 rounded-ui px-4 font-semibold'

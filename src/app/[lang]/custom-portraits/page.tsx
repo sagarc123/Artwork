@@ -28,7 +28,7 @@ export default async function CustomPortraitsPage() {
 
   return (
     <>
-      <PageHero floor="kumkum" title={h.title} sub={h.sub} word="चित्र" art={<PortraitPair photoLabel={h.photo} drawingLabel={h.drawing} />}>
+      <PageHero floor="kumkum" title={h.title} sub={h.sub} word="चित्र" art={<PortraitPair photoLabel={h.photo} drawingLabel={h.drawing} draw />}>
         <ButtonLink href="#enquire" variant="light">
           {h.cta}
         </ButtonLink>

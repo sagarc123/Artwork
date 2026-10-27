@@ -33,7 +33,7 @@ export default async function FestivalsPage() {
                       href={localePath(locale, `/festivals/${f.slug}`)}
                       className={`card group relative flex min-h-64 flex-col justify-end overflow-hidden rounded-ui p-5 text-paper grain-dark ${look.floor}`}
                     >
-                      <FestivalMotif kind={look.kind} className="absolute -top-2 -right-4 w-40 opacity-90 transition-transform duration-500 group-hover:scale-105" />
+                      <FestivalMotif kind={look.kind} live="scroll" className="absolute -top-2 -right-4 w-40 opacity-90 transition-transform duration-500 group-hover:scale-105" />
                       <span className="relative font-heading text-h2">{f.name}</span>
                     </Link>
                   </li>

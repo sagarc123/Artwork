@@ -1357,7 +1357,11 @@ export interface SiteSetting {
      */
     link?: string | null;
     /**
-     * A small festival decoration under the menu. Automatic: for 3 weeks before each festival that has a date.
+     * Everyday: a calm studio look (paper, charcoal, peacock). Festive: the full colour look with the festival decoration. Automatic: festive for 3 weeks before each festival that has a date, everyday the rest of the year.
+     */
+    siteLook?: ('auto' | 'everyday' | 'festive') | null;
+    /**
+     * The decoration under the menu while the site looks festive. Automatic: the next festival with a date. Picking a festival also keeps the site festive when "Site look" is Automatic.
      */
     festiveLook?: ('off' | 'auto' | 'diwali' | 'ganesh' | 'gudi' | 'wedding') | null;
   };
@@ -1592,6 +1596,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         enabled?: T;
         message?: T;
         link?: T;
+        siteLook?: T;
         festiveLook?: T;
       };
   instagram?:

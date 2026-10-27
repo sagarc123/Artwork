@@ -49,9 +49,41 @@
   --font-heading: var(--font-tiro), "Martel", serif;
   --font-body: var(--font-mukta), system-ui, sans-serif;
   --font-display: var(--font-rozha), var(--font-tiro), serif;
+  /* Season tokens (see "Two looks" below): text on the current floor, and the accent colour. */
+  --color-on: var(--on);
+  --color-accent: var(--accent);
 }
 
 @layer base {
+  /* ─────────────── Two looks: <html data-season="everyday | festive"> (Site settings → Site look) ───────────────
+     Everyday (also the default with no attribute): a calm studio. Paper and charcoal, peacock accent, kumkum only on
+     the one primary button, a pencil rule between sections, colour floors become an ink-wash sheet.
+     Festive: colour floors, paithani thresholds, marigold brush and tape, the toran. Components don't fork: they use
+     these tokens and the .floor-* / .threshold classes. */
+  :root {
+    --on: var(--color-charcoal);
+    --accent: var(--color-peacock);
+    --deco: var(--color-peacock);
+    --brush: color-mix(in oklab, currentColor 55%, #0000); /* a pencil line in the text colour: works on paper and charcoal */
+    --brush-w: 3.5;
+    --tape: rgb(205 196 178 / 0.62);
+    --wash: #eee7dc;
+    --btn-bg: var(--color-paper);
+    --btn-fg: var(--color-charcoal);
+    --kolam-line: var(--color-charcoal);
+    --kolam-dot: rgb(30 27 24 / 0.35);
+    --grain-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --grain-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  :root[data-season='festive'] {
+    --accent: var(--color-kumkum);
+    --deco: var(--color-marigold);
+    --brush: var(--color-marigold);
+    --brush-w: 6;
+    --tape: rgb(242 183 5 / 0.55);
+    --kolam-line: var(--color-kumkum);
+    --kolam-dot: var(--color-marigold);
+  }
   html {
     scroll-padding-top: 7rem;
     -webkit-text-size-adjust: 100%;
@@ -94,10 +126,10 @@
 
 /* Paper grain (charcoal noise) and chalky floor (white noise). Tiled data-URI: no extra request. */
 @utility grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: var(--grain-light);
 }
 @utility grain-dark {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: var(--grain-dark);
 }
 
 @utility footer-link {
@@ -153,8 +185,67 @@ dialog.drawer[open] {
 
 /* ─────────────── "Umbartha" (doorstep) art pieces ─────────────── */
 
-/* Woven paithani border between floors. */
+/* Floors: full-bleed section grounds. Charcoal is the one dark gallery floor in both looks; kumkum, peacock and leaf
+   are colour floors when festive and an ink-wash sheet (a faint stain in one corner) on everyday days.
+   .floor-keep holds the colour all year (festival pages are a festive moment by nature). */
+.floor {
+  background-color: var(--floor);
+  background-image: var(--grain-light);
+  color: var(--on);
+}
+.floor-paper {
+  --floor: var(--color-paper);
+}
+.floor-charcoal {
+  --floor: var(--color-charcoal);
+  --on: var(--color-paper);
+  background-image: var(--grain-dark);
+}
+.floor-kumkum,
+.floor-peacock,
+.floor-leaf {
+  --floor: var(--wash);
+  /* The one primary of the view sits on this floor: kumkum. */
+  --btn-bg: var(--color-kumkum);
+  --btn-fg: #fff;
+  background-image: radial-gradient(ellipse 55% 75% at 88% 12%, rgb(30 27 24 / 0.06), #0000 70%), var(--grain-light);
+}
+:root[data-season='festive'] :is(.floor-kumkum, .floor-peacock, .floor-leaf),
+.floor-keep:is(.floor-kumkum, .floor-peacock, .floor-leaf) {
+  --on: var(--color-paper);
+  --btn-bg: var(--color-paper);
+  --btn-fg: var(--color-charcoal);
+  background-image: var(--grain-dark);
+}
+:root[data-season='festive'] .floor-kumkum,
+.floor-keep.floor-kumkum {
+  --floor: var(--color-kumkum);
+}
+:root[data-season='festive'] .floor-peacock,
+.floor-keep.floor-peacock {
+  --floor: var(--color-peacock);
+}
+:root[data-season='festive'] .floor-leaf,
+.floor-keep.floor-leaf {
+  --floor: var(--color-leaf);
+}
+
+:root:not([data-season='festive']) .ph-colour {
+  background-color: var(--color-charcoal);
+}
+
+/* Hero: the only place both looks are in the HTML (when the look is "auto"); the other one costs nothing (display: none). */
+:root:not([data-season='festive']) .look-festive,
+:root[data-season='festive'] .look-everyday {
+  display: none;
+}
+
+/* Woven paithani border between floors (festive); a peacock hairline on everyday days. */
 .paithani {
+  height: 3px;
+  background: var(--color-peacock);
+}
+:root[data-season='festive'] .paithani {
   height: 16px;
   background:
     conic-gradient(from 135deg at 50% 0, var(--color-turmeric) 90deg, #0000 0) 0 0 / 16px 8px repeat-x,
@@ -162,8 +253,27 @@ dialog.drawer[open] {
     var(--color-kumkum);
 }
 /* Threshold between floors: the same border over a row of powder dots, on one empty element. */
+/* Everyday: a pencil rule drawn by hand, with the sections' own space around it. None next to a floor (the floor edge is the divider). */
 .threshold {
+  width: min(75rem, 100% - 2.5rem);
+  height: 12px;
+  margin-inline: auto;
+  background: var(--color-charcoal);
+  opacity: 0.32;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 12' preserveAspectRatio='none'%3E%3Cpath d='M2 7C70 4 130 8 200 6S330 3 400 6 470 8 498 5' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 12' preserveAspectRatio='none'%3E%3Cpath d='M2 7C70 4 130 8 200 6S330 3 400 6 470 8 498 5' fill='none' stroke='%23000' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+:root:not([data-season='festive']) :is(.floor:not(.floor-paper) + .threshold, .threshold:has(+ .floor:not(.floor-paper))) {
+  display: none;
+}
+/* Festive: the woven paithani border over a row of powder dots, on one empty element. */
+:root[data-season='festive'] .threshold {
+  width: auto;
   height: 30px;
+  margin: 0;
+  opacity: 1;
+  -webkit-mask: none;
+  mask: none;
   background:
     conic-gradient(from 135deg at 50% 0, var(--color-turmeric) 90deg, #0000 0) 0 0 / 16px 8px repeat-x,
     radial-gradient(circle, var(--color-paper) 1.5px, #0000 2px) 0 8px / 16px 8px repeat-x,
@@ -195,7 +305,10 @@ dialog.drawer[open] {
   background: var(--color-turmeric);
   box-shadow: 0 0 14px 4px rgb(242 183 5 / 0.45);
 }
-/* Giant Devanagari word used as texture. */
+/* Giant Devanagari word used as texture (festive only: on everyday days the headings stand alone). */
+:root:not([data-season='festive']) .display-word {
+  display: none !important;
+}
 .display-word {
   display: block;
   font-family: var(--font-display);
@@ -214,8 +327,8 @@ dialog.drawer[open] {
 }
 .brush path {
   fill: none;
-  stroke: var(--color-marigold);
-  stroke-width: 6;
+  stroke: var(--brush);
+  stroke-width: var(--brush-w);
   stroke-linecap: round;
 }
 .tilt-left {
@@ -231,7 +344,7 @@ dialog.drawer[open] {
   stroke-linejoin: round;
 }
 .chalk-arrow path {
-  stroke: var(--color-paper);
+  stroke: currentColor;
   stroke-width: 2.5;
 }
 /* Masking tape on framed artworks. Small and tucked in on phones so it never reaches neighbours or the screen edge. */
@@ -242,7 +355,7 @@ dialog.drawer[open] {
   top: -4px;
   width: 34px;
   height: 12px;
-  background: rgb(242 183 5 / 0.55);
+  background: var(--tape);
   z-index: 1;
 }
 .tape::before {
@@ -347,7 +460,7 @@ dialog.drawer[open] {
     content: '';
     position: absolute;
     inset: -8px;
-    border: 2.5px dotted var(--color-marigold);
+    border: 2.5px dotted var(--deco);
     border-radius: var(--radius-ui);
     pointer-events: none;
     --sweep: 0deg;
@@ -618,7 +731,7 @@ dialog.drawer[open] {
 
 /* ─────────────── Festive look (Site settings → Announcement strip): a toran hanging under the menu ─────────────── */
 /* Decoration only (pointer-events: none), part of the sticky header. It unfurls once on load; calm mode and slow phones don't get it at all. */
-:root[data-festive] .site-header::after {
+:root[data-season='festive'][data-festive] .site-header::after {
   content: '';
   position: absolute;
   inset: 100% 0 auto;
@@ -649,7 +762,7 @@ dialog.drawer[open] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='20' viewBox='0 0 64 20'%3E%3Cpath d='M0 2.5h64' stroke='%232e6b3c' stroke-width='2'/%3E%3Ccircle cx='8' cy='7' r='5' fill='%23e8890c'/%3E%3Ccircle cx='20' cy='7' r='3.6' fill='%23a6261d'/%3E%3Ccircle cx='32' cy='7' r='5' fill='%23f2b705'/%3E%3Ccircle cx='44' cy='7' r='3.6' fill='%23a6261d'/%3E%3Cpath d='M56 4q4.5 7 0 15q-4.5-8 0-15z' fill='%232e6b3c'/%3E%3C/svg%3E");
 }
 @media (prefers-reduced-motion: no-preference) {
-  :root[data-festive] .site-header::after {
+  :root[data-season='festive'][data-festive] .site-header::after {
     animation: unfurl 900ms var(--ease-pour) 300ms both;
   }
 }
@@ -660,6 +773,241 @@ dialog.drawer[open] {
 }
 :root:is([data-motion='off'], [data-fx='lite'])[data-festive] .site-header::after {
   display: none;
+}
+
+/* ─────────────── Everyday hero: the studio wall (charcoal portrait, watercolour, ink rangoli) ─────────────── */
+/* Pieces hang on a string from a nail; the rangoli study is taped up. */
+.hang {
+  position: relative;
+}
+.hang::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--drop, 22px) - 3px);
+  width: 7px;
+  height: 7px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: var(--color-charcoal);
+  box-shadow: 0 1px 1px rgb(30 27 24 / 0.3);
+}
+.hang::after {
+  content: '';
+  position: absolute;
+  inset: auto 18% 100%;
+  height: var(--drop, 22px);
+  background: rgb(30 27 24 / 0.45);
+  clip-path: polygon(0 100%, 50% 0, 100% 100%, calc(100% - 1.5px) 100%, 50% 4px, 1.5px 100%);
+}
+/* Rangoli study in ink: the dots pressed with a pen, then one line drawn round them all. */
+.ink-kolam path {
+  fill: none;
+  stroke: var(--color-charcoal);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ink-kolam path:first-child {
+  stroke-width: 2.6;
+}
+.ink-kolam path:last-child {
+  stroke-width: 0.9;
+  stroke-opacity: 0.85;
+  stroke-dasharray: 1;
+}
+@keyframes ink-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes wash-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Pencil: the scribble blocks it in, two passes of line, hatching, the few dark accents, then the tone is rubbed in. */
+  .sketch-draw svg > g > [pathLength] {
+    stroke-dasharray: 1;
+    animation: draw var(--d, 1.2s) var(--ease-draw) var(--t, 0.2s) both;
+  }
+  .sketch-draw svg > g > :nth-child(1) {
+    --t: 0.1s;
+    --d: 0.9s;
+  }
+  .sketch-draw svg > g > :nth-child(4) {
+    --t: 0.25s;
+    --d: 1.4s;
+  }
+  .sketch-draw svg > g > :nth-child(5) {
+    --t: 0.8s;
+    --d: 1.2s;
+  }
+  .sketch-draw svg > g > :nth-child(3) {
+    --t: 1.5s;
+    --d: 0.8s;
+  }
+  .sketch-draw svg > g > :nth-child(6) {
+    --t: 1.9s;
+    --d: 0.6s;
+  }
+  .sketch-draw svg > g > :is(:nth-child(2), :nth-child(7)) {
+    animation: ink-in 0.9s ease-out 1.7s both;
+  }
+  .ink-kolam path:last-child {
+    animation: draw 2.6s var(--ease-draw) 0.6s both;
+  }
+  /* Watercolour: the wash runs down the wet paper. */
+  .wash-in .wash {
+    animation: wash-in 1.6s var(--ease-pour) 0.5s both;
+  }
+}
+
+/* ─────────────── Empty and loading states: an unfinished kolam (dot grid, one line drawn once, then it holds) ─────────────── */
+.kolam-wait .kw-dots {
+  fill: var(--kolam-dot);
+}
+.kolam-wait path {
+  fill: none;
+  stroke: var(--kolam-line);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kolam-wait path {
+    animation: draw 1.5s var(--ease-draw) 0.15s both;
+  }
+}
+
+/* ─────────────── Festival moments (festival pages, once) ─────────────── */
+/* Diwali: a row of diyas on the doorstep under the hero, lit one by one. */
+.diya-row .diya {
+  position: relative;
+}
+/* Wedding: a marigold garland hanging across the top of the hero. */
+.garland {
+  height: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='20' viewBox='0 0 64 20'%3E%3Cpath d='M0 2.5h64' stroke='%232e6b3c' stroke-width='2'/%3E%3Ccircle cx='8' cy='7' r='5' fill='%23e8890c'/%3E%3Ccircle cx='20' cy='7' r='3.6' fill='%23a6261d'/%3E%3Ccircle cx='32' cy='7' r='5' fill='%23f2b705'/%3E%3Ccircle cx='44' cy='7' r='3.6' fill='%23a6261d'/%3E%3Cpath d='M56 4q4.5 7 0 15q-4.5-8 0-15z' fill='%232e6b3c'/%3E%3C/svg%3E") center top / auto 100% repeat-x;
+  transform-origin: 50% 0;
+}
+.festival-motif .fm-kolam {
+  fill: none;
+  stroke: var(--color-paper);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  opacity: 0.9;
+}
+@keyframes sway-in {
+  0% {
+    transform: translateY(-100%) rotate(-2.5deg);
+  }
+  45% {
+    transform: rotate(1.4deg);
+  }
+  75% {
+    transform: rotate(-0.6deg);
+  }
+}
+@keyframes unfurl-cloth {
+  from {
+    clip-path: inset(0 100% 0 0);
+    transform: skewY(10deg);
+  }
+}
+@keyframes flame-up {
+  from {
+    transform: scale(0.2);
+  }
+}
+/* Motif parts: [diwali] flame = 2nd fill · [gudi] cloth = 1st fill · [ganesh] the extra modak kolam line · [wedding] the whole kalash. */
+.festival-motif .fx > path {
+  transform-box: fill-box;
+}
+.fm-diwali .fx > path:nth-child(2),
+.fm-diwali .fx > path:nth-child(3) {
+  transform-origin: 50% 100%;
+}
+.fm-gudi .fx > path:first-child {
+  transform-origin: 0 0;
+}
+.fm-wedding {
+  transform-origin: 50% 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .diya-row .diya::before {
+    transform-origin: 50% 100%;
+    animation:
+      flame 420ms var(--ease-pour) calc(0.5s + var(--i, 0) * 160ms) both,
+      glow 600ms ease-in-out calc(0.9s + var(--i, 0) * 160ms);
+  }
+  .garland {
+    animation: sway-in 1.4s var(--ease-settle) 0.3s both;
+  }
+  .fm-load.fm-diwali .fx > path:is(:nth-child(2), :nth-child(3)) {
+    animation: flame-up 700ms var(--ease-pour) 0.4s both;
+  }
+  .fm-load.fm-gudi .fx > path:first-child {
+    animation: unfurl-cloth 1.1s var(--ease-pour) 0.4s both;
+  }
+  .fm-load .fm-kolam {
+    animation: draw 1.6s var(--ease-draw) 0.3s both;
+  }
+  .fm-load.fm-wedding {
+    animation: sway-in 1.4s var(--ease-settle) 0.3s both;
+  }
+}
+/* The same moments on festival tiles further down a page play as they scroll in. No support: the still, final state. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fm-scroll.fm-diwali .fx > path:is(:nth-child(2), :nth-child(3)),
+    .fm-scroll.fm-gudi .fx > path:first-child,
+    .fm-scroll .fm-kolam,
+    .fm-scroll.fm-wedding {
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 45%;
+    }
+    .fm-scroll.fm-diwali .fx > path:is(:nth-child(2), :nth-child(3)) {
+      animation-name: flame-up;
+    }
+    .fm-scroll.fm-gudi .fx > path:first-child {
+      animation-name: unfurl-cloth;
+    }
+    .fm-scroll .fm-kolam {
+      animation-name: draw;
+    }
+    .fm-scroll.fm-wedding {
+      animation-name: sway-in;
+    }
+    /* Shop: each card settles like a print being pinned up (a slight turn and drop; transform/opacity only). */
+    .pin-in > li {
+      animation: pin linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+    .pin-in > li:nth-child(even) {
+      --pin-r: 1.6deg;
+      animation-range: entry 8% entry 43%;
+    }
+  }
+}
+@keyframes pin {
+  from {
+    opacity: 0.6;
+    transform: translateY(-14px) rotate(var(--pin-r, -1.8deg));
+  }
+}
+
+/* Product card → product page: the artwork itself carries over (React <ViewTransition name="art-…" share="morph">). */
+::view-transition-group(.morph) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-pour);
+}
+::view-transition-image-pair(.morph) {
+  isolation: isolate;
 }
 
 /* Calm mode: the footer switch (data-motion="off") and slow phones (data-fx="lite") get the final, still state. */

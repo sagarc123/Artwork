@@ -4,7 +4,7 @@ import { cubic, taperedPath, type Pt, type RangoliStyle } from '@/lib/art'
 import { GenerativeRangoli } from './GenerativeRangoli'
 import { PhotoStandIn, SketchStandIn } from './StandIns'
 
-/** Threshold between two "floors": a woven paithani border over a row of powder dots. One empty div; the pattern is all CSS. */
+/** Threshold between two "floors": festive, a woven paithani border over powder dots; everyday, a pencil rule. One empty div; all CSS. */
 export function Threshold({ className = '' }: { className?: string }) {
   return <div aria-hidden="true" className={`threshold ${className}`} />
 }
@@ -18,7 +18,7 @@ export function DisplayWord({ children, className = '' }: { children: ReactNode;
   )
 }
 
-/** Marigold brush stroke under a heading. */
+/** Brush stroke under a heading: marigold when festive, a pencil line on everyday days (CSS tokens). */
 export function BrushUnderline({ className = '' }: { className?: string }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 300 16" preserveAspectRatio="none" className={`brush ${className}`}>
@@ -35,7 +35,7 @@ export function StepList({ steps, className = '' }: { steps: string[]; className
     <ol className={`grid gap-5 ${className}`}>
       {steps.map((step, i) => (
         <li key={step} className="grid grid-cols-[3.5rem_1fr] items-center gap-3">
-          <span aria-hidden="true" className="reveal font-display text-[3.25rem] leading-none text-kumkum">
+          <span aria-hidden="true" className="reveal font-display text-[3.25rem] leading-none text-accent">
             {DEVA_DIGITS[i]}
           </span>
           <span className="text-h3-sm">{step}</span>
@@ -45,14 +45,14 @@ export function StepList({ steps, className = '' }: { steps: string[]; className
   )
 }
 
-/** Top-down doorstep in a paper frame (so it reads on dark floors too): toran on top, a rangoli in front, a stone step and diyas. */
-export function DoorstepScene({ seed, style, label, className = '' }: { seed: string; style?: RangoliStyle; label?: string; className?: string }) {
+/** Top-down doorstep in a paper frame (so it reads on dark floors too): toran on top, a rangoli in front, a stone step and diyas. `draw`: the rangoli draws itself in once. */
+export function DoorstepScene({ seed, style, label, draw, className = '' }: { seed: string; style?: RangoliStyle; label?: string; draw?: boolean; className?: string }) {
   return (
     <figure className={`grid gap-2 ${className}`}>
       <div aria-hidden="true" className="bg-surface p-1.5 shadow-frame sm:p-2 lg:p-3">
         <div className="relative aspect-[4/5] overflow-hidden bg-charcoal grain-dark">
           <div className="toran absolute inset-x-0 top-0 h-6" />
-          <GenerativeRangoli seed={seed} style={style} tone="dark" className="absolute top-1/2 left-1/2 w-[82%] -translate-x-1/2 -translate-y-[45%]" />
+          <GenerativeRangoli seed={seed} style={style} tone="dark" animate={draw} className="absolute top-1/2 left-1/2 w-[82%] -translate-x-1/2 -translate-y-[45%]" />
           <span className="diya absolute bottom-[16%] left-[8%]" />
           <span className="diya absolute right-[8%] bottom-[16%]" />
           {/* Basalt doorstep with a worn, lighter edge: same stone family as the floor. */}
@@ -64,24 +64,24 @@ export function DoorstepScene({ seed, style, label, className = '' }: { seed: st
   )
 }
 
-/** "Your photo" beside "drawn by hand": a flat snapshot and the same face in charcoal (its lines draw in on scroll). */
-export function PortraitPair({ photoLabel, drawingLabel }: { photoLabel: string; drawingLabel: string }) {
+/** "Your photo" beside "drawn by hand": a flat snapshot and the same face in charcoal. Its lines draw in on scroll, or with `draw` once on load, line by line. */
+export function PortraitPair({ photoLabel, drawingLabel, draw }: { photoLabel: string; drawingLabel: string; draw?: boolean }) {
   return (
     <div className="relative grid grid-cols-2 items-end gap-4 sm:gap-8">
       <figure className="tilt-left grid gap-3">
         <div aria-hidden="true" className="aspect-[4/5] bg-surface p-2 shadow-frame sm:p-3">
           <PhotoStandIn seed="portrait-pair" />
         </div>
-        <figcaption className="text-paper">{photoLabel}</figcaption>
+        <figcaption>{photoLabel}</figcaption>
       </figure>
       <svg aria-hidden="true" viewBox="0 0 80 40" className="chalk-arrow absolute top-[38%] left-1/2 w-[18%] -translate-x-1/2">
         <path d="M4 26C24 6 52 6 72 20M72 20L60 18M72 20L66 30" pathLength={1} />
       </svg>
       <figure className="tilt-right grid gap-3">
-        <div aria-hidden="true" className="grid aspect-[4/5] place-items-center bg-paper shadow-frame grain">
+        <div aria-hidden="true" className={`grid aspect-[4/5] place-items-center bg-paper shadow-frame grain ${draw ? 'sketch-draw' : ''}`}>
           <SketchStandIn seed="portrait-pair" subject="face" />
         </div>
-        <figcaption className="text-paper">{drawingLabel}</figcaption>
+        <figcaption>{drawingLabel}</figcaption>
       </figure>
     </div>
   )
@@ -204,11 +204,16 @@ const MOTIF: Record<'diwali' | 'ganesh' | 'gudi' | 'wedding', Motif> = {
   },
 }
 
-/** Festival symbols: diya (Diwali), modak (Ganesh), gudi (Gudi Padwa), kalash (weddings). */
-export function FestivalMotif({ kind, className = '' }: { kind: keyof typeof MOTIF; className?: string }) {
+/**
+ * Festival symbols: diya (Diwali), modak (Ganesh), gudi (Gudi Padwa), kalash (weddings).
+ * `live`: its festival moment plays once, on load (a page hero) or as it scrolls in (tiles): the flame rises, the gudi
+ * cloth unfurls, a kolam line draws round the modak, the kalash sways in.
+ */
+export function FestivalMotif({ kind, live, className = '' }: { kind: keyof typeof MOTIF; live?: 'load' | 'scroll'; className?: string }) {
   const m = MOTIF[kind]
   return (
-    <svg aria-hidden="true" viewBox="0 0 100 100" className={`festival-motif ${className}`}>
+    <svg aria-hidden="true" viewBox="0 0 100 100" className={`festival-motif ${live ? `fm-${live} fm-${kind}` : ''} ${className}`}>
+      {live && kind === 'ganesh' && <path className="fm-kolam" d="M50 9C64 26 83 42 81 64C79 88 21 88 19 64C17 42 36 26 50 9Z" pathLength={1} />}
       <g className="fx" filter="url(#powder)">
         {m.fills.map(([d, fill]) => (
           <path key={d} d={d} fill={fill} />

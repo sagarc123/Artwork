@@ -23,7 +23,7 @@ export function Testimonials({ items, t, className = 'bg-paper' }: { items: Test
             return (
               <li key={q.id}>
                 <figure className="grid h-full content-start gap-4 rounded-ui bg-surface p-6 shadow-frame">
-                  <p className="text-h3-sm tracking-widest text-kumkum">
+                  <p className="text-h3-sm tracking-widest text-accent">
                     <span className="sr-only">{t.rating.replace('{n}', String(rating))}</span>
                     <span aria-hidden="true">
                       {'★'.repeat(rating)}

@@ -33,6 +33,7 @@ export function FestivalTiles({ festivals, t, locale, remind }: { festivals: Fes
             {i === 0 ? <span className="relative z-10 self-start rounded-full bg-turmeric px-3 font-semibold text-charcoal">{t.next}</span> : <span />}
             <FestivalMotif
               kind={f.kind}
+              live="scroll"
               className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-32 sm:w-44 lg:w-52' : 'w-28'}`}
             />
             {/* Scrim so the countdown stays readable where it runs over the art. */}

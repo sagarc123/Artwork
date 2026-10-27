@@ -6,8 +6,8 @@ const variants = {
   primary: 'bg-kumkum text-white hover:bg-kumkum/90 active:bg-kumkum/80',
   secondary:
     'border-[1.5px] border-charcoal text-charcoal hover:bg-charcoal hover:text-paper active:bg-charcoal/90 active:text-paper',
-  /** On coloured floors (kumkum, peacock, charcoal): paper button, dark text. */
-  light: 'bg-paper text-charcoal hover:bg-white active:bg-paper/90',
+  /** On floors: a paper button on dark/colour floors; on the everyday ink-wash floor it becomes the kumkum primary (globals.css floor tokens). */
+  light: 'bg-(--btn-bg) text-(--btn-fg) hover:brightness-105 active:brightness-95',
   tertiary: 'text-peacock underline underline-offset-4 hover:no-underline px-0 min-h-11',
 }
 

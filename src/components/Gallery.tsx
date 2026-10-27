@@ -2,11 +2,12 @@
 
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, ViewTransition } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { noRepeat, styleFor, type Medium } from '@/lib/art'
 import { whatsappLink } from '@/lib/site'
+import { EmptyState } from './EmptyState'
 import { MediaImage, photoSrc } from './MediaImage'
 import { ShareButton } from './ShareButton'
 import type { Floor } from './PhotoPlaceholder'
@@ -27,8 +28,11 @@ export type GalleryItem = {
 
 const FILTER_FROM = 8
 
-/** Masonry wall with category tabs and a full-screen viewer (native <dialog>: Esc closes, focus stays inside). */
-export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t: Dictionary['gallery']; enquiryMessage: string }) {
+/**
+ * Masonry wall with category tabs and a full-screen viewer (native <dialog>: Esc closes, focus stays inside).
+ * `morph`: the open piece carries over into its shop page (only where no shop grid on the page uses the same name).
+ */
+export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryItem[]; t: Dictionary['gallery']; enquiryMessage: string; morph?: boolean }) {
   const [tab, setTab] = useState('all')
   const [open, setOpen] = useState<number | null>(null)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -46,7 +50,7 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
 
   const step = (d: number) => setOpen((i) => (i === null ? i : (i + d + shown.length) % shown.length))
 
-  if (items.length === 0) return <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.empty}</p>
+  if (items.length === 0) return <EmptyState title={t.empty} body={t.emptyBody} />
 
   return (
     <>
@@ -97,7 +101,9 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
         {current && (
           <div className="grid max-h-[100dvh] overflow-y-auto bg-surface lg:grid-cols-[3fr_2fr]">
             <div className="bg-charcoal p-4 lg:p-8">
-              <MediaImage media={current.image} alt={current.title} ratio={current.ratio} seed={current.seed} medium={current.medium} style={styles[open!]} floor={current.floor} sizes="(min-width: 1024px) 60vw, 100vw" className="mx-auto max-h-[70dvh] w-auto" />
+              <ViewTransition name={morph && current.productHref ? `art-${current.productHref.split('/').pop()}` : undefined} share="morph" default="none">
+                <MediaImage media={current.image} alt={current.title} ratio={current.ratio} seed={current.seed} medium={current.medium} style={styles[open!]} floor={current.floor} sizes="(min-width: 1024px) 60vw, 100vw" className="mx-auto max-h-[70dvh] w-auto" />
+              </ViewTransition>
             </div>
             <div className="grid content-start gap-4 p-6 lg:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">

@@ -5,9 +5,10 @@ import { SketchStandIn, WashStandIn } from './StandIns'
 const FLOORS = {
   paper: 'bg-paper grain',
   charcoal: 'bg-charcoal grain-dark',
-  kumkum: 'bg-kumkum grain-dark',
-  peacock: 'bg-peacock grain-dark',
-  leaf: 'bg-leaf grain-dark',
+  // ph-colour: on everyday days these turn charcoal (globals.css), so a wall of stand-ins reads as a calm gallery.
+  kumkum: 'ph-colour bg-kumkum grain-dark',
+  peacock: 'ph-colour bg-peacock grain-dark',
+  leaf: 'ph-colour bg-leaf grain-dark',
 } as const
 
 export type Floor = keyof typeof FLOORS

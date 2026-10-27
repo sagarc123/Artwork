@@ -13,6 +13,7 @@ import { lookupPincode } from '@/server/pincode'
 import { PINCODE_STORE } from '@/lib/delivery'
 import { isPincode } from '@/lib/pincode'
 import { DeliveryPromise } from './DeliveryPromise'
+import { EmptyState, Loading } from './EmptyState'
 import { cartActions, useCart } from './cart-store'
 import { pickMedium } from '@/lib/art'
 import { MediaImage } from './MediaImage'
@@ -154,18 +155,17 @@ function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart'
 /** /cart */
 export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string; t: T; checkoutHref: string; shopHref: string }) {
   const { lines, quote, pending, failed, removed, retry, hydrated } = useQuote(locale)
-  if (!hydrated) return <p className="text-muted">{t.cart.loading}</p>
+  if (!hydrated) return <Loading label={t.cart.loading} />
   if (lines.length === 0)
     return (
-      <div className="grid justify-items-center gap-5 rounded-ui bg-surface p-10 text-center">
+      <EmptyState title={t.cart.empty} body={t.cart.emptyBody}>
         <RemovedNote count={removed} t={t.cart} />
-        <p className="font-heading text-h3">{t.cart.empty}</p>
-        <Link href={shopHref} className="press inline-flex h-13 items-center rounded-ui bg-kumkum px-6 font-semibold text-white">
+        <Link href={shopHref} className="press mt-2 inline-flex h-13 items-center rounded-ui bg-kumkum px-6 font-semibold text-white">
           {t.cart.browse}
         </Link>
-      </div>
+      </EmptyState>
     )
-  if (!quote) return failed ? <QuoteError t={t.checkout.errors} retry={retry} /> : <p className="text-muted">{t.cart.loading}</p>
+  if (!quote) return failed ? <QuoteError t={t.checkout.errors} retry={retry} /> : <Loading label={t.cart.loading} />
   return (
     <div className="grid gap-10 lg:grid-cols-12">
       <div className="grid content-start gap-5 lg:col-span-7">

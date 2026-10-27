@@ -28,12 +28,12 @@ export default async function ContactPage() {
           href={whatsappLink(t.whatsapp.message, b.whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
-          className="press inline-flex h-14 items-center justify-center gap-3 rounded-ui bg-paper px-7 text-h3-sm font-semibold text-leaf hover:bg-white"
+          className="press inline-flex h-14 items-center justify-center gap-3 rounded-ui border-[1.5px] border-leaf bg-paper px-7 text-h3-sm font-semibold text-leaf hover:bg-white"
         >
           <MessageCircle aria-hidden="true" className="size-7" />
           {c.whatsapp}
         </a>
-        <p className="font-semibold text-paper/90">{c.reply.replace('{hours}', String(b.replyHours))}</p>
+        <p className="font-semibold text-on/90">{c.reply.replace('{hours}', String(b.replyHours))}</p>
       </PageHero>
 
       <Threshold />

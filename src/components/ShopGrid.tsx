@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, ViewTransition } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { noRepeat, styleFor, type Medium } from '@/lib/art'
 import { formatPrice } from '@/lib/site'
+import { EmptyState } from './EmptyState'
 import { MediaImage } from './MediaImage'
 import type { Floor } from './PhotoPlaceholder'
 import { SaveButton } from './SaveButton'
@@ -43,7 +44,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
   // Neighbouring rangoli stand-ins never share a style.
   const styles = noRepeat(shown.map((i) => styleFor(i.seed)))
 
-  if (items.length === 0) return <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.empty}</p>
+  if (items.length === 0) return <EmptyState title={t.empty} />
 
   return (
     <div className="grid gap-8">
@@ -87,11 +88,13 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
       {shown.length === 0 ? (
         <p className="rounded-ui bg-surface p-8 text-center text-muted">{t.emptyFilter}</p>
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
+        <ul className="pin-in grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
           {shown.map((item, i) => (
             <li key={item.href} className="relative">
               <Link href={item.href} className="card grid gap-3">
                 <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
+                  {/* The artwork morphs into the product page's main image (same name there). */}
+                  <ViewTransition name={`art-${item.slug}`} share="morph" default="none">
                   <MediaImage
                     media={item.image}
                     alt={item.title}
@@ -103,6 +106,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
                     className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
                   />
+                  </ViewTransition>
                   {item.sold && <SoldBadge label={t.sold} className="absolute top-4 left-4" />}
                 </span>
                 <span className="font-heading text-h3-sm">{item.title}</span>

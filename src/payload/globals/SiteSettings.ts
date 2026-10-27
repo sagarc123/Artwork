@@ -59,11 +59,26 @@ export const SiteSettings: GlobalConfig = {
           validate: ((value) => (!value || /^\/(?!\/)\S*$|^https:\/\/\S+$/.test(value) ? true : 'Start with / for a page of this website, or https:// for another site.')) as TextFieldSingleValidation,
         },
         {
-          name: 'festiveLook',
-          label: 'Festive look',
+          name: 'siteLook',
+          label: 'Site look',
           type: 'select',
           defaultValue: 'auto',
-          admin: { isClearable: false, description: 'A small festival decoration under the menu. Automatic: for 3 weeks before each festival that has a date.' },
+          admin: {
+            isClearable: false,
+            description: 'Everyday: a calm studio look (paper, charcoal, peacock). Festive: the full colour look with the festival decoration. Automatic: festive for 3 weeks before each festival that has a date, everyday the rest of the year.',
+          },
+          options: [
+            { label: 'Automatic', value: 'auto' },
+            { label: 'Always everyday (studio)', value: 'everyday' },
+            { label: 'Always festive', value: 'festive' },
+          ],
+        },
+        {
+          name: 'festiveLook',
+          label: 'Festival decoration',
+          type: 'select',
+          defaultValue: 'auto',
+          admin: { isClearable: false, description: 'The decoration under the menu while the site looks festive. Automatic: the next festival with a date. Picking a festival also keeps the site festive when "Site look" is Automatic.' },
           options: [
             { label: 'Off', value: 'off' },
             { label: 'Automatic', value: 'auto' },

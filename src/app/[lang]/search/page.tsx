@@ -2,6 +2,7 @@ import { MessageCircle, Search } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
+import { UnfinishedKolam } from '@/components/EmptyState'
 import { MediaImage } from '@/components/MediaImage'
 import { PageHero } from '@/components/PageHero'
 import { ShopGrid } from '@/components/ShopGrid'
@@ -94,6 +95,7 @@ async function Results({ searchParams, locale, t }: { searchParams: Promise<Reco
 
       {total === 0 ? (
         <div className="grid gap-6 rounded-ui bg-surface p-6 shadow-frame lg:p-8">
+          <UnfinishedKolam />
           <p className="font-heading text-h3">{s.none.replace('{q}', q)}</p>
           {suggestions}
           <a

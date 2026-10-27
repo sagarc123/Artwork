@@ -20,7 +20,7 @@ export default async function ArtworkPage() {
       <PageHero title={t.gallery.title} sub={t.gallery.intro} word="कला" />
       <section className="bg-paper pb-20 lg:pb-28">
         <div className="wrap">
-          <Gallery items={items} t={t.gallery} enquiryMessage={`${t.forms.waIntro} ${t.gallery.enquire}:`} />
+          <Gallery items={items} t={t.gallery} enquiryMessage={`${t.forms.waIntro} ${t.gallery.enquire}:`} morph />
         </div>
       </section>
     </>

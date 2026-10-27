@@ -6,16 +6,20 @@ import { ButtonLink } from '@/components/ButtonLink'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { InstagramStrip } from '@/components/InstagramStrip'
-import { MediaImage } from '@/components/MediaImage'
+import { MediaImage, photoSrc } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
+import { StudioWall, type WallPhoto } from '@/components/StudioWall'
 import { SoldBadge } from '@/components/SoldBadge'
 import { Testimonials } from '@/components/Testimonials'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
+import type { Medium } from '@/lib/art'
+import { fixedSeason } from '@/lib/festive'
 import { eventFrom, fromText, portraitFrom } from '@/lib/prices'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
 import { festivalLook, getFestivals, getProducts, getServicePrices, getSiteExtras, getTestimonials, toShopItem } from '@/server/content'
+import { ViewTransition } from 'react'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: alternates(await getLocale(), '/') }
@@ -28,7 +32,7 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
-  const [products, festivalDocs, prices, testimonials, { instagram }] = await Promise.all([
+  const [products, festivalDocs, prices, testimonials, { instagram, siteLook, festiveLook }] = await Promise.all([
     getProducts(locale),
     getFestivals(locale),
     getServicePrices(locale),
@@ -37,10 +41,15 @@ export default async function HomePage() {
   ])
 
   // Latest pieces, the ones marked "featured" first.
-  const featured = [...products]
-    .sort((a, b) => Number(!!b.featured) - Number(!!a.featured))
-    .slice(0, 5)
-    .map((x) => toShopItem(x, locale))
+  const items = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)).map((x) => toShopItem(x, locale))
+  const featured = items.slice(0, 5)
+  // Everyday hero: a real photo for each spot on the studio wall once one exists, else the drawn stand-in.
+  const wall = (...media: Medium[]): WallPhoto => {
+    const x = items.find((i) => media.includes(i.medium) && photoSrc(i.image))
+    return x?.image ? { media: x.image, alt: x.title } : null
+  }
+  // Both heroes are sent only when the look depends on the visitor's date ("auto"); CSS shows one.
+  const season = fixedSeason(siteLook, festiveLook)
   const festivals = festivalDocs.map((f) => ({
     id: f.id,
     slug: f.slug,
@@ -55,8 +64,39 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* 1 · The doorstep: headline on paper, a rangoli drawing itself on the charcoal floor. */}
-      <section className="relative overflow-hidden bg-paper grain">
+      {/* 1 (everyday) · The studio wall: his range, a charcoal portrait, a watercolour and an ink rangoli, drawn in pencil and ink. */}
+      {season !== 'festive' && (
+        <section className="look-everyday relative overflow-hidden bg-paper grain">
+          <div className="wrap grid gap-8 pt-6 pb-14 lg:grid-cols-12 lg:items-center lg:gap-10 lg:pt-10 lg:pb-20">
+            <div className="relative z-10 grid gap-5 lg:col-span-5">
+              <div>
+                <h1 className="hero-title font-heading text-display">{h.studio.title}</h1>
+                <BrushUnderline className="brush--draw mt-3 w-2/3 max-w-xs" />
+              </div>
+              <p className="hero-in max-w-[42ch] text-muted" style={n(1)}>
+                {h.studio.sub}
+              </p>
+              <div className="hero-in grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
+                <ButtonLink href={p('/events')}>{h.hero.ctaEvent}</ButtonLink>
+                <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
+                  {h.hero.ctaShop}
+                </Link>
+                <Link href={p('/custom-portraits')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
+                  {h.portraits.cta}
+                </Link>
+              </div>
+            </div>
+            {/* Phone: the wall comes first so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
+            <div className="order-first mx-auto w-full max-w-[17rem] sm:max-w-md lg:order-none lg:col-span-7 lg:max-w-none lg:pl-6">
+              <StudioWall portrait={wall('portrait', 'drawing')} painting={wall('painting')} rangoli={wall('rangoli')} labels={h.studio.labels} />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 1 (festive) · The doorstep: headline on paper, a rangoli drawing itself on the charcoal floor. */}
+      {season !== 'everyday' && (
+      <section className="look-festive relative overflow-hidden bg-paper grain">
         <div className="wrap grid gap-6 pt-6 lg:grid-cols-12 lg:items-center lg:gap-8 lg:pt-14">
           <div className="relative z-10 grid gap-5 pb-4 lg:col-span-5 lg:pb-24">
             {/* Phones get the rangoli tile instead of the big word. */}
@@ -93,6 +133,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       <Threshold />
 
@@ -101,7 +142,7 @@ export default async function HomePage() {
         <DisplayWord className="absolute top-4 -right-4 text-charcoal/[0.05]">दारी</DisplayWord>
         <div className="wrap relative grid gap-12 lg:grid-cols-12">
           <div className="grid content-start gap-6 lg:col-span-5">
-            <p className="font-semibold text-kumkum">{h.events.kicker}</p>
+            <p className="font-semibold text-accent">{h.events.kicker}</p>
             <h2 className="font-heading text-h1">{h.events.title}</h2>
             <p className="text-muted">{h.events.sub}</p>
             {eventPrice && <p className="text-h3-sm font-semibold">{eventPrice}</p>}
@@ -120,12 +161,12 @@ export default async function HomePage() {
 
       <Threshold />
 
-      {/* 3 · Custom portraits on a kumkum floor: your photo → drawn by hand. */}
-      <section className="bg-kumkum grain-dark py-16 text-paper lg:py-28">
+      {/* 3 · Custom portraits: your photo → drawn by hand. Kumkum floor when festive, an ink-wash sheet on everyday days. */}
+      <section className="floor floor-kumkum py-16 lg:py-28">
         <div className="wrap grid gap-12 lg:grid-cols-12 lg:items-center">
           <div className="grid gap-5 lg:col-span-5">
             <h2 className="font-heading text-h1">{h.portraits.title}</h2>
-            <p className="text-paper/90">{h.portraits.sub}</p>
+            <p className="text-on/90">{h.portraits.sub}</p>
             {portraitPrice && <p className="text-h3-sm font-semibold">{portraitPrice}</p>}
             <ButtonLink href={p('/custom-portraits')} variant="light" className="sm:justify-self-start">
               {h.portraits.cta}
@@ -159,6 +200,7 @@ export default async function HomePage() {
                 <li key={f.slug} className={i === 0 ? 'col-span-2 lg:row-span-2' : ''}>
                   <Link href={f.href} className="card grid gap-3">
                     <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
+                      <ViewTransition name={`art-${f.slug}`} share="morph" default="none">
                       <MediaImage
                         media={f.image}
                         alt={f.title}
@@ -169,6 +211,7 @@ export default async function HomePage() {
                         sizes={i === 0 ? '(min-width: 1024px) 50vw, 100vw' : '(min-width: 1024px) 25vw, 50vw'}
                         className={f.sold ? 'opacity-70 grayscale-[.3]' : ''}
                       />
+                      </ViewTransition>
                       {f.sold && <SoldBadge label={t.shop.sold} className="absolute top-5 left-5 lg:top-6 lg:left-6" />}
                     </div>
                     <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.title}</span>
@@ -199,8 +242,8 @@ export default async function HomePage() {
       {/* Phones skip the artist section (About is one tap away in the menu) to keep the home page short. */}
       <Threshold className="max-lg:hidden" />
 
-      {/* 6 · Meet the artist on a charcoal floor. */}
-      <section className="relative overflow-hidden bg-charcoal max-lg:hidden grain-dark py-20 text-paper lg:py-32">
+      {/* 6 · Meet the artist on the charcoal floor (the one dark gallery floor in both looks). */}
+      <section className="floor floor-charcoal relative overflow-hidden py-20 max-lg:hidden lg:py-32">
         <DisplayWord className="absolute top-2 -left-6 text-paper/[0.07]">सिद्धेश</DisplayWord>
         <div className="wrap relative grid gap-14 lg:grid-cols-12 lg:items-center">
           <div className="relative mx-4 lg:col-span-5 lg:mx-0">
@@ -221,15 +264,15 @@ export default async function HomePage() {
       {/* 7 · Course on a peacock floor: a kolam line weaves through the dots as you scroll. */}
       {site.coursesLive && <Threshold />}
       {site.coursesLive && (
-      <section className="bg-peacock grain-dark py-16 text-paper lg:py-28">
+      <section className="floor floor-peacock py-16 lg:py-28">
         <div className="wrap grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
             <KolamWeave className="scroll-draw mx-auto w-full max-w-sm" />
           </div>
           <div className="grid gap-5 lg:col-span-6 lg:col-start-7">
-            <p className="font-semibold text-paper/85">{h.course.kicker}</p>
+            <p className="font-semibold text-on/85">{h.course.kicker}</p>
             <h2 className="font-heading text-h1">{h.course.name}</h2>
-            <p className="text-paper/90">
+            <p className="text-on/90">
               {h.course.title} · {h.course.meta}
             </p>
             <span className="justify-self-start rounded-full bg-turmeric px-4 py-1 font-semibold text-charcoal">{h.course.tag}</span>

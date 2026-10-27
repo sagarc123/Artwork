@@ -247,6 +247,7 @@ export async function getSiteExtras(locale: Locale) {
   return {
     announcement: message ? { message, href: a?.link || null } : null,
     festiveLook: a?.festiveLook ?? 'auto',
+    siteLook: a?.siteLook ?? 'auto',
     instagram: { href: s.instagram?.profileUrl || s.social?.instagram || site.instagram, posts, caption: s.instagram?.caption || '' },
   }
 }

@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ViewTransition } from 'react'
 import { DeliveryCheck } from '@/components/DeliveryCheck'
 import { DeliveryPromise } from '@/components/DeliveryPromise'
 import { MediaImage } from '@/components/MediaImage'
@@ -95,7 +96,10 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
         <div className="grid content-start gap-4 md:col-span-6 lg:col-span-7">
           {/* Phones: capped so the price peeks in on the first screen. */}
           <div className="tape relative mx-auto w-full max-w-[calc(48svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
-            <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 100vw" priority />
+            {/* Shares its name with the card that opened it (shop, home, gallery), so the artwork morphs across. */}
+            <ViewTransition name={`art-${product.slug}`} share="morph" default="none">
+              <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 100vw" priority />
+            </ViewTransition>
           </div>
           {images.length > 1 && (
             <ul className="grid grid-cols-3 gap-3">
@@ -110,7 +114,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
 
         <div className="grid content-start gap-6 md:col-span-6 lg:sticky lg:top-32 lg:col-span-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="font-semibold text-kumkum">{s.types[product.type]}</p>
+            <p className="font-semibold text-accent">{s.types[product.type]}</p>
             <div className="flex flex-wrap justify-end gap-2">
               <ShareButton label={s.share} text={s.shareText} links={[{ title: product.title, href: localePath(locale, `/shop/p/${product.slug}`) }]} />
               <SaveButton slug={product.slug} title={product.title} labels={s} />

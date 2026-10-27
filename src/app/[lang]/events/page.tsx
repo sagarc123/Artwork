@@ -31,7 +31,7 @@ export default async function EventsPage() {
 
   return (
     <>
-      <PageHero floor="charcoal" kicker={h.kicker} title={h.title} sub={h.sub} word="दारी" art={<DoorstepScene seed="events-hero" style="phool" className="mx-auto max-w-sm" />}>
+      <PageHero floor="charcoal" kicker={h.kicker} title={h.title} sub={h.sub} word="दारी" art={<DoorstepScene seed="events-hero" style="phool" draw className="mx-auto max-w-sm" />}>
         <ButtonLink href="#enquire" variant="light">
           {h.cta}
         </ButtonLink>
