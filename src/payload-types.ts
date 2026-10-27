@@ -1380,6 +1380,23 @@ export interface SiteSetting {
     caption?: string | null;
   };
   /**
+   * A short time-lapse of you making a piece, on the home and About pages. It plays once, without sound, when scrolled to. Until you add one, a drawing of a rangoli (or a pencil sketch) being made stands in.
+   */
+  makingOf?: {
+    /**
+     * MP4 from your phone. Keep it under a minute and about 20 MB, so it loads quickly on mobile data.
+     */
+    video?: (number | null) | Media;
+    /**
+     * Shown before the video plays. A photo of the finished piece works well.
+     */
+    poster?: (number | null) | Media;
+    /**
+     * One or two lines, e.g. "A peacock rangoli for a Diwali doorstep, 3 hours in 40 seconds." Also read out to people who cannot see the video.
+     */
+    caption?: string | null;
+  };
+  /**
    * Required by the E-Commerce Rules: who customers can complain to.
    */
   grievanceOfficer?: {
@@ -1475,7 +1492,7 @@ export interface CommerceSetting {
   createdAt?: string | null;
 }
 /**
- * Starting prices shown on Book an Event, Custom Portraits and the home page.
+ * Starting prices shown on Book an Event, Custom Portraits and the home page, and the photo-and-drawing examples on Custom Portraits.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "service-prices".
@@ -1564,6 +1581,21 @@ export interface ServicePrice {
     extraPersonPercent?: number | null;
     advancePercent?: number | null;
   };
+  /**
+   * Up to 3 of a customer's photo next to your finished drawing. Visitors drag a line across to compare. Only add one when the customer has said yes.
+   */
+  portraitExamples?:
+    | {
+        photo: number | Media;
+        drawing: number | Media;
+        /**
+         * e.g. "Aaji and Ajoba, charcoal, A3".
+         */
+        caption?: string | null;
+        permission: boolean;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1604,6 +1636,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
     | {
         profileUrl?: T;
         posts?: T;
+        caption?: T;
+      };
+  makingOf?:
+    | T
+    | {
+        video?: T;
+        poster?: T;
         caption?: T;
       };
   grievanceOfficer?:
@@ -1715,6 +1754,15 @@ export interface ServicePricesSelect<T extends boolean = true> {
             };
         extraPersonPercent?: T;
         advancePercent?: T;
+      };
+  portraitExamples?:
+    | T
+    | {
+        photo?: T;
+        drawing?: T;
+        caption?: T;
+        permission?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -338,6 +338,15 @@
     "oldPhoto": {
       "title": "Old, faded or torn photo?",
       "body": "Send it anyway — I work from the clearest details, and we agree on them first."
+    },
+    "examples": {
+      "title": "From your photo to my drawing",
+      "sub": "Drag the line across to compare the photo with the finished portrait.",
+      "photo": "Your photo",
+      "drawing": "My drawing",
+      "slider": "Compare the photo and the drawing",
+      "value": "{photo}% photo, {drawing}% drawing",
+      "sample": "A sample to show how it works. Portraits from real customers are coming soon."
     }
   },
   "gallery": {
@@ -360,7 +369,8 @@
     "filter": "Category",
     "share": "Share",
     "shareText": "Look at this by Siddesh Mokashi:",
-    "emptyBody": "I'm photographing the latest pieces. Please check back in a few days."
+    "emptyBody": "I'm photographing the latest pieces. Please check back in a few days.",
+    "view": "View"
   },
   "festivalsPage": {
     "metaTitle": "Rangoli through the festivals",
@@ -1065,5 +1075,16 @@
     "cancel": "Not now",
     "doneTitle": "Reminder set",
     "doneBody": "I will WhatsApp you around {date}, a week before {name}."
+  },
+  "makingOf": {
+    "title": "Watch it being made",
+    "sub": "From the first dot to the last colour, sped up so a few hours fit in a minute.",
+    "play": "Play",
+    "pause": "Pause",
+    "replay": "Play again",
+    "soon": "Video coming soon. Until then, a drawing shows how a piece comes together.",
+    "caption": "Time-lapse of Siddesh making a rangoli by hand, from the first dots to the finished colours.",
+    "standInFestive": "A rangoli comes together: dots first, then one line round them, then the colours.",
+    "standInEveryday": "A pencil portrait comes together, line by line, then the shading."
   }
 }

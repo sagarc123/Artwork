@@ -102,6 +102,38 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      name: 'makingOf',
+      label: 'Making-of video',
+      type: 'group',
+      admin: { description: 'A short time-lapse of you making a piece, on the home and About pages. It plays once, without sound, when scrolled to. Until you add one, a drawing of a rangoli (or a pencil sketch) being made stands in.' },
+      fields: [
+        {
+          name: 'video',
+          label: 'Video',
+          type: 'upload',
+          relationTo: 'media',
+          filterOptions: { mimeType: { contains: 'video' } },
+          admin: { description: 'MP4 from your phone. Keep it under a minute and about 20 MB, so it loads quickly on mobile data.' },
+        },
+        {
+          name: 'poster',
+          label: 'Cover photo',
+          type: 'upload',
+          relationTo: 'media',
+          filterOptions: { mimeType: { contains: 'image' } },
+          admin: { description: 'Shown before the video plays. A photo of the finished piece works well.' },
+        },
+        {
+          name: 'caption',
+          label: 'What happens in the video',
+          type: 'textarea',
+          localized: true,
+          maxLength: 240,
+          admin: { description: 'One or two lines, e.g. "A peacock rangoli for a Diwali doorstep, 3 hours in 40 seconds." Also read out to people who cannot see the video.' },
+        },
+      ],
+    },
+    {
       name: 'grievanceOfficer',
       label: 'Complaints contact',
       type: 'group',

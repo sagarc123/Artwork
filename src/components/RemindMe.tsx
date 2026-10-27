@@ -1,12 +1,13 @@
 'use client'
 
-import { BellRing, CheckCircle2 } from 'lucide-react'
+import { BellRing } from 'lucide-react'
 import { addTransitionType, startTransition, useActionState, useEffect, useId, useRef, useState } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { EnquiryField } from '@/lib/enquiry'
 import { addDays, daysBetween, localToday, ORDER_LEAD_DAYS } from '@/lib/dates'
 import { submitEnquiry, type EnquiryState } from '@/server/enquiry-action'
 import { useHydrated } from './local-store'
+import { ThankYouMark } from './ThankYou'
 
 type Props = {
   festival: { id: number; name: string; nextDate: string | null }
@@ -61,7 +62,7 @@ export function RemindMe({ festival, locale, t, forms, onDark = false }: Props) 
         {state.status === 'ok' ? (
           <div ref={doneRef} tabIndex={-1} role="status" className="grid gap-2">
             <p className="flex items-center gap-2 font-heading text-h3">
-              <CheckCircle2 aria-hidden="true" className="size-7 shrink-0 text-leaf" />
+              <ThankYouMark className="size-10" />
               {t.doneTitle}
             </p>
             <p>{fill(t.doneBody).replace('{date}', remindOn)}</p>

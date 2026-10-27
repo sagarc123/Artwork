@@ -6,6 +6,7 @@ import { ButtonLink } from '@/components/ButtonLink'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { InstagramStrip } from '@/components/InstagramStrip'
+import { MakingOf } from '@/components/MakingOf'
 import { MediaImage, photoSrc } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
@@ -32,7 +33,7 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
-  const [products, festivalDocs, prices, testimonials, { instagram, siteLook, festiveLook }] = await Promise.all([
+  const [products, festivalDocs, prices, testimonials, { instagram, siteLook, festiveLook, makingOf }] = await Promise.all([
     getProducts(locale),
     getFestivals(locale),
     getServicePrices(locale),
@@ -238,6 +239,11 @@ export default async function HomePage() {
           </a>
         </div>
       </section>
+
+      <Threshold />
+
+      {/* 5b · Watch it being made: the time-lapse (or a drawn stand-in). */}
+      <MakingOf t={t.makingOf} makingOf={makingOf} />
 
       {/* Phones skip the artist section (About is one tap away in the menu) to keep the home page short. */}
       <Threshold className="max-lg:hidden" />

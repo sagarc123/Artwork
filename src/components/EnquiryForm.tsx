@@ -1,12 +1,13 @@
 'use client'
 
-import { CheckCircle2, MessageCircle } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { addTransitionType, startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { EnquiryField } from '@/lib/enquiry'
 import { whatsappLink } from '@/lib/site'
 import { submitEnquiry, type EnquiryState } from '@/server/enquiry-action'
 import { pinch } from './pinch'
+import { ThankYouMark } from './ThankYou'
 
 type Labels = Dictionary['forms']
 /** "from ₹X" under a chip, keyed by the chip's value. */
@@ -104,7 +105,7 @@ export function EnquiryForm({ kind, locale, t, typeLabel, hints }: Props) {
   if (state.status === 'ok') {
     return (
       <div ref={doneRef} tabIndex={-1} role="status" className="grid justify-items-start gap-4 rounded-ui border-2 border-leaf bg-surface p-6 lg:p-8">
-        <CheckCircle2 aria-hidden="true" className="size-10 text-leaf" />
+        <ThankYouMark className="size-16" />
         <h3 className="font-heading text-h2">{t.success.title}</h3>
         <p className="text-muted">{t.success.body}</p>
         <a

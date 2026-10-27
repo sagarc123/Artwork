@@ -3,7 +3,7 @@ import { refreshOnChange } from '../hooks'
 import type { CollectionConfig } from 'payload'
 import { anyone, canEditContent, hideFromHelpers, isOwner } from '../access'
 
-/** Photos for products, artworks, courses and pages. */
+/** Photos for products, artworks, courses and pages, plus the making-of video (Website details). */
 export const Media: CollectionConfig = {
   slug: 'media',
   hooks: refreshOnChange('media'),
@@ -19,7 +19,8 @@ export const Media: CollectionConfig = {
   upload: {
     // ponytail: local disk for development; production moves to cloud storage (Supabase/S3) before launch.
     staticDir: path.resolve(process.cwd(), 'media'),
-    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif'],
+    // Videos: only the making-of time-lapse uses them (MP4 from a phone, or WebM). Resizing below applies to photos only.
+    mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'video/mp4', 'video/webm'],
     focalPoint: true,
     adminThumbnail: 'thumb',
     // The site resizes on the fly (next/image) from the original, so only the admin's thumbnail is made here.

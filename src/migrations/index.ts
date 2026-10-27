@@ -8,6 +8,7 @@ import * as migration_20261026_044300_round1_fixes from './20261026_044300_round
 import * as migration_20261026_113923_round2_simpler from './20261026_113923_round2_simpler';
 import * as migration_20261026_122645_round3a_features from './20261026_122645_round3a_features';
 import * as migration_20261027_063103_site_look from './20261027_063103_site_look';
+import * as migration_20261027_074127_motion_pass_2 from './20261027_074127_motion_pass_2';
 
 export const migrations = [
   {
@@ -58,6 +59,11 @@ export const migrations = [
   {
     up: migration_20261027_063103_site_look.up,
     down: migration_20261027_063103_site_look.down,
-    name: '20261027_063103_site_look'
+    name: '20261027_063103_site_look',
+  },
+  {
+    up: migration_20261027_074127_motion_pass_2.up,
+    down: migration_20261027_074127_motion_pass_2.down,
+    name: '20261027_074127_motion_pass_2'
   },
 ];

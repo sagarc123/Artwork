@@ -1,4 +1,4 @@
-import type { Field, GlobalConfig } from 'payload'
+import type { CheckboxFieldValidation, Field, GlobalConfig } from 'payload'
 import { anyone, hideFromHelpers, isOwner } from '../access'
 import { refreshGlobalOnChange } from '../hooks'
 
@@ -21,7 +21,7 @@ export const ServicePrices: GlobalConfig = {
   slug: 'service-prices',
   label: 'Event & portrait prices',
   hooks: refreshGlobalOnChange('service-prices'),
-  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Starting prices shown on Book an Event, Custom Portraits and the home page.' },
+  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Starting prices shown on Book an Event, Custom Portraits and the home page, and the photo-and-drawing examples on Custom Portraits.' },
   access: { read: anyone, update: isOwner },
   fields: [
     {
@@ -49,6 +49,31 @@ export const ServicePrices: GlobalConfig = {
             { name: 'extraPersonPercent', label: 'Each extra person (+%)', type: 'number', min: 0 },
             { name: 'advancePercent', label: 'Advance (%)', type: 'number', min: 0, max: 100 },
           ],
+        },
+      ],
+    },
+    {
+      name: 'portraitExamples',
+      label: 'Portrait examples',
+      labels: { singular: 'Example', plural: 'Examples' },
+      type: 'array',
+      maxRows: 3,
+      admin: { description: "Up to 3 of a customer's photo next to your finished drawing. Visitors drag a line across to compare. Only add one when the customer has said yes." },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'photo', label: "Customer's photo", type: 'upload', relationTo: 'media', required: true, filterOptions: { mimeType: { contains: 'image' } } },
+            { name: 'drawing', label: 'Your drawing', type: 'upload', relationTo: 'media', required: true, filterOptions: { mimeType: { contains: 'image' } } },
+          ],
+        },
+        { name: 'caption', label: 'Caption (optional)', type: 'text', localized: true, maxLength: 90, admin: { description: 'e.g. "Aaji and Ajoba, charcoal, A3".' } },
+        {
+          name: 'permission',
+          label: 'The customer said yes to showing this on the website',
+          type: 'checkbox',
+          required: true,
+          validate: ((value) => value === true || 'Tick this once the customer has said yes, or remove the example.') as CheckboxFieldValidation,
         },
       ],
     },

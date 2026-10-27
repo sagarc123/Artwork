@@ -1,10 +1,11 @@
 import config from '@payload-config'
-import { Check, CheckCircle2, Clock, FileDown, MessageCircle } from 'lucide-react'
+import { Check, Clock, FileDown, MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { OrderAgain } from '@/components/OrderAgain'
+import { ThankYouMark } from '@/components/ThankYou'
 import { localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { CartLine } from '@/lib/cart'
@@ -62,7 +63,7 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
       <div className="wrap">
         <div className="mx-auto grid max-w-3xl gap-8 rounded-ui bg-surface p-6 shadow-frame lg:p-10">
           <div className="grid justify-items-start gap-3">
-            {paid ? <CheckCircle2 aria-hidden="true" className="size-12 text-leaf" /> : <Clock aria-hidden="true" className="size-12 text-marigold" />}
+            {paid ? <ThankYouMark once={order.publicId ?? undefined} className="size-16" /> : <Clock aria-hidden="true" className="size-12 text-marigold" />}
             <h1 className="font-heading text-h1">{stopped ? o.stoppedTitle[stopped] : paid ? o.thanks : awaitingCod ? o.codPlaced : o.pending}</h1>
             {!paid && !stopped && <p className="text-muted">{awaitingCod ? o.codPlacedBody : o.pendingBody}</p>}
             {awaitingCod && (

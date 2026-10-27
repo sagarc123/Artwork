@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { DisplayWord, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
+import { MakingOf } from '@/components/MakingOf'
 import { DevNote } from '@/components/OwnerText'
 import { PageHero } from '@/components/PageHero'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
@@ -10,6 +11,7 @@ import { alternates, localePath } from '@/i18n/config'
 import { STYLES } from '@/lib/art'
 import { site } from '@/lib/site'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
+import { getSiteExtras } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary()
@@ -24,6 +26,7 @@ export default async function AboutPage() {
   const locale = await getLocale()
   const t = await getDictionary()
   const a = t.about
+  const { makingOf } = await getSiteExtras(locale)
 
   return (
     <>
@@ -60,6 +63,8 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
+
+      <MakingOf t={t.makingOf} makingOf={makingOf} />
 
       <section className="relative overflow-hidden bg-charcoal py-16 text-paper grain-dark lg:py-24">
         <DisplayWord className="absolute top-2 -right-4 text-paper/[0.06]">प्रवास</DisplayWord>

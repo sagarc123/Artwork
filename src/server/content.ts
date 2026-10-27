@@ -217,12 +217,21 @@ export async function getBusiness() {
   return { ...b, values }
 }
 
-/** Owner-set "from" prices for events and portraits (empty fields stay null, and the pages hide them). */
+/** Owner-set "from" prices for events and portraits (empty fields stay null, and the pages hide them), plus the portrait examples. */
 export async function getServicePrices(locale: Locale) {
   'use cache'
   cacheLife('max')
-  cacheTag('service-prices')
-  return (await db()).findGlobal({ slug: 'service-prices', locale, depth: 0 })
+  cacheTag('service-prices', 'media')
+  return (await db()).findGlobal({ slug: 'service-prices', locale, depth: 1 })
+}
+
+/** Photo-and-drawing pairs the customer agreed to show (Event & portrait prices → Portrait examples), at most 3. */
+export function portraitExamples(prices: Awaited<ReturnType<typeof getServicePrices>>) {
+  const media = (m: unknown) => (m && typeof m === 'object' ? (m as Media) : null)
+  return (prices.portraitExamples ?? []).flatMap((e) => {
+    const [photo, drawing] = [media(e.photo), media(e.drawing)]
+    return e.permission && photo && drawing ? [{ id: e.id ?? photo.id, photo, drawing, caption: e.caption ?? '' }] : []
+  }).slice(0, 3)
 }
 
 /** Reviews the customer agreed to share, for one page (see pickTestimonials): home when no topic is given. */
@@ -235,7 +244,7 @@ export async function getTestimonials(locale: Locale, topic?: 'event' | 'portrai
   return pickTestimonials(docs, locale, topic)
 }
 
-/** Announcement strip, festive look and the Instagram strip (Site settings), in one language. */
+/** Announcement strip, festive look, the Instagram strip and the making-of video (Site settings), in one language. */
 export async function getSiteExtras(locale: Locale) {
   'use cache'
   cacheLife('max')
@@ -249,6 +258,7 @@ export async function getSiteExtras(locale: Locale) {
     festiveLook: a?.festiveLook ?? 'auto',
     siteLook: a?.siteLook ?? 'auto',
     instagram: { href: s.instagram?.profileUrl || s.social?.instagram || site.instagram, posts, caption: s.instagram?.caption || '' },
+    makingOf: { video: firstMedia([s.makingOf?.video]), poster: firstMedia([s.makingOf?.poster]), caption: s.makingOf?.caption?.trim() || '' },
   }
 }
 

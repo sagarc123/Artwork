@@ -103,14 +103,15 @@ function hatch([bx, by, bw, bh]: Box, rand: () => number, gap: number) {
 
 /** Charcoal sketch on cream paper: a face (portraits) or a still life, each line gone over a few times, shadows hatched and smudged. */
 // `scribble={false}`: no loose background scribble (the home hero, where every KB of HTML counts twice).
-export function SketchStandIn({ seed, subject, scribble = true }: { seed: string; subject: 'face' | 'still'; scribble?: boolean }) {
+// `fill`: covers its box like PhotoStandIn, so the two line up exactly (the before/after slider).
+export function SketchStandIn({ seed, subject, scribble = true, fill }: { seed: string; subject: 'face' | 'still'; scribble?: boolean; fill?: boolean }) {
   const id = `k${useId().replace(/[^\w-]/g, '')}`
   const { rand, bun, transform } = pose(seed)
   const s: Subject = subject === 'face' && bun ? { ...FACE, lines: FACE.lines + BUN_LINE, dark: FACE.dark + BUN } : subject === 'face' ? FACE : STILL
   const ink = '#2a2522'
   const bg = hatch(s.bg, rand, 3) // worked out even when not drawn, so the rest keeps the same hand
   return (
-    <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false" className="size-[86%]">
+    <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false" preserveAspectRatio={fill ? 'xMidYMid slice' : undefined} className={fill ? 'size-full' : 'size-[86%]'}>
       <defs>
         <clipPath id={id}>
           <path d={s.shade} />
