@@ -83,7 +83,6 @@ export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryIte
                   <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} medium={item.medium} style={styles[i]} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
                 </span>
                 <span aria-hidden="true" className="peek-info">
-                  <span className="font-heading text-h3-sm">{item.title}</span>
                   <span className="peek-view">{t.view}</span>
                 </span>
               </span>
