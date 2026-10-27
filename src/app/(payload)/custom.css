@@ -1035,14 +1035,24 @@ body:has(.payload-settings) #force-unlock {
     min-height: 1.75rem;
     border-radius: 0;
   }
-  /* Orders and enquiries lists: the essentials only (number, status, total / name, status, phone), so nothing hides off the side. */
+  /* Orders and enquiries lists: the essentials only (tick box, number, status, total / name, status, phone), so nothing hides off the side. */
   /* ponytail: by column position (header cells carry no field class); fine while the default columns stay. */
-  .collection-list--orders .table :is(th, td):is(:first-child, :nth-child(n + 5)),
+  .collection-list--orders .table :is(th, td):nth-child(n + 5),
   .collection-list--enquiries .table :is(th, td):is(:first-child, :nth-child(n + 5)) {
     display: none;
   }
   .collection-list .table .status-chip {
     white-space: normal;
+  }
+  /* With the tick box back, the order number column gives up some width so the total still fits. */
+  .collection-list--orders .table :is(th, td) {
+    min-width: 0;
+  }
+  .collection-list--orders .table .title-cell {
+    max-width: 8rem;
+  }
+  .collection-list--orders .table .status-chip {
+    padding-inline: 0.5rem;
   }
   .collection-list .table :is(th, td) {
     padding-inline: 0.4rem;
@@ -1106,7 +1116,8 @@ body:has(.payload-settings) #force-unlock {
     width: 100%;
   }
   :is(.collection-list--products, .collection-list--artworks) .table thead,
-  :is(.collection-list--products, .collection-list--artworks) .table :is(.cell-_select, .cell-updatedAt, .cell-createdAt) {
+  :is(.collection-list--products, .collection-list--artworks) .table :is(.cell-updatedAt, .cell-createdAt),
+  .collection-list--artworks .table .cell-_select {
     display: none;
   }
   :is(.collection-list--products, .collection-list--artworks) .table tr {
@@ -1128,6 +1139,10 @@ body:has(.payload-settings) #force-unlock {
   }
   :is(.collection-list--products, .collection-list--artworks) .table td.cell-images {
     flex: 1 1 100%;
+  }
+  /* Paintings & prints: the tick box (for the bulk buttons) sits beside the photo and name. */
+  .collection-list--products .table td.cell-images {
+    flex-basis: calc(100% - 3.5rem);
   }
   :is(.collection-list--products, .collection-list--artworks) .table td:not(.cell-images) {
     color: var(--theme-elevation-650);
@@ -1175,4 +1190,581 @@ body:has(.nav--nav-open) .doc-controls__controls-wrapper {
   background: var(--theme-elevation-800);
   color: var(--theme-elevation-0);
   font-weight: 600;
+}
+
+/* Round 3B: quick-add buttons, sales card, festival sale preset, Customers, Festival planner, bulk bar, phone photos. */
+.today__add {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+}
+.today__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0.4rem 0.9rem;
+  border: 2px solid var(--theme-elevation-700);
+  line-height: 1.25;
+  border-radius: var(--style-radius-m);
+  background: var(--theme-input-bg, var(--theme-elevation-50));
+  color: var(--theme-text);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.today__add-btn:hover {
+  border-color: var(--action);
+}
+.today__add-btn svg {
+  flex-shrink: 0;
+  color: var(--color-kumkum);
+}
+.sales__change {
+  color: var(--theme-text);
+}
+.sales__split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+.sales__split div {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-50);
+}
+.sales__split dt {
+  color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.sales__split dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sales__split small {
+  font-weight: 400;
+}
+.sales__spark {
+  margin: 0.5rem 0 0.75rem;
+}
+.sales__spark svg {
+  display: block;
+  color: var(--color-peacock);
+}
+html[data-theme='dark'] .sales__spark svg {
+  color: #5fb3c7;
+}
+.sales__spark rect {
+  fill: currentColor;
+}
+.sales__spark rect.is-zero {
+  fill: var(--theme-elevation-250);
+}
+.sales__spark figcaption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.sales__top-title {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1rem;
+}
+.sales__top {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+.sales__top li {
+  padding: 0.3rem 0;
+}
+.sales__top li a,
+.sales__top li span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
+/* Festival sale preset (Today, planner, Shop settings). */
+.sale-preset {
+  display: grid;
+  gap: 0.75rem;
+}
+.sale-preset__now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--style-radius-m);
+  background: var(--chip-done-bg);
+  color: var(--chip-done-fg);
+}
+.sale-preset__now.is-planned {
+  background: var(--chip-busy-bg);
+  color: var(--chip-busy-fg);
+}
+.sale-preset__now p {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+.sale-preset__form {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+.sale-preset__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.sale-preset label,
+.call-form > label,
+.photo-taker__alt {
+  display: grid;
+  gap: 0.3rem;
+  font-weight: 600;
+}
+.sale-preset input[type='number'],
+.call-form input:not([type='radio']),
+.call-form textarea,
+.tool-search input,
+.photo-taker__alt input,
+.bulk-bar select {
+  min-height: 48px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--theme-elevation-400);
+  border-radius: var(--style-radius-s);
+  background: var(--theme-input-bg);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 400;
+}
+.sale-preset input[type='number'] {
+  width: 7.5rem;
+}
+.sale-preset__hint {
+  margin: 0;
+  color: var(--theme-elevation-650);
+}
+.sale-preset__cats summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sale-preset__cats summary::before {
+  content: '\25B8';
+}
+.sale-preset__cats[open] summary::before {
+  content: '\25BE';
+}
+.sale-preset__cats fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.sale-preset .sale-preset__cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-weight: 400;
+}
+.sale-preset__cat input,
+.photo-taker__check input,
+.call-form__pick input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--action);
+}
+.sale-preset__confirm {
+  padding: 1rem;
+  border: 2px solid var(--color-marigold);
+  border-radius: var(--style-radius-m);
+}
+.sale-preset__confirm p {
+  margin: 0 0 0.75rem;
+}
+.sale-preset-field .field-label {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+}
+.sale-preset-field {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+}
+
+/* Our own admin pages. */
+.tool-page {
+  padding-bottom: 3rem;
+}
+.tool-page__title {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 2.2rem;
+}
+.tool-page__intro,
+.tool-page__count {
+  max-width: 48rem;
+  margin: 0 0 1.25rem;
+  color: var(--theme-elevation-650);
+}
+.tool-section {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-l);
+  background: var(--theme-input-bg, var(--theme-elevation-50));
+  scroll-margin-top: 5rem;
+}
+.tool-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+}
+.tool-search {
+  margin: 0 0 1rem;
+}
+.tool-search label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+}
+.tool-search > div {
+  max-width: 40rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tool-search input {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+.tool-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.tool-list li > a:not(.one-tap__btn),
+.tool-list__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  min-height: 52px;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--theme-elevation-100);
+  color: inherit;
+  text-decoration: none;
+}
+.tool-list__row > span {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+}
+.tool-list small,
+.customer-list small {
+  color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.tool-list li > a:not(.one-tap__btn):hover strong {
+  text-decoration: underline;
+}
+.tool-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.customer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.customer-list > li {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.2fr) minmax(0, 3fr) auto;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0.5rem;
+  border-top: 1px solid var(--theme-elevation-150);
+}
+.customer-list > li.is-open {
+  background: var(--theme-elevation-50);
+}
+.customer-list__who {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+.customer-list__who strong {
+  font-size: 1.1rem;
+  text-decoration: underline;
+  text-decoration-color: var(--theme-elevation-300);
+  text-underline-offset: 3px;
+}
+.customer-list__facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  margin: 0;
+}
+.customer-list__facts dt {
+  color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.customer-list__facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.customer-contact {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.customer-detail {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  border: 2px solid var(--color-peacock);
+  border-radius: var(--style-radius-l);
+  background: var(--theme-input-bg, var(--theme-elevation-50));
+}
+html[data-theme='dark'] .customer-detail,
+html[data-theme='dark'] .bulk-bar {
+  border-color: #5fb3c7;
+}
+.customer-detail__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+.customer-detail h2 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+.customer-detail h3 {
+  margin: 1rem 0 0.25rem;
+  font-size: 1.1rem;
+}
+.customer-detail__phone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: 1.1rem;
+}
+@media (max-width: 900px) {
+  .customer-list > li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .customer-list__facts {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.plan-list {
+  display: grid;
+  gap: 1rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.plan-card {
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-150);
+  border-top: 4px solid var(--color-marigold);
+  border-radius: var(--style-radius-l);
+  background: var(--theme-input-bg, var(--theme-elevation-50));
+}
+.plan-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+.plan-card__head h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+.plan-card__head p {
+  margin: 0;
+}
+.plan-card__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 8rem), 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0.75rem 0 1rem;
+}
+.plan-card__facts dt {
+  color: var(--theme-elevation-650);
+  font-size: 0.95rem;
+}
+.plan-card__facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+.plan-card__facts dd.is-late {
+  color: var(--color-kumkum);
+}
+.plan-card .one-tap__btn,
+.tool-pages .one-tap__btn,
+.tool-search .one-tap__btn,
+.bulk-bar .one-tap__btn,
+.sale-preset .one-tap__btn,
+.call-form .one-tap__btn,
+.photo-taker .one-tap__btn,
+.tool-list .one-tap__btn,
+.customer-contact .one-tap__btn {
+  min-height: 44px;
+}
+
+/* Enquiry from a call. */
+.call-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 34rem;
+}
+.call-form textarea {
+  min-height: 6rem;
+  padding: 0.6rem 0.75rem;
+}
+.call-form fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.call-form legend {
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+.call-form__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 999px;
+  background: var(--theme-input-bg, var(--theme-elevation-0));
+  cursor: pointer;
+}
+.call-form__pick:has(input:checked) {
+  border: 2px solid var(--theme-elevation-800);
+  font-weight: 600;
+}
+.call-form__pick:has(input:focus-visible) {
+  outline: 3px solid var(--color-marigold);
+  outline-offset: 2px;
+}
+.call-form__error {
+  margin: 0;
+  color: var(--color-kumkum);
+  font-weight: 600;
+}
+.call-form > .one-tap__btn {
+  justify-self: start;
+  min-height: 52px;
+  padding: 0 2rem;
+}
+
+/* Bulk bar above the Orders and Paintings & prints tables. */
+.bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-peacock);
+  border-radius: var(--style-radius-m);
+  background: var(--theme-input-bg, var(--theme-elevation-50));
+}
+.bulk-bar p {
+  margin: 0;
+}
+.bulk-bar__summary:empty {
+  display: none;
+}
+.bulk-bar__summary {
+  flex-basis: 100%;
+  font-weight: 600;
+}
+.bulk-bar__festival {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.bulk-bar__festival label {
+  font-weight: 600;
+}
+
+/* Phone photos on a painting or gallery piece. */
+.photo-taker {
+  margin: -0.5rem 0 var(--spacing-field, 1.5rem);
+}
+.photo-taker > .one-tap__btn {
+  min-height: 52px;
+}
+/* Outlined: the page's one filled button stays "Put on website". */
+.photo-taker__take {
+  border: 2px solid var(--theme-elevation-700);
+}
+.photo-taker__edit {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 26rem;
+  padding: 1rem;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: var(--style-radius-m);
+}
+.photo-taker__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-weight: 600;
+}
+.photo-taker__frame {
+  overflow: hidden;
+  border-radius: var(--style-radius-s);
+  background: var(--theme-elevation-100);
+}
+.photo-taker__frame img {
+  display: block;
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  user-select: none;
+}
+.photo-taker__frame.is-crop {
+  aspect-ratio: 4 / 5;
+  outline: 3px solid var(--color-marigold);
+  cursor: grab;
+  touch-action: none;
+}
+.photo-taker__frame.is-crop img {
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  pointer-events: none;
 }

@@ -72,3 +72,20 @@ export function listUrl(collection: string, field: string, values: string[]) {
 
 /** A page on the public site in the given language, for "View on site" buttons. */
 export const sitePath = (locale: string | undefined, path: string) => localePath(isLocale(locale) ? locale : 'en', path)
+
+const LONG_DAY: Record<Lang, string> = { en: 'en-IN', mr: 'mr-IN', hi: 'hi-IN' }
+const longDay = (ymd: string, l: Lang) =>
+  new Intl.DateTimeFormat(LONG_DAY[l], { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${ymd.slice(0, 10)}T00:00:00Z`))
+
+/** The festival reminder someone asked for ("Remind me"), in their language: the date, the designs link and the last day to order. */
+export function festivalReminder(r: { name?: string | null; locale?: string | null; festival: string; date: string; orderBy?: string | null; link: string }) {
+  const l = lang(r.locale)
+  const name = r.name?.trim() || ''
+  const date = longDay(r.date, l)
+  const by = r.orderBy ? longDay(r.orderBy, l) : null
+  return {
+    en: `Namaste ${name}! This is ${ARTIST.en}, with the reminder you asked for: ${r.festival} is on ${date}. See the designs here: ${r.link}${by ? `. To get a parcel in time, please order by ${by}.` : '.'}`,
+    mr: `नमस्कार ${name}! मी ${ARTIST.mr}. तुम्ही सांगितल्याप्रमाणे आठवण: ${r.festival} ${date} रोजी आहे. डिझाइन्स इथे पाहा: ${r.link}${by ? `. पार्सल वेळेत मिळण्यासाठी ${by} पर्यंत ऑर्डर करा.` : '.'}`,
+    hi: `नमस्ते ${name}! मैं ${ARTIST.hi} हूँ, आपकी माँगी हुई याद: ${r.festival} ${date} को है। डिज़ाइन यहाँ देखें: ${r.link}${by ? `। समय पर पार्सल के लिए ${by} तक ऑर्डर करें।` : '।'}`,
+  }[l]
+}

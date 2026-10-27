@@ -44,6 +44,7 @@ export const Artworks: CollectionConfig = {
               admin: { description: 'Needed in English. Marathi and Hindi are optional: when empty, the English name shows.' },
             },
             { name: 'images', label: 'Photos', type: 'upload', relationTo: 'media', hasMany: true, required: true, admin: { description: 'First photo is the main one.', components: { Cell: '/payload/admin/Cells#ThumbCell' } } },
+            { name: 'photoTaker', type: 'ui', admin: { components: { Field: '/payload/admin/PhotoTaker#PhotoTaker' } } },
             { name: 'category', type: 'relationship', relationTo: 'categories', required: true, filterOptions: { scope: { in: ['artwork', 'both'] } } },
           ],
         },

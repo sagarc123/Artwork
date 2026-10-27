@@ -24,7 +24,7 @@ export const Products: CollectionConfig = {
     defaultColumns: ['images', 'sold', '_status', 'type'],
     description: 'Paintings, drawings, prints and downloads for sale. Each one also shows in the gallery unless you untick "Show in gallery".',
     hidden: hideFromHelpers,
-    components: { beforeListTable: [{ path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No paintings or prints yet. Tap “Add new” to put your first piece in the shop.' } }] },
+    components: { beforeListTable: ['/payload/admin/Bulk#ProductBulk', { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No paintings or prints yet. Tap “Add new” to put your first piece in the shop.' } }] },
     // "View on site" button: the live shop page in the language being edited.
     preview: (doc, { locale }) => (doc.slug ? sitePath(locale, `/shop/p/${doc.slug}`) : null),
   },
@@ -58,7 +58,7 @@ export const Products: CollectionConfig = {
                 { label: 'Print', value: 'print' },
                 { label: 'Digital download', value: 'digital' },
               ],
-              admin: { components: { Field: '/payload/admin/ChoiceButtons#ChoiceButtons' } },
+              admin: { components: { Field: { path: '/payload/admin/ChoiceButtons#ChoiceButtons', clientProps: { fromQuery: 'type' } } } },
             },
             {
               name: 'images',
@@ -72,6 +72,7 @@ export const Products: CollectionConfig = {
                 components: { Cell: '/payload/admin/Cells#ThumbCell' },
               },
             },
+            { name: 'photoTaker', type: 'ui', admin: { components: { Field: '/payload/admin/PhotoTaker#PhotoTaker' } } },
             // An original is just a price and a Sold switch; they are stored as its one size row (see originalFromSimpleFields).
             {
               type: 'row',

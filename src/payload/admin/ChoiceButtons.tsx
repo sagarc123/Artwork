@@ -1,18 +1,30 @@
 'use client'
 
 import type { SelectFieldClientProps } from 'payload'
-import { FieldLabel, useDocumentInfo, useField, useFormProcessing } from '@payloadcms/ui'
+import { FieldLabel, useDocumentInfo, useField, useFormInitializing, useFormProcessing } from '@payloadcms/ui'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import { useOneTap } from './one-tap'
 
 /**
  * A select shown as big tap buttons (easier than a dropdown on a phone).
  * `saveOnTap` (enquiry status): on a saved document each tap saves at once, with Undo.
+ * `fromQuery`: a new document starts on the choice named in the address, e.g. Today's "+ Print" (?type=print).
  */
-export function ChoiceButtons({ field, path, saveOnTap }: SelectFieldClientProps & { saveOnTap?: boolean }) {
+export function ChoiceButtons({ field, path, saveOnTap, fromQuery }: SelectFieldClientProps & { saveOnTap?: boolean; fromQuery?: string }) {
   const { value, setValue, disabled } = useField<string>({ path: path ?? field.name })
   const { id } = useDocumentInfo()
   const busy = useFormProcessing()
   const save = useOneTap(path ?? field.name)
+  const preset = useSearchParams().get(fromQuery ?? '')
+  const initializing = useFormInitializing()
+  const applied = useRef(false)
+  useEffect(() => {
+    // Once, when the new document's form is ready (earlier, the form's own first values would replace it).
+    if (initializing || applied.current || id || !preset) return
+    applied.current = true
+    if (preset !== value && field.options.some((o) => (typeof o === 'string' ? o : o.value) === preset)) setValue(preset)
+  }, [initializing, id, preset, value, field.options, setValue])
   const label = (v: unknown) => {
     const o = field.options.find((x) => (typeof x === 'string' ? x : x.value) === v)
     return typeof o === 'object' && typeof o.label === 'string' ? o.label : String(v ?? '')

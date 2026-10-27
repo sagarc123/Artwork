@@ -12,6 +12,20 @@ const lock = (fields: Field[]): Field[] =>
 /** An error whose message staff see in the admin. The production build blanks class names, and Payload hides nameless errors. */
 const refuse = (message: string, status = 400) => Object.assign(new APIError(message, status, null, true), { name: 'APIError' })
 
+/** Order statuses with their labels (also used by the Customers page). */
+export const ORDER_STATUSES = [
+  { label: 'Waiting for payment', value: 'pending_payment' },
+  { label: 'COD: customer to confirm', value: 'cod_pending_confirmation' },
+  { label: 'COD confirmed: to pack', value: 'cod_confirmed' },
+  { label: 'Paid: to pack', value: 'paid' },
+  { label: 'Packed', value: 'packed' },
+  { label: 'Shipped', value: 'shipped' },
+  { label: 'Delivered', value: 'delivered' },
+  { label: 'Cancelled', value: 'cancelled' },
+  { label: 'Needs refund', value: 'needs_refund' },
+  { label: 'Refunded', value: 'refunded' },
+]
+
 const OWNER_ONLY_STATUSES = ['paid', 'needs_refund', 'refunded']
 
 /** Shop orders. Created only by the website's checkout; staff move them through packing and shipping. */
@@ -19,7 +33,7 @@ export const Orders: CollectionConfig = {
   slug: 'orders',
   admin: {
     useAsTitle: 'orderNumber',
-    group: 'Customers',
+    group: 'Orders & enquiries',
     defaultColumns: ['orderNumber', 'status', 'total', 'paymentMode', 'createdAt'],
     listSearchableFields: ['orderNumber', 'customer.name', 'customer.phone'],
     description: 'Open an order and use the big buttons as you confirm, pack and ship it.',
@@ -41,6 +55,8 @@ export const Orders: CollectionConfig = {
           },
         },
         { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No orders yet. New orders appear here and on Today.' } },
+        // Tick several: Mark packed / Print all packing slips (each saved through the same rules as one order).
+        '/payload/admin/Bulk#OrderBulk',
       ],
     },
     // Opens the invoice PDF once one is issued, otherwise the customer's order page.
@@ -53,6 +69,8 @@ export const Orders: CollectionConfig = {
   // Orders contain customers' names, phones and addresses.
   access: { read: isOrderStaff, create: () => false, update: isOrderStaff, delete: isOwner },
   defaultSort: '-createdAt',
+  // Payload's bulk "Edit" would show the raw status list; the bulk buttons above the table do the job in plain words.
+  disableBulkEdit: true,
   hooks: {
     beforeChange: [
       async ({ data, originalDoc, req, operation }) => {
@@ -105,18 +123,7 @@ export const Orders: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'pending_payment',
-      options: [
-        { label: 'Waiting for payment', value: 'pending_payment' },
-        { label: 'COD: customer to confirm', value: 'cod_pending_confirmation' },
-        { label: 'COD confirmed: to pack', value: 'cod_confirmed' },
-        { label: 'Paid: to pack', value: 'paid' },
-        { label: 'Packed', value: 'packed' },
-        { label: 'Shipped', value: 'shipped' },
-        { label: 'Delivered', value: 'delivered' },
-        { label: 'Cancelled', value: 'cancelled' },
-        { label: 'Needs refund', value: 'needs_refund' },
-        { label: 'Refunded', value: 'refunded' },
-      ],
+      options: ORDER_STATUSES,
       // Lists, Today and the maintenance job all filter by status.
       index: true,
       // Only choices that can work: never back to "waiting", no money statuses for helpers, and Cancel only where it can be done.

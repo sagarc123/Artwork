@@ -1,14 +1,14 @@
 import type { ServerProps } from 'payload'
-import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Plus, Truck, type LucideIcon } from 'lucide-react'
+import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Percent, Plus, Truck, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { hasRole } from '../access'
 import { ago, listUrl } from '../../lib/admin'
+import { changeLabel, festivalPlan, percentChange, sparkBars } from '../../lib/admin-tools'
 import { indiaToday } from '../../lib/dates'
 import { formatPrice } from '../../lib/site'
-
-/** Statuses that count as a sale (paid online, or a COD order the customer confirmed). */
-const SOLD = ['paid', 'cod_confirmed', 'packed', 'shipped', 'delivered']
+import { salePresetData, salesSummary, SOLD } from '../../server/admin-data'
+import { SalePreset } from './SalePreset'
 const LOW_STOCK = 2
 const ASKING: Record<string, string> = { event: 'event rangoli', portrait: 'portrait', workshop: 'workshop', general: 'message' }
 /** Server render time (the page is rendered per request). */
@@ -72,19 +72,21 @@ export async function Today({ payload, user }: ServerProps) {
   const findOrders = (status: string[]) =>
     payload.find({ collection: 'orders', where: { status: { in: status } }, sort: 'createdAt', limit: 5, depth: 0, select: { orderNumber: true, customer: true, total: true, createdAt: true } })
 
-  const [site, enquiries, cod, toPack, shipped, week, prints, festivals] = await Promise.all([
+  const [site, enquiries, cod, toPack, shipped, sales, prints, festivals, preset, upcoming] = await Promise.all([
     payload.findGlobal({ slug: 'site-settings', depth: 0 }),
     orders ? payload.find({ collection: 'enquiries', where: { status: { equals: 'new' } }, sort: 'createdAt', limit: 5, depth: 0, select: { name: true, type: true, createdAt: true } }) : null,
     orders ? findOrders(['cod_pending_confirmation']) : null,
     orders ? findOrders(['paid', 'cod_confirmed']) : null,
     orders ? findOrders(['shipped']) : null,
-    owner
-      ? payload.find({ collection: 'orders', where: { and: [{ status: { in: SOLD } }, { createdAt: { greater_than: new Date(now - 7 * 86_400_000).toISOString() } }] }, pagination: false, depth: 0, select: { total: true } })
-      : null,
+    owner ? salesSummary(payload, indiaToday(new Date(now))) : null,
     content ? payload.find({ collection: 'products', where: { type: { equals: 'print' } }, pagination: false, depth: 0, draft: true, select: { title: true, variants: true } }) : null,
     // Only dates that have passed: festivals without a date (like weddings) are fine as they are.
     content ? payload.find({ collection: 'festivals', where: { nextDate: { less_than: indiaToday(new Date(now)) } }, limit: 20, depth: 0, select: { name: true, nextDate: true } }) : null,
+    owner ? salePresetData(payload) : null,
+    // The next festival names the sale ("Start Diwali sale").
+    owner ? payload.find({ collection: 'festivals', where: { nextDate: { greater_than_equal: indiaToday(new Date(now)) } }, sort: 'nextDate', limit: 1, depth: 0, select: { name: true, nextDate: true } }) : null,
   ])
+  const nextFestival = upcoming && preset ? festivalPlan(upcoming.docs, preset.today, new Map())[0] : undefined
   const replyHours = site.contact?.replyHours ?? 4
   const lowPrints = (prints?.docs ?? []).flatMap((p) => {
     const left = Math.min(...p.variants.map((v) => v.stock - (v.reserved ?? 0)))
@@ -146,17 +148,32 @@ export async function Today({ payload, user }: ServerProps) {
             {orders && (waiting ? ` · ${waiting} ${waiting === 1 ? 'thing needs' : 'things need'} you` : ' · all caught up')}
           </p>
         </div>
-        <nav className="today__quick" aria-label="Quick links">
-          {content && (
-            <Link href="/admin/collections/products/create" className="today__link">
-              <Plus size={20} aria-hidden="true" /> Add a painting
-            </Link>
-          )}
-          <a href="/" target="_blank" rel="noopener noreferrer" className="today__link">
-            <ExternalLink size={18} aria-hidden="true" /> View website
-          </a>
-        </nav>
+        <a href="/" target="_blank" rel="noopener noreferrer" className="today__link">
+          <ExternalLink size={18} aria-hidden="true" /> View website
+        </a>
       </header>
+      <nav className="today__add" aria-label="Add something new">
+        {content && (
+          <>
+            <Link href="/admin/collections/products/create" className="today__add-btn">
+              <Plus size={22} aria-hidden="true" /> Painting / original
+            </Link>
+            <Link href="/admin/collections/products/create?type=print" className="today__add-btn">
+              <Plus size={22} aria-hidden="true" /> Print
+            </Link>
+          </>
+        )}
+        {orders && (
+          <Link href="/admin/add-call" className="today__add-btn">
+            <Plus size={22} aria-hidden="true" /> Enquiry from a call
+          </Link>
+        )}
+        {content && (
+          <Link href="/admin/collections/testimonials/create" className="today__add-btn">
+            <Plus size={22} aria-hidden="true" /> Review
+          </Link>
+        )}
+      </nav>
       {urgent.length > 0 && <div className="today__grid today__grid--urgent">{urgent.map(card)}</div>}
       {clear.length > 0 && (
         <p className="today__clear">
@@ -166,17 +183,15 @@ export async function Today({ payload, user }: ServerProps) {
           </span>
         </p>
       )}
-      {(info.length > 0 || week) && (
+      {(info.length > 0 || sales || preset) && (
         <div className="today__grid">
-          {info.map(card)}
-          {week && (
-            <Card title="Sales, last 7 days" icon={IndianRupee} href={listUrl('orders', 'status', SOLD)} tone="info" empty="">
-              <p className="today-card__big">{formatPrice(week.docs.reduce((sum, o) => sum + (o.total ?? 0), 0))}</p>
-              <p className="today-card__empty">
-                {week.docs.length} {week.docs.length === 1 ? 'order' : 'orders'}
-              </p>
+          {sales && <SalesCard sales={sales} />}
+          {preset && (
+            <Card title="Festival sale" icon={Percent} href="/admin/festival-planner#sale" tone="info" empty="">
+              <SalePreset name={nextFestival?.name} {...preset} />
             </Card>
           )}
+          {info.map(card)}
         </div>
       )}
       <h2 className="today__all">Everything else</h2>
@@ -184,11 +199,85 @@ export async function Today({ payload, user }: ServerProps) {
   )
 }
 
-/** "Today" at the top of the menu. */
-export function TodayNavLink() {
+/** Owner only: this month against last month, prepaid vs COD, best sellers and a 30-day bar sparkline. */
+function SalesCard({ sales: s }: { sales: Awaited<ReturnType<typeof salesSummary>> }) {
+  const change = changeLabel(percentChange(s.revThis, s.revLast))
+  const values = s.days.map((d) => d.total)
+  const bars = sparkBars(values, 280, 56, 2)
+  const total30 = values.reduce((a, b) => a + b, 0)
+  const best = s.days.reduce((a, b) => (b.total > a.total ? b : a), s.days[0])
+  const orders = (n: number) => `${n} ${n === 1 ? 'order' : 'orders'}`
+  const day = (ymd: string) => new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(`${ymd}T00:00:00Z`))
   return (
-    <Link href="/admin" className="nav__link today-nav">
-      Today
-    </Link>
+    <Card title="Sales this month" icon={IndianRupee} href={listUrl('orders', 'status', [...SOLD])} tone="info" empty="">
+      <p className="today-card__big">{formatPrice(s.revThis)}</p>
+      <p className="today-card__empty">
+        {orders(s.nThis)} · last month {formatPrice(s.revLast)}, {orders(s.nLast)}
+        {change && <strong className="sales__change"> ({change})</strong>}
+      </p>
+      <dl className="sales__split">
+        <div>
+          <dt>Paid online</dt>
+          <dd>
+            {formatPrice(s.prepaidRev)} <small>({orders(s.prepaidN)})</small>
+          </dd>
+        </div>
+        <div>
+          <dt>Cash on delivery</dt>
+          <dd>
+            {formatPrice(s.codRev)} <small>({orders(s.codN)})</small>
+          </dd>
+        </div>
+      </dl>
+      <figure className="sales__spark">
+        <svg viewBox="0 0 280 56" width="100%" height="56" preserveAspectRatio="none" role="img" aria-label={`Sales per day, last 30 days: ${formatPrice(total30)} in all${best.total ? `, best day ${day(best.day)} with ${formatPrice(best.total)}` : ''}.`}>
+          {bars.map((b, i) => (
+            <rect key={s.days[i].day} x={b.x} y={b.y} width={b.w} height={b.h} rx={Math.min(2, b.w / 2)} className={values[i] ? undefined : 'is-zero'}>
+              <title>{`${day(s.days[i].day)}: ${formatPrice(values[i])}`}</title>
+            </rect>
+          ))}
+        </svg>
+        <figcaption>
+          <span>Last 30 days</span>
+          <span>{formatPrice(total30)}</span>
+        </figcaption>
+      </figure>
+      <h3 className="sales__top-title">Best sellers this month</h3>
+      {s.top.length ? (
+        <ol className="sales__top">
+          {s.top.map((t) => (
+            <li key={`${t.productId ?? t.title}`}>
+              {t.productId ? <Link href={`/admin/collections/products/${t.productId}`}>{t.title}</Link> : <span>{t.title}</span>}
+              <small>
+                {t.qty} sold · {formatPrice(t.amount)}
+              </small>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="today-card__empty">No sales yet this month.</p>
+      )}
+    </Card>
+  )
+}
+
+/** Top of the menu: Today, then Customers (owner and helper) and the Festival planner (owner). */
+export function TodayNavLink({ user }: ServerProps) {
+  return (
+    <>
+      <Link href="/admin" className="nav__link today-nav">
+        Today
+      </Link>
+      {hasRole(user, 'owner', 'staff') && (
+        <Link href="/admin/customers" className="nav__link today-nav">
+          Customers
+        </Link>
+      )}
+      {hasRole(user, 'owner') && (
+        <Link href="/admin/festival-planner" className="nav__link today-nav">
+          Festival planner
+        </Link>
+      )}
+    </>
   )
 }

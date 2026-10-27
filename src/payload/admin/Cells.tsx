@@ -9,7 +9,7 @@ import { formatPrice } from '../../lib/site'
 const clock = () => Date.now()
 
 /** Colour per status: kumkum = needs you now, marigold = in progress, leaf = done, grey = closed. */
-const TONE: Record<string, 'urgent' | 'busy' | 'done' | 'off'> = {
+export const TONE: Record<string, 'urgent' | 'busy' | 'done' | 'off'> = {
   // orders
   cod_pending_confirmation: 'urgent',
   paid: 'urgent',

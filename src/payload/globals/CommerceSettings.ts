@@ -118,6 +118,7 @@ export const CommerceSettings: GlobalConfig = {
       type: 'group',
       admin: { description: 'Takes a percentage off shop prices for a few days. The old price shows crossed out. Products are not changed.' },
       fields: [
+        { name: 'preset', type: 'ui', admin: { components: { Field: '/payload/admin/FestivalPlanner#SalePresetField' } } },
         { name: 'enabled', label: 'Sale is on', type: 'checkbox' },
         {
           type: 'row',

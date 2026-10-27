@@ -1,6 +1,22 @@
 import type { CollectionConfig } from 'payload'
 import { isOrderStaff, isOwner, isStaff } from '../access'
 
+/** Enquiry statuses and kinds with their labels (also used by the Customers page and the call form). */
+export const ENQUIRY_STATUSES = [
+  { label: 'New', value: 'new' },
+  { label: 'Replied', value: 'replied' },
+  { label: 'Quoted', value: 'quoted' },
+  { label: 'Advance paid', value: 'advance_paid' },
+  { label: 'Done', value: 'done' },
+  { label: 'Lost', value: 'lost' },
+]
+export const ENQUIRY_TYPES = [
+  { label: 'Event rangoli', value: 'event' },
+  { label: 'Custom portrait', value: 'portrait' },
+  { label: 'Workshop', value: 'workshop' },
+  { label: 'General', value: 'general' },
+]
+
 /** Show a field only for these kinds of enquiry. */
 const only = (...types: string[]) => ({ condition: (data: Partial<{ type: string }>) => types.includes(data?.type ?? '') })
 
@@ -9,7 +25,7 @@ export const Enquiries: CollectionConfig = {
   slug: 'enquiries',
   admin: {
     useAsTitle: 'name',
-    group: 'Customers',
+    group: 'Orders & enquiries',
     defaultColumns: ['name', 'status', 'phone', 'type', 'eventDate', 'createdAt'],
     listSearchableFields: ['name', 'phone', 'city'],
     description: 'Requests from the website forms. Tap the green WhatsApp button to reply; it marks the enquiry as replied.',
@@ -45,14 +61,7 @@ export const Enquiries: CollectionConfig = {
       defaultValue: 'new',
       // Saves on tap (with Undo), like the order buttons.
       admin: { components: { Field: { path: '/payload/admin/ChoiceButtons#ChoiceButtons', clientProps: { saveOnTap: true } }, Cell: '/payload/admin/Cells#StatusCell' } },
-      options: [
-        { label: 'New', value: 'new' },
-        { label: 'Replied', value: 'replied' },
-        { label: 'Quoted', value: 'quoted' },
-        { label: 'Advance paid', value: 'advance_paid' },
-        { label: 'Done', value: 'done' },
-        { label: 'Lost', value: 'lost' },
-      ],
+      options: ENQUIRY_STATUSES,
     },
     {
       type: 'row',
@@ -71,12 +80,7 @@ export const Enquiries: CollectionConfig = {
           type: 'select',
           required: true,
           admin: { isClearable: false },
-          options: [
-            { label: 'Event rangoli', value: 'event' },
-            { label: 'Custom portrait', value: 'portrait' },
-            { label: 'Workshop', value: 'workshop' },
-            { label: 'General', value: 'general' },
-          ],
+          options: ENQUIRY_TYPES,
         },
         { name: 'city', type: 'text' },
         { name: 'eventDate', label: 'Date (event or needed by)', type: 'date', admin: { date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' }, ...only('event', 'portrait', 'workshop') } },

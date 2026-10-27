@@ -53,6 +53,12 @@ export default buildConfig({
       beforeDashboard: ['/payload/admin/Today#Today'],
       beforeNavLinks: ['/payload/admin/Today#TodayNavLink'],
       actions: ['/payload/admin/LocaleNote#LocaleNote'],
+      // Our own pages (each checks who may open it).
+      views: {
+        customers: { Component: '/payload/admin/Customers#CustomersView', path: '/customers', meta: { title: 'Customers' } },
+        festivalPlanner: { Component: '/payload/admin/FestivalPlanner#FestivalPlannerView', path: '/festival-planner', meta: { title: 'Festival planner' } },
+        addCall: { Component: '/payload/admin/AddCall#AddCallView', path: '/add-call', meta: { title: 'Enquiry from a call' } },
+      },
     },
     // ponytail: the admin itself stays in English; Payload has no Marathi or Hindi admin translations yet.
   },
@@ -98,7 +104,7 @@ export default buildConfig({
       },
     },
   },
-  // Menu groups follow this order: Customers (orders, invoices, enquiries), Shop, Gallery & Festivals, (Courses, hidden), Lists (categories, mediums, GST classes), Settings.
+  // Menu groups follow this order: Orders & enquiries (orders, invoices, enquiries; the Customers page sits above them), Shop, Gallery & Festivals, (Courses, hidden), Lists (categories, mediums, GST classes), Settings.
   collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Categories, Mediums, TaxClasses, Users].map(noApiTab),
   globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {
