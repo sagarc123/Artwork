@@ -28,6 +28,8 @@ export const Enquiries: CollectionConfig = {
             ],
           },
         },
+        // Festival reminders asked for from the "Remind me" button: message them a week before.
+        { path: '/payload/admin/QuickFilters#QuickFilters', clientProps: { collection: 'enquiries', field: 'topic', tabs: [{ label: 'Festival reminders', values: ['reminder'] }] } },
         { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No enquiries yet. Messages from the website forms appear here and on Today.' } },
       ],
     },
@@ -78,6 +80,19 @@ export const Enquiries: CollectionConfig = {
         },
         { name: 'city', type: 'text' },
         { name: 'eventDate', label: 'Date (event or needed by)', type: 'date', admin: { date: { pickerAppearance: 'dayOnly', displayFormat: 'd MMM yyyy' }, ...only('event', 'portrait', 'workshop') } },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        { name: 'topic', label: 'Kind', type: 'select', options: [{ label: 'Festival reminder', value: 'reminder' }], admin: { readOnly: true, condition: (data) => Boolean(data?.topic) } },
+        {
+          name: 'reminder',
+          label: 'Remind before',
+          type: 'relationship',
+          relationTo: 'festivals',
+          admin: { condition: (data) => data?.topic === 'reminder', description: 'Send them one WhatsApp message a week before this festival, with designs and the last day to order.' },
+        },
       ],
     },
     { type: 'row', fields: [{ name: 'venue', type: 'text', admin: only('event') }, { name: 'size', label: 'Rangoli size', type: 'text', admin: only('event') }, { name: 'styles', label: 'Styles they like', type: 'text', hasMany: true, admin: only('event') }] },

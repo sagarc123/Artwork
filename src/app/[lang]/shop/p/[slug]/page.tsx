@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DeliveryCheck } from '@/components/DeliveryCheck'
 import { DeliveryPromise } from '@/components/DeliveryPromise'
 import { MediaImage } from '@/components/MediaImage'
 import { ProductBuy } from '@/components/ProductBuy'
@@ -12,7 +13,7 @@ import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { site } from '@/lib/site'
-import { getBusiness, getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
+import { getBusiness, getDeliveryRules, getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
@@ -35,7 +36,6 @@ const name = (rel: unknown) => (rel && typeof rel === 'object' && 'name' in rel 
 
 export async function generateMetadata({ params }: PageProps<'/[lang]/shop/p/[slug]'>): Promise<Metadata> {
   const { product, locale } = await load(params)
-  const image = Array.isArray(product.images) && typeof product.images[0] === 'object' ? (product.images[0] as Media) : null
   const title = product.seo?.title || product.title
   const description = product.seo?.description || product.story?.slice(0, 155) || undefined
   return {
@@ -43,7 +43,8 @@ export async function generateMetadata({ params }: PageProps<'/[lang]/shop/p/[sl
     description,
     alternates: alternates(locale, `/shop/p/${product.slug}`),
     // A page's openGraph replaces the layout's whole object, so repeat its defaults.
-    openGraph: { siteName: site.brandName, type: 'website', title, description, images: image?.url ? [{ url: image.url, alt: image.alt || title }] : undefined },
+    // The share picture comes from ./opengraph-image.tsx.
+    openGraph: { siteName: site.brandName, type: 'website', title, description },
   }
 }
 
@@ -61,7 +62,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
   const available = product.variants.some((v) => v.stock - (v.reserved ?? 0) > 0)
   const physical = product.type !== 'digital'
   // Same rule as checkout (src/lib/cart.ts codBlock): prints and originals, within the COD limit.
-  const { cod } = await getBusiness()
+  const [{ cod }, { rules }] = await Promise.all([getBusiness(), getDeliveryRules()])
   const codOk = physical && cod.enabled && Math.min(...product.variants.map((v) => v.price)) + cod.fee <= cod.maxTotal
 
   // Structured data so Google can show price and availability.
@@ -120,7 +121,14 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
             slug={product.slug}
             title={product.title}
             physical={physical}
-            promise={physical ? <DeliveryPromise locale={locale} deliveredBy={s.deliveredBy} cod={codOk ? s.codAvailable : null} /> : undefined}
+            promise={
+              physical ? (
+                <div className="grid gap-4">
+                  <DeliveryPromise locale={locale} deliveredBy={s.deliveredBy} cod={codOk ? s.codAvailable : null} days={[rules.minDays, rules.maxDays]} />
+                  <DeliveryCheck locale={locale} t={s.delivery} codOk={codOk} />
+                </div>
+              ) : undefined
+            }
             variants={product.variants.map((v) => ({ id: v.id!, label: v.label, price: v.price, compareAtPrice: v.compareAtPrice, stock: v.stock - (v.reserved ?? 0) }))}
             framing={(product.framing ?? []).map((f) => ({ id: f.id!, label: f.label, extraPrice: f.extraPrice }))}
             t={s}

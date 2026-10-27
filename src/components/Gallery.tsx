@@ -7,7 +7,8 @@ import type { Dictionary } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { noRepeat, styleFor, type Medium } from '@/lib/art'
 import { whatsappLink } from '@/lib/site'
-import { MediaImage } from './MediaImage'
+import { MediaImage, photoSrc } from './MediaImage'
+import { ShareButton } from './ShareButton'
 import type { Floor } from './PhotoPlaceholder'
 
 export type GalleryItem = {
@@ -99,7 +100,9 @@ export function Gallery({ items, t, enquiryMessage }: { items: GalleryItem[]; t:
               <MediaImage media={current.image} alt={current.title} ratio={current.ratio} seed={current.seed} medium={current.medium} style={styles[open!]} floor={current.floor} sizes="(min-width: 1024px) 60vw, 100vw" className="mx-auto max-h-[70dvh] w-auto" />
             </div>
             <div className="grid content-start gap-4 p-6 lg:p-8">
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {/* Shares the piece's shop page, or this page; a real photo goes along as a file where the phone allows it. */}
+                <ShareButton label={t.share} text={t.shareText} links={[{ title: current.title, href: current.productHref ?? '' }]} image={photoSrc(current.image)} />
                 <button type="button" onClick={() => dialog.current?.close()} className="flex min-h-12 items-center gap-2 rounded-ui px-3 hover:bg-charcoal/5">
                   <X aria-hidden="true" className="size-6" />
                   {t.close}

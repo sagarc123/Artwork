@@ -34,7 +34,9 @@
     "whatsapp": "WhatsApp"
   },
   "header": {
-    "replyPromise": "I reply within 4 hours on WhatsApp"
+    "replyPromise": "I reply within {hours} hours on WhatsApp",
+    "announceClose": "Close",
+    "announceLabel": "Announcement"
   },
   "menu": {
     "eventsSub": "Weddings, festivals, office events",
@@ -52,7 +54,7 @@
     },
     "events": {
       "title": "Let me colour your celebration",
-      "sub": "Weddings, festivals, housewarmings and office events across Maharashtra. Tell me the date — I reply within 4 hours.",
+      "sub": "Weddings, festivals, housewarmings and office events across Maharashtra. Tell me the date — I reply within {hours} hours.",
       "cta": "Plan my event rangoli",
       "kicker": "Event rangoli",
       "steps": [
@@ -114,6 +116,12 @@
       "title": "New to buying online?",
       "body": "Short guides show you how to order and pay with UPI. Or just message me on WhatsApp.",
       "cta": "See how it works"
+    },
+    "instagram": {
+      "title": "From my Instagram",
+      "follow": "See more on Instagram",
+      "open": "Open on Instagram: {title}",
+      "photo": "Instagram photo {n}"
     }
   },
   "footer": {
@@ -232,11 +240,12 @@
       "date": "Please choose a date from today onwards.",
       "rate": "You have sent a few enquiries already. Please message me on WhatsApp instead.",
       "failed": "Something went wrong. Please message me on WhatsApp — I will reply soon.",
-      "dateRequired": "Please choose the date of your event."
+      "dateRequired": "Please choose the date of your event.",
+      "consent": "Tick the box so I can send you the WhatsApp message."
     },
     "success": {
       "title": "Thank you! I have your details.",
-      "body": "WhatsApp is opening with your details filled in — just tap send. I reply within 4 hours.",
+      "body": "WhatsApp is opening with your details filled in — just tap send. I reply within {hours} hours.",
       "whatsapp": "Continue on WhatsApp"
     },
     "waIntro": "Namaste! I just sent an enquiry on your website.",
@@ -248,7 +257,7 @@
   },
   "eventsPage": {
     "metaTitle": "Book event rangoli",
-    "metaDesc": "Rangoli for weddings, festivals, housewarmings and office events across Maharashtra by Siddesh Mokashi. Tell me the date — I reply within 4 hours.",
+    "metaDesc": "Rangoli for weddings, festivals, housewarmings and office events across Maharashtra by Siddesh Mokashi. Tell me the date — I reply within {hours} hours.",
     "typesTitle": "For every celebration",
     "types": [
       {
@@ -306,7 +315,7 @@
     "good": "Good",
     "bad": "Avoid",
     "formTitle": "Start your portrait",
-    "formSub": "Tell me what you have in mind — I quote within 4 hours.",
+    "formSub": "Tell me what you have in mind — I quote within {hours} hours.",
     "prices": {
       "title": "Prices",
       "medium": "Medium",
@@ -339,7 +348,9 @@
     "story": "The story",
     "count": "pieces",
     "countOne": "piece",
-    "filter": "Category"
+    "filter": "Category",
+    "share": "Share",
+    "shareText": "Look at this by Siddesh Mokashi:"
   },
   "festivalsPage": {
     "metaTitle": "Rangoli through the festivals",
@@ -351,7 +362,9 @@
     "nextDate": "Next date",
     "gallery": "Designs from this festival",
     "emptyGallery": "Photos from this festival are coming soon.",
-    "shop": "For this festival"
+    "shop": "For this festival",
+    "share": "Share with family",
+    "shareText": "Rangoli designs for {name} by Siddesh Mokashi:"
   },
   "shop": {
     "metaTitle": "Shop original art and prints",
@@ -405,7 +418,18 @@
     "soldHome": "This one has found a home.",
     "trust": "Free delivery above {free} · Cash on delivery",
     "trustNoCod": "Free delivery above {free}",
-    "buyBar": "Quick buy"
+    "buyBar": "Quick buy",
+    "delivery": {
+      "title": "Check delivery",
+      "button": "Check",
+      "checking": "Checking…",
+      "result": "Delivers by {from} – {to}",
+      "cod": "Cash on delivery available",
+      "noCod": "Cash on delivery is not available here. Pay online by UPI or card.",
+      "invalid": "Enter a 6-digit PIN code, for example 411004.",
+      "busy": "Too many checks just now. Try again in a minute.",
+      "failed": "Could not check right now. Delivery usually takes 5–8 days."
+    }
   },
   "cart": {
     "title": "Your cart",
@@ -1017,5 +1041,17 @@
     "finding": "Looking…",
     "notFound": "No order matches this mobile number and order number. Please check both, or message me on WhatsApp.",
     "rate": "Too many tries. Please wait a few minutes, or message me on WhatsApp."
+  },
+  "remind": {
+    "button": "Remind me before {name}",
+    "intro": "I will send you one WhatsApp message a week before {name}, with new designs and the last day to order.",
+    "name": "Your name",
+    "phone": "WhatsApp number",
+    "consent": "Yes, send me this reminder on WhatsApp",
+    "submit": "Remind me",
+    "sending": "Saving…",
+    "cancel": "Not now",
+    "doneTitle": "Reminder set",
+    "doneBody": "I will WhatsApp you around {date}, a week before {name}."
   }
 }

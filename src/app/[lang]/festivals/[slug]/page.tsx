@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation'
 import { FestivalMotif, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
 import { Gallery } from '@/components/Gallery'
+import { photoSrc } from '@/components/MediaImage'
 import { PageHero } from '@/components/PageHero'
+import { RemindMe } from '@/components/RemindMe'
+import { ShareButton } from '@/components/ShareButton'
 import { ShopGrid } from '@/components/ShopGrid'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -55,6 +58,20 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
         <ButtonLink href={localePath(locale, '/events')} variant="light">
           {t.festivalsPage.book}
         </ButtonLink>
+        <ShareButton
+          label={t.festivalsPage.share}
+          text={t.festivalsPage.shareText.replace('{name}', festival.name)}
+          links={[{ title: festival.name, href: localePath(locale, `/festivals/${festival.slug}`) }]}
+          image={photoSrc(festival.heroImage)}
+          className="sm:justify-self-start"
+        />
+        <RemindMe
+          festival={{ id: festival.id, name: festival.name, nextDate: festival.nextDate ?? null }}
+          locale={locale}
+          t={t.remind}
+          forms={{ errors: t.forms.errors, required: t.forms.required }}
+          onDark
+        />
       </PageHero>
       <Threshold />
       <section className="bg-paper py-16 lg:py-24">

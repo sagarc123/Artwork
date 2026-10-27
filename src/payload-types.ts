@@ -509,6 +509,11 @@ export interface Enquiry {
   type: 'event' | 'portrait' | 'workshop' | 'general';
   city?: string | null;
   eventDate?: string | null;
+  topic?: 'reminder' | null;
+  /**
+   * Send them one WhatsApp message a week before this festival, with designs and the last day to order.
+   */
+  reminder?: (number | null) | Festival;
   venue?: string | null;
   size?: string | null;
   styles?: string[] | null;
@@ -979,6 +984,8 @@ export interface EnquiriesSelect<T extends boolean = true> {
   type?: T;
   city?: T;
   eventDate?: T;
+  topic?: T;
+  reminder?: T;
   venue?: T;
   size?: T;
   styles?: T;
@@ -1332,9 +1339,41 @@ export interface SiteSetting {
     phone?: string | null;
     email?: string | null;
     /**
-     * Today warns you when an enquiry has waited longer than this.
+     * Shown on the website ("I reply within 4 hours"). Today warns you when an enquiry has waited longer than this.
      */
     replyHours?: number | null;
+  };
+  /**
+   * One short line at the very top of every page, e.g. "Diwali parcels: order by 1 Nov". Visitors can close it.
+   */
+  announcement?: {
+    enabled?: boolean | null;
+    /**
+     * Write it in each language (switch language at the top). An empty Marathi or Hindi line shows the English one.
+     */
+    message?: string | null;
+    /**
+     * A page of this website, e.g. /festivals/diwali, or a full https:// link.
+     */
+    link?: string | null;
+    /**
+     * A small festival decoration under the menu. Automatic: for 3 weeks before each festival that has a date.
+     */
+    festiveLook?: ('off' | 'auto' | 'diwali' | 'ganesh' | 'gudi' | 'wedding') | null;
+  };
+  /**
+   * Pick 3 to 6 photos you have posted on Instagram. They show on the home page and open your Instagram.
+   */
+  instagram?: {
+    /**
+     * e.g. https://instagram.com/yourname. Empty: the Instagram link under Social media links.
+     */
+    profileUrl?: string | null;
+    /**
+     * Choose 3 to 6. With fewer than 3 the strip stays hidden.
+     */
+    posts?: (number | Media)[] | null;
+    caption?: string | null;
   };
   /**
    * Required by the E-Commerce Rules: who customers can complain to.
@@ -1355,7 +1394,7 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
- * Cash on delivery, gift wrap, GST and the festival sale.
+ * Cash on delivery, delivery times, gift wrap, GST and the festival sale.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "commerce-settings".
@@ -1370,6 +1409,25 @@ export interface CommerceSetting {
      * Pincodes where COD is not offered, separated by commas or new lines.
      */
     blockedPincodes?: string | null;
+  };
+  /**
+   * What "Check delivery" on a product page tells buyers. Days are counted from the order day.
+   */
+  delivery: {
+    minDays: number;
+    maxDays: number;
+    /**
+     * Match by the first digits of the PIN code: 411 for Pune city, 41 for most of Pune district, 4 for Maharashtra. The longest match wins; other PIN codes get the days above.
+     */
+    zones?:
+      | {
+          prefix: string;
+          minDays: number;
+          maxDays: number;
+          cod?: boolean | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   /**
    * Added when a buyer ticks "Gift wrap". Sample price: please confirm.
@@ -1528,6 +1586,21 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         replyHours?: T;
       };
+  announcement?:
+    | T
+    | {
+        enabled?: T;
+        message?: T;
+        link?: T;
+        festiveLook?: T;
+      };
+  instagram?:
+    | T
+    | {
+        profileUrl?: T;
+        posts?: T;
+        caption?: T;
+      };
   grievanceOfficer?:
     | T
     | {
@@ -1557,6 +1630,21 @@ export interface CommerceSettingsSelect<T extends boolean = true> {
         maxTotal?: T;
         fee?: T;
         blockedPincodes?: T;
+      };
+  delivery?:
+    | T
+    | {
+        minDays?: T;
+        maxDays?: T;
+        zones?:
+          | T
+          | {
+              prefix?: T;
+              minDays?: T;
+              maxDays?: T;
+              cod?: T;
+              id?: T;
+            };
       };
   giftWrapFee?: T;
   tax?:

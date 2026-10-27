@@ -6,6 +6,7 @@ import * as migration_20261023_072100_service_prices_gift_wrap from './20261023_
 import * as migration_20261023_084437_admin_simpler from './20261023_084437_admin_simpler';
 import * as migration_20261026_044300_round1_fixes from './20261026_044300_round1_fixes';
 import * as migration_20261026_113923_round2_simpler from './20261026_113923_round2_simpler';
+import * as migration_20261026_122645_round3a_features from './20261026_122645_round3a_features';
 
 export const migrations = [
   {
@@ -46,6 +47,11 @@ export const migrations = [
   {
     up: migration_20261026_113923_round2_simpler.up,
     down: migration_20261026_113923_round2_simpler.down,
-    name: '20261026_113923_round2_simpler'
+    name: '20261026_113923_round2_simpler',
+  },
+  {
+    up: migration_20261026_122645_round3a_features.up,
+    down: migration_20261026_122645_round3a_features.down,
+    name: '20261026_122645_round3a_features'
   },
 ];

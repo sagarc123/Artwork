@@ -10,6 +10,8 @@ import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
 import { lookupPincode } from '@/server/pincode'
+import { PINCODE_STORE } from '@/lib/delivery'
+import { isPincode } from '@/lib/pincode'
 import { DeliveryPromise } from './DeliveryPromise'
 import { cartActions, useCart } from './cart-store'
 import { pickMedium } from '@/lib/art'
@@ -215,6 +217,22 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   // City and state filled in from the pincode (India Post). Only fields the buyer hasn't changed get overwritten.
   const [filledFrom, setFilledFrom] = useState('')
   const autoFilled = useRef({ city: '', state: 'Maharashtra' })
+  // The PIN code checked on a product page ("Check delivery") fills the empty field, once the form is on screen.
+  const prefilled = useRef(false)
+  const formShown = hydrated && lines.length > 0
+  useEffect(() => {
+    const el = formRef.current?.elements.namedItem('pincode') as HTMLInputElement | null
+    if (!formShown || prefilled.current || !el) return
+    prefilled.current = true
+    try {
+      const saved = localStorage.getItem(PINCODE_STORE)
+      if (!saved || !isPincode(saved) || el.value) return
+      el.value = saved
+      setPincode(saved)
+    } catch {
+      // Storage blocked: the buyer types it.
+    }
+  }, [formShown])
   useEffect(() => {
     if (!pin) return
     let live = true

@@ -1,0 +1,52 @@
+# Checks every push and pull request: lint, types, unit tests and a production build.
+# The build pre-renders pages from the database, so CI starts an empty Postgres, runs the migrations and loads the
+# sample content (scripts/seed.ts only runs against localhost). No real secrets are needed: Razorpay, cron and
+# the business details stay empty, as on a fresh install.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: siddesh_art
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/siddesh_art
+      PAYLOAD_SECRET: ci-only-not-a-secret-0123456789abcdef
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Database schema
+        run: npm run migrate
+      - name: Sample content
+        run: npm run seed
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

@@ -9,7 +9,7 @@ import { pickMedium } from '@/lib/art'
 import { galleryDocs, type GalleryDoc } from '@/lib/gallery'
 import { hashString } from '@/lib/seed'
 import { pickTestimonials } from '@/lib/testimonials'
-import { applySale, FREE_SHIPPING_FROM, nextSaleChange, SHIPPING_FEE } from '@/lib/cart'
+import { applySale, FREE_SHIPPING_FROM, nextSaleChange, parsePincodes, SHIPPING_FEE } from '@/lib/cart'
 import { formatPrice, site } from '@/lib/site'
 import type { GalleryItem } from '@/components/Gallery'
 import type { Floor } from '@/components/PhotoPlaceholder'
@@ -233,4 +233,37 @@ export async function getTestimonials(locale: Locale, topic?: 'event' | 'portrai
   // ponytail: reads every shared review (a handful) and picks in code; query by language and topic if there are hundreds.
   const { docs } = await (await db()).find({ collection: 'testimonials', locale, where: { permission: { equals: true } }, sort: '-createdAt', limit: 200, depth: 1 })
   return pickTestimonials(docs, locale, topic)
+}
+
+/** Announcement strip, festive look and the Instagram strip (Site settings), in one language. */
+export async function getSiteExtras(locale: Locale) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('site-settings', 'media')
+  const s = await (await db()).findGlobal({ slug: 'site-settings', locale, depth: 1 })
+  const a = s.announcement
+  const message = a?.enabled ? a.message?.trim() : ''
+  const posts = (s.instagram?.posts ?? []).filter((m): m is Media => typeof m === 'object' && m !== null).slice(0, 6)
+  return {
+    announcement: message ? { message, href: a?.link || null } : null,
+    festiveLook: a?.festiveLook ?? 'auto',
+    instagram: { href: s.instagram?.profileUrl || s.social?.instagram || site.instagram, posts, caption: s.instagram?.caption || '' },
+  }
+}
+
+/** Delivery table plus the COD rules that depend on the PIN code. Server-only: blocked PIN codes stay private. */
+export async function getDeliveryRules() {
+  'use cache'
+  cacheLife('max')
+  cacheTag('commerce-settings')
+  const c = await (await db()).findGlobal({ slug: 'commerce-settings', depth: 0 })
+  const d = c.delivery
+  return {
+    rules: {
+      minDays: d?.minDays ?? 5,
+      maxDays: d?.maxDays ?? 8,
+      zones: (d?.zones ?? []).map((z) => ({ prefix: z.prefix, minDays: z.minDays, maxDays: z.maxDays, cod: z.cod })),
+    },
+    blockedPincodes: new Set<string>(parsePincodes(c.cod?.blockedPincodes)),
+  }
 }

@@ -50,3 +50,17 @@ test('event enquiries need a date; portraits and general questions do not', () =
   assert.ok(validateEnquiry(form({ type: 'portrait', name: 'Rohan', phone: '9876543210' }), '2026-10-22').ok)
   assert.ok(validateEnquiry(form({ type: 'general', name: 'Aarya', phone: '9876543210' }), '2026-10-22').ok)
 })
+
+test('festival reminder: linked to the festival, needs the WhatsApp consent', () => {
+  const ok = validateEnquiry(form({ type: 'general', name: 'Asha', phone: '9876543210', reminder: '3', consent: 'yes', locale: 'mr' }), '2026-10-27')
+  assert.ok(ok.ok)
+  if (ok.ok) {
+    assert.equal(ok.data.topic, 'reminder')
+    assert.equal(ok.data.reminder, 3)
+    assert.equal(ok.data.wantsOffers, false)
+  }
+  const noConsent = validateEnquiry(form({ type: 'general', name: 'Asha', phone: '9876543210', reminder: '3' }), '2026-10-27')
+  assert.deepEqual(noConsent, { ok: false, errors: ['consent'] })
+  const plain = validateEnquiry(form({ type: 'general', name: 'Asha', phone: '9876543210', reminder: 'x' }), '2026-10-27')
+  assert.ok(plain.ok && plain.data.topic === undefined)
+})

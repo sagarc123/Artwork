@@ -9,7 +9,9 @@ import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
 import { SavedCount } from './SavedCount'
 import { BrandMark } from './Art'
-import { getBusiness } from '@/server/content'
+import { getBusiness, getSiteExtras } from '@/server/content'
+import { hashString } from '@/lib/seed'
+import { AnnouncementClose } from './AnnouncementClose'
 
 const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
@@ -24,7 +26,21 @@ function Logo({ locale, brand }: { locale: Locale; brand: string }) {
 
 export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
   const p = (path: string) => localePath(locale, path)
-  const { phone } = await getBusiness()
+  const [{ phone }, { announcement }] = await Promise.all([getBusiness(), getSiteExtras(locale)])
+  // Closed strips stay closed for the visit: the head script copies the closed strip's id onto <html> before first paint.
+  const ann = announcement && { ...announcement, id: `a${hashString(announcement.message + announcement.href).toString(36)}`, external: announcement.href?.startsWith('https://') }
+  const annText = ann && (ann.href ? (
+    <a href={ann.href} {...(ann.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})} className="underline decoration-marigold decoration-2 underline-offset-4 hover:decoration-current">
+      {ann.message}
+    </a>
+  ) : (
+    <span>{ann.message}</span>
+  ))
+  const reply = (
+    <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="hover:text-leaf">
+      {t.header.replyPromise}
+    </a>
+  )
   const commissions = [
     { href: p('/events'), label: t.nav.events, sub: t.menu.eventsSub },
     { href: p('/custom-portraits'), label: t.nav.portraits, sub: t.menu.portraitsSub },
@@ -39,14 +55,33 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
     'py-2 font-medium whitespace-nowrap hover:text-kumkum aria-[current=page]:text-kumkum aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8'
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
+    <header className="site-header sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
+      {ann && <style>{`html[data-ann-off="${ann.id}"] .ann,html:not([data-ann-off="${ann.id}"]) .ann-alt{display:none}`}</style>}
+      {/* Phones and tablets: the announcement as a slim line above the menu (at most 44px). */}
+      {ann && (
+        <div role="region" aria-label={t.header.announceLabel} className="ann bg-charcoal text-paper lg:hidden">
+          <div className="wrap flex h-11 items-center justify-between gap-2 [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
+            <p className="line-clamp-2 text-[0.9375rem] leading-tight font-semibold">{annText}</p>
+            <AnnouncementClose id={ann.id} label={t.header.announceClose} className="-mr-2 text-paper/85 hover:text-paper" />
+          </div>
+        </div>
+      )}
       {/* Desktop utility row */}
       <div className="hidden border-b border-border/20 lg:block">
-        <div className="wrap flex h-12 items-center justify-between text-muted [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
+        <div className="wrap flex h-12 items-center justify-between gap-6 text-muted [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
           <LanguageSwitcher current={locale} label={t.nav.language} />
-          <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="hover:text-leaf">
-            {t.header.replyPromise}
-          </a>
+          {ann ? (
+            <>
+              <div role="region" aria-label={t.header.announceLabel} className="ann flex min-w-0 items-center gap-3 font-semibold text-charcoal">
+                <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-kumkum" />
+                <p className="truncate">{annText}</p>
+                <AnnouncementClose id={ann.id} label={t.header.announceClose} className="font-normal text-muted hover:text-charcoal" />
+              </div>
+              <span className="ann-alt">{reply}</span>
+            </>
+          ) : (
+            reply
+          )}
           <Link href={p('/contact')} className="hover:text-charcoal">
             {t.nav.contact}
           </Link>

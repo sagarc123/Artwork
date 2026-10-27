@@ -12,6 +12,9 @@ import { locales } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { site, whatsappLink } from '@/lib/site'
 import { InlineScript } from '@/components/InlineScript'
+import { FestiveLook } from '@/components/FestiveLook'
+import { FESTIVE_KINDS } from '@/lib/festive'
+import { getFestivals, getSiteExtras } from '@/server/content'
 
 const tiro = Tiro_Devanagari_Marathi({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-tiro', display: 'swap' })
 // Festival-poster display face, used only for one giant word per section and step numerals.
@@ -40,18 +43,24 @@ export const viewport: Viewport = { themeColor: '#FAF6EF' }
 export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>) {
   const locale = await getLocale()
   const t = await getDictionary()
+  const [{ festiveLook }, festivals] = await Promise.all([getSiteExtras(locale), getFestivals(locale)])
+  // A look the owner picked is drawn from the first paint; "auto" depends on the visitor's date (FestiveLook).
+  const fixedLook = (FESTIVE_KINDS as readonly string[]).includes(festiveLook) ? festiveLook : undefined
 
   return (
-    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`} data-festive={fixedLook} suppressHydrationWarning>
       <head>
-        {/* Apply a saved "Stop animations" before first paint so the hero doesn't start drawing and then jump. */}
-        <InlineScript html={`try{if(localStorage.getItem("motion")==="off")document.documentElement.dataset.motion="off"}catch(e){}`} />
+        {/* Before first paint: a saved "Stop animations" (so the hero doesn't start drawing and then jump), and an announcement closed earlier this visit. */}
+        <InlineScript
+          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}`}
+        />
       </head>
       <body className="flex min-h-dvh flex-col">
         <a href="#main" className="skip-link">
           {t.nav.skip}
         </a>
         <ArtDefs />
+        <FestiveLook setting={festiveLook} festivals={festivals.map((f) => ({ slug: f.slug, nextDate: f.nextDate }))} />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>

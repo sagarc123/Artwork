@@ -1,13 +1,16 @@
-import type { GlobalConfig } from 'payload'
+import type { GlobalConfig, NumberFieldSingleValidation, TextFieldSingleValidation } from 'payload'
 import { anyone, hideFromHelpers, isOwner, staffOnlyField } from '../access'
 import { refreshGlobalOnChange } from '../hooks'
+
+const atLeastMin = ((value, { siblingData }) =>
+  value == null || value >= ((siblingData as { minDays?: number })?.minDays ?? 1) ? true : 'Must be the same as or more than "from".') as NumberFieldSingleValidation
 
 /** Cash-on-delivery rules and the tax defaults the checkout and invoices use. */
 export const CommerceSettings: GlobalConfig = {
   slug: 'commerce-settings',
   label: 'Shop settings',
   hooks: refreshGlobalOnChange('commerce-settings'),
-  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Cash on delivery, gift wrap, GST and the festival sale.' },
+  admin: { group: 'Settings', hidden: hideFromHelpers, description: 'Cash on delivery, delivery times, gift wrap, GST and the festival sale.' },
   access: { read: anyone, update: isOwner },
   fields: [
     {
@@ -29,6 +32,45 @@ export const CommerceSettings: GlobalConfig = {
           type: 'textarea',
           access: { read: staffOnlyField },
           admin: { description: 'Pincodes where COD is not offered, separated by commas or new lines.' },
+        },
+      ],
+    },
+    {
+      name: 'delivery',
+      label: 'Delivery times',
+      type: 'group',
+      admin: { description: 'What "Check delivery" on a product page tells buyers. Days are counted from the order day.' },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'minDays', label: 'Usually from (days)', type: 'number', required: true, defaultValue: 5, min: 1, max: 60 },
+            { name: 'maxDays', label: 'Up to (days)', type: 'number', required: true, defaultValue: 8, min: 1, max: 60, validate: atLeastMin },
+          ],
+        },
+        {
+          name: 'zones',
+          label: 'Faster or slower areas',
+          type: 'array',
+          labels: { singular: 'Area', plural: 'Areas' },
+          admin: { description: 'Match by the first digits of the PIN code: 411 for Pune city, 41 for most of Pune district, 4 for Maharashtra. The longest match wins; other PIN codes get the days above.' },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'prefix',
+                  label: 'PIN code starts with',
+                  type: 'text',
+                  required: true,
+                  validate: ((value) => (/^[1-9]\d{0,2}$/.test(value ?? '') ? true : 'Enter the first 1 to 3 digits of the PIN code, e.g. 411.')) as TextFieldSingleValidation,
+                },
+                { name: 'minDays', label: 'From (days)', type: 'number', required: true, min: 1, max: 60 },
+                { name: 'maxDays', label: 'Up to (days)', type: 'number', required: true, min: 1, max: 60, validate: atLeastMin },
+                { name: 'cod', label: 'Cash on delivery here', type: 'checkbox', defaultValue: true },
+              ],
+            },
+          ],
         },
       ],
     },

@@ -5,6 +5,7 @@ import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, S
 import { ButtonLink } from '@/components/ButtonLink'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
+import { InstagramStrip } from '@/components/InstagramStrip'
 import { MediaImage } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
@@ -14,7 +15,7 @@ import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { eventFrom, fromText, portraitFrom } from '@/lib/prices'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
-import { festivalLook, getFestivals, getProducts, getServicePrices, getTestimonials, toShopItem } from '@/server/content'
+import { festivalLook, getFestivals, getProducts, getServicePrices, getSiteExtras, getTestimonials, toShopItem } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: alternates(await getLocale(), '/') }
@@ -27,11 +28,12 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
-  const [products, festivalDocs, prices, testimonials] = await Promise.all([
+  const [products, festivalDocs, prices, testimonials, { instagram }] = await Promise.all([
     getProducts(locale),
     getFestivals(locale),
     getServicePrices(locale),
     getTestimonials(locale),
+    getSiteExtras(locale),
   ])
 
   // Latest pieces, the ones marked "featured" first.
@@ -40,6 +42,7 @@ export default async function HomePage() {
     .slice(0, 5)
     .map((x) => toShopItem(x, locale))
   const festivals = festivalDocs.map((f) => ({
+    id: f.id,
     slug: f.slug,
     href: p(`/festivals/${f.slug}`),
     name: f.name,
@@ -245,12 +248,14 @@ export default async function HomePage() {
         <section className="bg-paper py-16 lg:py-24">
           <div className="wrap grid gap-8">
             <h2 className="font-heading text-h1">{h.festivals.title}</h2>
-            <FestivalTiles festivals={festivals} t={h.festivals} locale={locale} />
+            <FestivalTiles festivals={festivals} t={h.festivals} locale={locale} remind={{ t: t.remind, forms: { errors: t.forms.errors, required: t.forms.required } }} />
           </div>
         </section>
       )}
 
       <Testimonials items={testimonials} t={t.testimonials} />
+
+      <InstagramStrip {...instagram} t={h.instagram} />
 
       {/* 9 · A note for first-time online buyers. */}
       <section className="bg-paper pt-4 pb-20 lg:pb-28">

@@ -2,7 +2,7 @@
 
 export const ENQUIRY_TYPES = ['event', 'portrait', 'workshop', 'general'] as const
 export type EnquiryType = (typeof ENQUIRY_TYPES)[number]
-export type EnquiryField = 'type' | 'name' | 'phone' | 'email' | 'date' | 'dateRequired'
+export type EnquiryField = 'type' | 'name' | 'phone' | 'email' | 'date' | 'dateRequired' | 'consent'
 
 export type EnquiryData = {
   type: EnquiryType
@@ -22,6 +22,9 @@ export type EnquiryData = {
   message?: string
   wantsOffers: boolean
   locale: 'en' | 'mr' | 'hi'
+  /** "Remind me before Diwali": a general enquiry linked to the festival (its id). */
+  topic?: 'reminder'
+  reminder?: number
 }
 
 type FormLike = { get(name: string): FormDataEntryValue | null; getAll(name: string): FormDataEntryValue[] }
@@ -60,6 +63,11 @@ export function validateEnquiry(form: FormLike, today: string): { ok: true; data
   if (eventDate && (!realDate(eventDate) || eventDate < today)) errors.push('date')
   // Events need a date to plan; portraits ("needed by") don't.
   if (!eventDate && type === 'event') errors.push('dateRequired')
+  // A festival reminder is a WhatsApp message they asked for: it needs their yes.
+  const reminder = Number(text(form, 'reminder', 10))
+  const isReminder = Number.isInteger(reminder) && reminder > 0
+  if (isReminder && type !== 'general') errors.push('type')
+  if (isReminder && form.get('consent') !== 'yes') errors.push('consent')
   if (errors.length) return { ok: false, errors }
 
   const faces = Number(text(form, 'faces', 3))
@@ -84,6 +92,7 @@ export function validateEnquiry(form: FormLike, today: string): { ok: true; data
       message: text(form, 'message', 1000),
       wantsOffers: form.get('offers') === 'yes',
       locale: locale === 'mr' || locale === 'hi' ? locale : 'en',
+      ...(isReminder ? { topic: 'reminder' as const, reminder } : {}),
     },
   }
 }
