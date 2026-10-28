@@ -40,7 +40,8 @@ export async function issueInvoice(orderId: number, req?: PayloadRequest) {
   }
 
   const items: InvoiceItem[] = (order.items ?? []).map((it) => {
-    const tc = classOf(it.product, it.type)
+    // A course is a service: its own GST class (SAC), not the goods ones.
+    const tc = it.course ? (taxClass(commerce.tax?.defaultTaxClassCourse) ?? fallback) : classOf(it.product, it.type)
     if (!tc) console.error(`Invoice for order ${orderId}: no tax class for "${it.title}", using 0%`)
     return {
       description: [it.title, it.variantLabel, it.frameLabel].filter(Boolean).join(' — '),

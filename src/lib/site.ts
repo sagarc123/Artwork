@@ -12,9 +12,9 @@ export const site = {
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
   // Sections still being built: every link to them stays hidden until the flag is switched on.
   coursesLive: true,
-  // Courses part 1: "Enrol" opens a WhatsApp chat. Part 2 (login + payment) sets this to false and the button goes to the real enrolment instead.
-  enrolByWhatsApp: true,
-  accountsLive: false,
+  // "Enrol" adds the course to the cart (or enrols a free course) after phone sign-in. true brings back the part-1 WhatsApp chat.
+  enrolByWhatsApp: false,
+  accountsLive: true,
 }
 
 /** ₹4,500 style prices (Indian grouping). Stored as whole rupees. */

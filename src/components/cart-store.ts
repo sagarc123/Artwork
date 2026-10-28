@@ -48,6 +48,10 @@ export const savedActions = {
   remove(slug: string) {
     saved.write(saved.read().filter((s) => s !== slug))
   },
+  /** Signing in: the account's saved pieces (already joined with this device's) become this device's list. */
+  replace(slugs: string[]) {
+    saved.write(slugs)
+  },
 }
 
 export const useSaved = saved.useList

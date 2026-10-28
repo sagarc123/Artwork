@@ -41,6 +41,8 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
   const total = formatPrice(order.total ?? 0)
 
   const physical = (order.items ?? []).some((it) => it.type !== 'digital')
+  // Only courses: nothing to pack or deliver, just a seat in the account.
+  const courseOnly = (order.items ?? []).length > 0 && (order.items ?? []).every((it) => it.course)
   const day = (ymd: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${ymd}T00:00:00Z`))
   // ponytail: estimated from the order date (5–8 days); the courier's date replaces it with Shiprocket.
   const [eta1, eta2] = deliveryRange(indiaToday(new Date(order.createdAt)))
@@ -64,7 +66,7 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
         <div className="mx-auto grid max-w-3xl gap-8 rounded-ui bg-surface p-6 shadow-frame lg:p-10">
           <div className="grid justify-items-start gap-3">
             {paid ? <ThankYouMark once={order.publicId ?? undefined} className="size-16" /> : <Clock aria-hidden="true" className="size-12 text-marigold" />}
-            <h1 className="font-heading text-h1">{stopped ? o.stoppedTitle[stopped] : paid ? o.thanks : awaitingCod ? o.codPlaced : o.pending}</h1>
+            <h1 className="font-heading text-h1">{stopped ? o.stoppedTitle[stopped] : paid ? (courseOnly ? o.courseReady : o.thanks) : awaitingCod ? o.codPlaced : o.pending}</h1>
             {!paid && !stopped && <p className="text-muted">{awaitingCod ? o.codPlacedBody : o.pendingBody}</p>}
             {awaitingCod && (
               <a
@@ -83,8 +85,14 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             {order.status === 'shipped' && order.courier && order.trackingNumber && (
               <p>{o.tracking.replace('{courier}', order.courier).replace('{number}', order.trackingNumber)}</p>
             )}
-            {paid && <p className="text-muted">{o.note}</p>}
+            {paid && <p className="text-muted">{courseOnly ? o.courseBody : o.note}</p>}
+            {paid && courseOnly && (
+              <Link href={localePath(locale, '/account')} className="press inline-flex h-13 items-center rounded-ui bg-kumkum px-6 font-semibold text-white">
+                {o.myCourses}
+              </Link>
+            )}
           </div>
+          {!courseOnly && (
           <div className="grid gap-4">
             <h2 className="font-heading text-h3">{o.timelineTitle}</h2>
             {'stopped' in progress ? (
@@ -108,13 +116,14 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
             )}
             {showEta && <p className="font-semibold">{o.expected.replace('{from}', day(eta1)).replace('{to}', day(eta2))}</p>}
           </div>
+          )}
           <div className="grid gap-3">
             <h2 className="font-heading text-h3">{o.items}</h2>
             <ul className="grid gap-2">
               {(order.items ?? []).map((it) => (
                 <li key={it.id} className="flex justify-between gap-4">
                   <span>
-                    {it.title} · {[it.variantLabel, it.frameLabel].filter(Boolean).join(', ')} × {it.qty}
+                    {it.course ? it.title : `${it.title} · ${[it.variantLabel, it.frameLabel].filter(Boolean).join(', ')} × ${it.qty}`}
                   </span>
                   <span className="font-semibold">{formatPrice(it.lineTotal ?? 0)}</span>
                 </li>
@@ -148,11 +157,13 @@ export default async function OrderPage({ params }: PageProps<'/[lang]/order/[pu
               </a>
             )}
           </div>
-          <div className="grid gap-1">
-            <h2 className="font-heading text-h3">{o.deliverTo}</h2>
-            <p className="text-muted">{[order.customer?.name, order.address?.line1, order.address?.line2, order.address?.city, order.address?.pincode].filter(Boolean).join(', ')}</p>
-          </div>
-          <OrderAgain lines={again} label={o.orderAgain} cartHref={localePath(locale, '/cart')} />
+          {!courseOnly && (
+            <div className="grid gap-1">
+              <h2 className="font-heading text-h3">{o.deliverTo}</h2>
+              <p className="text-muted">{[order.customer?.name, order.address?.line1, order.address?.line2, order.address?.city, order.address?.pincode].filter(Boolean).join(', ')}</p>
+            </div>
+          )}
+          {again.length > 0 && <OrderAgain lines={again} label={o.orderAgain} cartHref={localePath(locale, '/cart')} />}
           <div className="flex flex-wrap gap-x-8">
             <a href={whatsappLink(`${o.number}: ${order.orderNumber}`)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center font-semibold text-leaf">
               {o.whatsapp}

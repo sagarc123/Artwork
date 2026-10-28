@@ -17,6 +17,7 @@ import { StockField as StockField_398d2c08c7b7be7dc510b4169bf4c1d8 } from '../..
 import { PriceRowLabel as PriceRowLabel_fa634a07090b7bcf0c00aeebdd281296 } from '../../../payload/admin/PriceRowLabel'
 import { ProductBulk as ProductBulk_e3585f670ff671b3f00ee98df5be6f62 } from '../../../payload/admin/Bulk'
 import { YesNoCell as YesNoCell_6ad2bf8381d5a2730091b1470fced514 } from '../../../payload/admin/Cells'
+import { EraseStudent as EraseStudent_e86ad549832eceef5b3eb6e591bf48e6 } from '../../../payload/admin/EraseStudent'
 import { SalePresetField as SalePresetField_e016573c205c9f1f38310c40ed9a431d } from '../../../payload/admin/FestivalPlanner'
 import { Icon as Icon_fe32eb75d2e86cd142684d3b5ba68760 } from '../../../payload/admin/Brand'
 import { Logo as Logo_fe32eb75d2e86cd142684d3b5ba68760 } from '../../../payload/admin/Brand'
@@ -49,6 +50,7 @@ export const importMap = {
   "/payload/admin/PriceRowLabel#PriceRowLabel": PriceRowLabel_fa634a07090b7bcf0c00aeebdd281296,
   "/payload/admin/Bulk#ProductBulk": ProductBulk_e3585f670ff671b3f00ee98df5be6f62,
   "/payload/admin/Cells#YesNoCell": YesNoCell_6ad2bf8381d5a2730091b1470fced514,
+  "/payload/admin/EraseStudent#EraseStudent": EraseStudent_e86ad549832eceef5b3eb6e591bf48e6,
   "/payload/admin/FestivalPlanner#SalePresetField": SalePresetField_e016573c205c9f1f38310c40ed9a431d,
   "/payload/admin/Brand#Icon": Icon_fe32eb75d2e86cd142684d3b5ba68760,
   "/payload/admin/Brand#Logo": Logo_fe32eb75d2e86cd142684d3b5ba68760,

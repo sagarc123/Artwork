@@ -5,12 +5,13 @@ import config from '@payload-config'
 import { getPayload, type Payload } from 'payload'
 import { isLocale } from '@/i18n/config'
 import { isPincode } from '@/lib/pincode'
-import { applySale, codBlock, GIFT_NOTE_MAX, giftWrapCharge, orderTotal, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type FestivalSale, type Quote } from '@/lib/cart'
+import { applySale, CHILD_NAME_MAX, codBlock, GIFT_NOTE_MAX, giftWrapCharge, isCourseLine, needsSignIn, orderTotal, parsePincodes, priceCart, type CartLine, type CodBlock, type CodRules, type FestivalSale, type Quote } from '@/lib/cart'
 import { isValidGstin } from '@/lib/gst'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
 import { cancelPlan } from '@/lib/orders'
 import { cancelOrder, expireHolds, holdStock, HOLD_MINUTES, markPaid, refreshProducts } from './order-service'
+import { getCustomer } from './customer'
 import { allow } from './rate-limit'
 
 /** Accepts only well-formed cart lines from the browser. */
@@ -18,9 +19,18 @@ function cleanLines(input: unknown): CartLine[] {
   if (!Array.isArray(input)) return []
   return input.slice(0, 30).flatMap((l) => {
     if (!l || typeof l !== 'object') return []
-    const { slug, variantId, frameId, qty } = l as Record<string, unknown>
+    const { slug, variantId, frameId, qty, childName, consent } = l as Record<string, unknown>
     if (typeof slug !== 'string' || typeof variantId !== 'string' || slug.length > 120 || variantId.length > 60) return []
-    return [{ slug, variantId, frameId: typeof frameId === 'string' ? frameId.slice(0, 60) : undefined, qty: Number(qty) || 1 }]
+    return [
+      {
+        slug,
+        variantId,
+        frameId: typeof frameId === 'string' ? frameId.slice(0, 60) : undefined,
+        qty: Number(qty) || 1,
+        childName: typeof childName === 'string' ? childName.trim().slice(0, CHILD_NAME_MAX) : undefined,
+        consent: consent === true,
+      },
+    ]
   })
 }
 
@@ -46,18 +56,16 @@ async function quoteWithRules(input: unknown, locale: string, pincode?: string) 
   if (!lines.length) return { quote: { lines: [], subtotal: 0, shipping: 0, total: 0, ok: false } as Quote, rules: null, payload }
   // Throw, not an empty quote: the browser drops cart lines missing from a quote, so "busy" must never look like "all gone".
   if (!(await allow('quote', 60, 60_000))) throw new Error('Too many price checks')
-  const [{ docs }, rules] = await Promise.all([
-    payload.find({
-      collection: 'products',
-      locale: isLocale(locale) ? locale : 'en',
-      where: { and: [{ _status: { equals: 'published' } }, { slug: { in: lines.map((l) => l.slug) } }] },
-      depth: 1,
-      limit: 30,
-    }),
+  const lang = isLocale(locale) ? locale : 'en'
+  const published = { _status: { equals: 'published' } } as const
+  const slugs = (course: boolean) => lines.filter((l) => isCourseLine(l) === course).map((l) => l.slug)
+  const [{ docs }, { docs: courses }, rules] = await Promise.all([
+    payload.find({ collection: 'products', locale: lang, where: { and: [published, { slug: { in: slugs(false) } }] }, depth: 1, limit: 30 }),
+    slugs(true).length ? payload.find({ collection: 'courses', locale: lang, where: { and: [published, { slug: { in: slugs(true) } }] }, depth: 1, limit: 30 }) : { docs: [] },
     settings(payload),
   ])
   // Festival sale prices, checked against the clock now: the order is charged what the quote shows.
-  const quote = priceCart(lines, applySale(docs, rules.sale, new Date()))
+  const quote = priceCart(lines, applySale(docs, rules.sale, new Date()), courses)
   const cod = { fee: rules.cod.fee, maxTotal: rules.cod.maxTotal, block: codBlock(rules.cod, quote.lines, quote.total, isPincode(pincode) ? pincode : '') }
   return { quote: { ...quote, cod, online: razorpayConfig() !== null, giftWrapFee: rules.giftWrapFee } as Quote, rules, payload }
 }
@@ -93,7 +101,9 @@ export type CheckoutField = 'name' | 'phone' | 'email' | 'line1' | 'city' | 'sta
 export type CheckoutResult =
   | { status: 'invalid'; errors: CheckoutField[] }
   | { status: 'not_ready' | 'unavailable' | 'failed' | 'rate' }
-  | { status: 'sold_out'; title: string }
+  | { status: 'sold_out' | 'already_enrolled'; title: string }
+  /** A course is in the cart but nobody is signed in (or consent is missing). */
+  | { status: 'login' | 'consent' }
   | { status: 'cod_blocked'; reason: CodBlock }
   | { status: 'cod'; orderNumber: string; publicId: string }
   | { status: 'ok'; keyId: string; razorpayOrderId: string; amount: number; orderNumber: string; publicId: string }
@@ -107,16 +117,22 @@ const clip = (s: unknown, max: number) => (typeof s === 'string' ? s.trim().repl
  */
 // ponytail: COD phones aren't OTP-verified yet; add it with SMS (MSG91). Until then the WhatsApp confirmation is the check.
 export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> {
-  const c = { name: clip(input.customer?.name, 80), phone: normalisePhone(clip(input.customer?.phone, 20)), email: clip(input.customer?.email, 120) }
+  const cartLines = cleanLines(input.lines)
+  // Courses belong to an account: checkout step 1 is the phone sign-in, and the order uses that verified phone.
+  const me = await getCustomer()
+  if (needsSignIn(cartLines) && !me) return { status: 'login' }
+  const courseOnly = cartLines.length > 0 && cartLines.every(isCourseLine)
+  const c = { name: clip(input.customer?.name, 80), phone: normalisePhone(clip(courseOnly && me ? me.phone : input.customer?.phone, 20)), email: clip(input.customer?.email, 120) }
   const a = { line1: clip(input.address?.line1, 160), line2: clip(input.address?.line2, 160), city: clip(input.address?.city, 60), state: clip(input.address?.state, 60), pincode: clip(input.address?.pincode, 6) }
   const errors: CheckoutField[] = []
   if (c.name.length < 2) errors.push('name')
   if (!c.phone) errors.push('phone')
   if (c.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) errors.push('email')
-  if (a.line1.length < 3) errors.push('line1')
-  if (a.city.length < 2) errors.push('city')
+  // Nothing ships for a course: only the state is asked (for the GST invoice).
+  if (!courseOnly && a.line1.length < 3) errors.push('line1')
+  if (!courseOnly && a.city.length < 2) errors.push('city')
   if (a.state.length < 2) errors.push('state')
-  if (!isPincode(a.pincode)) errors.push('pincode')
+  if (!courseOnly && !isPincode(a.pincode)) errors.push('pincode')
   const gst = input.gst ? { gstin: clip(input.gst.gstin, 20).replace(/\s/g, '').toUpperCase(), businessName: clip(input.gst.businessName, 120) } : null
   if (gst && !isValidGstin(gst.gstin)) errors.push('gstin')
   if (gst && gst.businessName.length < 2) errors.push('businessName')
@@ -130,7 +146,14 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   // Also cancels this phone's earlier open checkouts, so retries don't pile up held stock.
   await expireHolds(c.phone!)
   const { quote, rules, payload } = await quoteWithRules(input.lines, input.locale)
-  if (!quote.ok || !rules) return { status: 'unavailable' }
+  if (!quote.ok || !rules || (courseOnly && quote.total === 0)) return { status: 'unavailable' }
+  const seats = quote.lines.filter((l) => l.courseId)
+  // Under-18 courses: the parent's tick is checked here, not just in the browser.
+  if (seats.some((l) => l.consent === false)) return { status: 'consent' }
+  if (seats.length && me) {
+    const { docs } = await payload.find({ collection: 'enrolments', where: { and: [{ customer: { equals: me.id } }, { course: { in: seats.map((l) => l.courseId!) } }] }, limit: 1, depth: 0, select: { course: true } })
+    if (docs[0]) return { status: 'already_enrolled', title: seats.find((l) => l.courseId === docs[0].course)?.title ?? '' }
+  }
   const giftFee = giftWrapCharge(input.giftWrap === true, quote.lines, rules.giftWrapFee)
   let codFee = 0
   if (cod) {
@@ -144,8 +167,12 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     status: cod ? ('cod_pending_confirmation' as const) : ('pending_payment' as const),
     paymentMode: cod ? ('cod' as const) : ('prepaid' as const),
     publicId,
+    account: me?.id,
     items: quote.lines.map((l) => ({
       product: l.productId,
+      course: l.courseId,
+      childFirstName: l.childName,
+      guardianConsent: l.consent,
       title: l.title,
       variantId: l.variantId,
       variantLabel: l.variantLabel,
@@ -187,6 +214,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     if (transactionID) await payload.db.rollbackTransaction(transactionID).catch(() => {})
     return { status: 'failed' }
   }
+  // First purchase: the name typed here becomes the account's name.
+  if (me && !me.name) await payload.update({ collection: 'customers', id: me.id, data: { name: c.name } }).catch(() => {})
   await refreshProducts()
   // ponytail: no owner alert yet; Today lists new orders. Email or WhatsApp alerts plug in here (COD) and in markPaid (online).
   const orderNumber = `ART-${10000 + order.id}`

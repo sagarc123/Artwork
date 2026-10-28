@@ -6,21 +6,24 @@ import { stripLocale } from '@/i18n/config'
 import { whatsappLink } from '@/lib/site'
 
 // Pages with their own bottom actions (pay, add to cart) or their own WhatsApp button, where the floating one would cover or repeat them.
-const HIDDEN = /^\/(cart|checkout|order|shop\/p|contact)(\/|$)/
+const HIDDEN = /^\/(cart|checkout|order|contact)(\/|$)/
+// Product and course pages have a sticky buy bar on phones: the button stacks above it.
+const STACKED = /^\/(shop\/p|courses)\/[^/]+\/?$/
 
-/** Floating help button on wide screens; phones have WhatsApp in the bottom tab bar. Leaf green keeps white text readable (6.4:1). */
+/** Floating help button: a round icon above the tab bar on phones, the labelled pill on wide screens. Leaf green keeps white text readable (6.4:1). */
 export function WhatsAppButton({ label, aria, message }: { label: string; aria: string; message: string }) {
-  if (HIDDEN.test(stripLocale(usePathname()))) return null
+  const path = stripLocale(usePathname())
+  if (HIDDEN.test(path)) return null
   return (
     <a
       href={whatsappLink(message)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={aria}
-      className="wa-nudge fixed right-6 bottom-6 z-45 hidden h-13 items-center gap-2 rounded-full bg-leaf px-5 font-semibold text-white shadow-md hover:bg-leaf/90 lg:inline-flex"
+      className={`wa-nudge fixed right-4 z-45 inline-flex size-13 items-center justify-center rounded-full bg-leaf font-semibold text-white shadow-md hover:bg-leaf/90 lg:right-6 lg:bottom-6 lg:w-auto lg:gap-2 lg:px-5 ${STACKED.test(path) ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))]' : 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))]'}`}
     >
       <MessageCircle aria-hidden="true" className="size-6" />
-      {label}
+      <span className="sr-only lg:not-sr-only">{label}</span>
     </a>
   )
 }

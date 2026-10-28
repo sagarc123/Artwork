@@ -99,7 +99,8 @@ await payload.delete({ collection: 'tax-classes', where: { name: { like: '(sampl
 const taxClass = async (name: string, hsn: string, rate: number) =>
   (await payload.create({ collection: 'tax-classes', data: { name: `${name} (sample — confirm with CA)`, hsn, rate } })).id
 const taxClasses = { original: await taxClass('Original artwork', '9701', 12), print: await taxClass('Print', '4911', 12) }
-await payload.updateGlobal({ slug: 'commerce-settings', data: { giftWrapFee: 49, tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print, defaultTaxClassOriginal: taxClasses.original, defaultTaxClassPrint: taxClasses.print } } })
+const courseTax = await taxClass('Online course (service)', '999293', 18)
+await payload.updateGlobal({ slug: 'commerce-settings', data: { giftWrapFee: 49, tax: { sellerState: 'Maharashtra', defaultTaxClass: taxClasses.print, defaultTaxClassOriginal: taxClasses.original, defaultTaxClassPrint: taxClasses.print, defaultTaxClassCourse: courseTax } } })
 
 // SAMPLE starting prices — the owner confirms or replaces them in Admin → Settings → Service prices.
 const round100 = (n: number) => Math.round(n / 100) * 100

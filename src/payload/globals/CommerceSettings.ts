@@ -103,6 +103,7 @@ export const CommerceSettings: GlobalConfig = {
             { name: 'defaultTaxClassPrint', label: 'GST for prints', type: 'relationship', relationTo: 'tax-classes' },
           ],
         },
+        { name: 'defaultTaxClassCourse', label: 'GST for courses (an online service)', type: 'relationship', relationTo: 'tax-classes', admin: { description: 'Online courses are a service, not goods. Ask your CA for the SAC code and rate.' } },
         {
           name: 'defaultTaxClass',
           label: 'GST for everything else',

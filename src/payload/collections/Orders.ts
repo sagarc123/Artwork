@@ -172,6 +172,9 @@ export const Orders: CollectionConfig = {
           fields: [
             { name: 'product', type: 'relationship', relationTo: 'products' },
             { name: 'title', type: 'text' },
+            { name: 'course', type: 'relationship', relationTo: 'courses' },
+            { name: 'childFirstName', label: "Child's first name", type: 'text' },
+            { name: 'guardianConsent', label: 'Parent agreed', type: 'checkbox' },
             { name: 'variantId', type: 'text', admin: { hidden: true } },
             { type: 'row', fields: [{ name: 'variantLabel', label: 'Size', type: 'text' }, { name: 'frameLabel', label: 'Frame', type: 'text' }] },
             { name: 'type', type: 'text', admin: { hidden: true } },
@@ -233,6 +236,8 @@ export const Orders: CollectionConfig = {
             { name: 'reservedUntil', label: 'Stock held until', type: 'date', admin: { readOnly: true } },
           ],
         },
+        // The signed-in customer who placed it (always set for course orders).
+        { name: 'account', label: 'Student account', type: 'relationship', relationTo: 'customers', index: true },
         { name: 'locale', type: 'text', admin: { hidden: true } },
       ]),
     },

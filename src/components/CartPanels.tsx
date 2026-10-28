@@ -4,8 +4,9 @@ import { ChevronDown, LockKeyhole, MessageCircle, Minus, Plus, Trash2 } from 'lu
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import type { Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
-import { GIFT_NOTE_MAX, giftWrapCharge, orderTotal, reconcileCart, type CartLine, type CodBlock, type Quote, type QuoteLine } from '@/lib/cart'
+import { GIFT_NOTE_MAX, giftWrapCharge, isCourseLine, needsSignIn, orderTotal, reconcileCart, type CartLine, type CodBlock, type Quote, type QuoteLine } from '@/lib/cart'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { confirmPayment, getCartQuote, placeOrder, type CheckoutField } from '@/server/orders'
@@ -17,9 +18,10 @@ import { EmptyState, Loading } from './EmptyState'
 import { cartActions, useCart } from './cart-store'
 import { pickMedium } from '@/lib/art'
 import { MediaImage } from './MediaImage'
+import { LoginForm } from './LoginForm'
 import { useHydrated } from './local-store'
 
-type T = Pick<Dictionary, 'cart' | 'checkout' | 'forms' | 'shop'>
+type T = Pick<Dictionary, 'cart' | 'checkout' | 'forms' | 'shop' | 'login'>
 type Extra = { label: string; amount: number }
 
 
@@ -83,12 +85,18 @@ const toLine = (l: QuoteLine) => ({ slug: l.slug, variantId: l.variantId, frameI
 
 /** Subtotal, delivery and any extras (COD fee, gift wrap), then the total. */
 function Totals({ quote, t, extras = [] }: { quote: Quote; t: T['cart']; extras?: Extra[] }) {
+  // Courses and downloads are not delivered: no delivery line, no delivery promise.
+  const delivered = quote.lines.some((l) => l.type !== 'digital')
   return (
     <dl className="grid grid-cols-[1fr_auto] gap-y-2 border-t border-border/30 pt-4">
       <dt>{t.subtotal}</dt>
       <dd>{formatPrice(quote.subtotal)}</dd>
-      <dt>{t.shipping}</dt>
-      <dd>{quote.shipping ? formatPrice(quote.shipping) : t.free}</dd>
+      {delivered && (
+        <>
+          <dt>{t.shipping}</dt>
+          <dd>{quote.shipping ? formatPrice(quote.shipping) : t.free}</dd>
+        </>
+      )}
       {extras.map((x) => (
         <div key={x.label} className="contents">
           <dt>{x.label}</dt>
@@ -98,7 +106,7 @@ function Totals({ quote, t, extras = [] }: { quote: Quote; t: T['cart']; extras?
       <dt className="text-h3 font-semibold">{t.total}</dt>
       <dd className="text-h3 font-semibold">{formatPrice(quote.total + extras.reduce((sum, x) => sum + x.amount, 0))}</dd>
       <dd className="col-span-2 text-muted">
-        {t.gst} {t.freeFrom}
+        {t.gst} {delivered && t.freeFrom}
       </dd>
     </dl>
   )
@@ -115,7 +123,7 @@ function Lines({ quote, t, editable, busy = false }: { quote: Quote; t: T['cart'
           </div>
           <div className="grid content-start gap-1">
             <p className="font-heading text-h3-sm">{l.title}</p>
-            <p className="text-muted">{[l.variantLabel, l.frameLabel].filter(Boolean).join(' · ')}</p>
+            <p className="text-muted">{(l.courseId ? [t.courseLine, l.childName && t.forChild.replace('{name}', l.childName)] : [l.variantLabel, l.frameLabel]).filter(Boolean).join(' · ')}</p>
             <p className="font-semibold">
               {formatPrice(l.lineTotal)}
               {l.wasTotal && <s className="ml-2 font-normal text-muted">{formatPrice(l.wasTotal)}</s>}
@@ -176,6 +184,7 @@ export function CartPage({ locale, t, checkoutHref, shopHref }: { locale: string
       <div className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:sticky lg:top-32 lg:col-span-5 lg:self-start">
         <h2 className="font-heading text-h2">{t.checkout.summary}</h2>
         <Totals quote={quote} t={t.cart} />
+        {needsSignIn(lines) && <p className="text-muted">{t.cart.signInNote}</p>}
         {quote.ok ? (
           <Link href={checkoutHref} className="press inline-flex h-13 items-center justify-center rounded-ui bg-kumkum px-6 font-semibold text-white">
             {t.cart.toPayment}
@@ -204,7 +213,7 @@ function loadRazorpay(): Promise<RazorpayCtor> {
 }
 
 /** /checkout: details → address → Razorpay (UPI shown first) or cash on delivery. */
-export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: string; t: T; orderPath: string; cartHref: string }) {
+export function CheckoutForm({ locale, t, orderPath, cartHref, me }: { locale: string; t: T; orderPath: string; cartHref: string; me: { name: string; phone: string } | null }) {
   const router = useRouter()
   const [pincode, setPincode] = useState('')
   const pin = /^[1-9]\d{5}$/.test(pincode) ? pincode : ''
@@ -275,6 +284,9 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
   const payMode: 'prepaid' | 'cod' = (mode === 'cod' || !online) && cod && !codReason ? 'cod' : 'prepaid'
   const codText = (b: CodBlock) => t.checkout.codBlocked[b].replace('{max}', formatPrice(cod?.maxTotal ?? 0)).replace('{pincode}', pin)
   const physical = quote?.lines.some((l) => l.type !== 'digital') ?? false
+  // Courses: sign in first (step 1), nothing to deliver, no cash on delivery.
+  const courseCart = needsSignIn(lines)
+  const courseOnly = lines.length > 0 && lines.every(isCourseLine)
   const giftFee = quote ? giftWrapCharge(giftWrap, quote.lines, quote.giftWrapFee ?? 0) : 0
   const codFee = payMode === 'cod' && cod ? cod.fee : 0
   const extras: Extra[] = [
@@ -301,7 +313,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
     const input = {
       lines,
       locale,
-      customer: { name: get('name'), phone: get('phone'), email: get('email') },
+      customer: { name: get('name'), phone: courseOnly && me ? me.phone : get('phone'), email: get('email') },
       address: { line1: get('line1'), line2: get('line2'), city: get('city'), state: get('state'), pincode: get('pincode') },
       note: get('note'),
       paymentMode: payMode,
@@ -330,6 +342,12 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
         setMessage(codText(result.reason))
       }
       if (result.status === 'sold_out') setMessage(`${t.checkout.errors.soldOut} ${result.title}`)
+      if (result.status === 'already_enrolled') setMessage(`${t.checkout.errors.enrolled} ${result.title}`)
+      if (result.status === 'consent') setMessage(t.checkout.errors.consent)
+      if (result.status === 'login') {
+        setMessage(t.checkout.errors.login)
+        router.refresh()
+      }
       if (result.status === 'unavailable' || result.status === 'failed' || result.status === 'rate') setMessage(t.checkout.errors[result.status])
       if (result.status !== 'ok') return
 
@@ -425,6 +443,22 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
     </>
   )
 
+  if (courseCart && !me)
+    return (
+      <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
+        <div className="grid content-start gap-5 rounded-ui bg-surface p-6 shadow-frame lg:col-span-7">
+          <p className="font-semibold text-kumkum">{c.steps[0]}</p>
+          <h2 className="font-heading text-h2">{t.login.checkoutTitle}</h2>
+          <p>{t.login.checkoutBody}</p>
+          <LoginForm locale={locale as Locale} t={t.login} next="/checkout" onDone={() => router.refresh()} />
+        </div>
+        <aside className="grid content-start gap-6 rounded-ui bg-surface p-6 shadow-frame lg:col-span-5">
+          <h2 className="font-heading text-h2">{c.summary}</h2>
+          {summary}
+        </aside>
+      </div>
+    )
+
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
       {/* Phones and tablets: the total first, the full order one tap away. */}
@@ -438,10 +472,20 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
       <form ref={formRef} onSubmit={submit} noValidate className="grid content-start gap-8 lg:col-span-7">
         <fieldset className="grid gap-5">
           {legend(0, c.details)}
-          {field('phone', `${t.forms.phone} ${t.forms.required}`, { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', required: true, onChange: () => setCodRefused(null) }, '+91')}
-          {field('name', `${t.forms.name} ${t.forms.required}`, { autoComplete: 'name', required: true })}
+          {courseOnly && me ? (
+            <p className="font-semibold">{c.signedInAs.replace('{phone}', me.phone)}</p>
+          ) : (
+            field('phone', `${t.forms.phone} ${t.forms.required}`, { type: 'tel', inputMode: 'numeric', autoComplete: 'tel-national', required: true, onChange: () => setCodRefused(null) }, '+91')
+          )}
+          {field('name', `${t.forms.name} ${t.forms.required}`, { autoComplete: 'name', required: true, defaultValue: me?.name })}
           {field('email', `${t.forms.email} ${t.forms.optional}`, { type: 'email', autoComplete: 'email' })}
         </fieldset>
+        {courseOnly ? (
+          <fieldset className="grid gap-5">
+            {legend(1, c.stateOnly)}
+            {field('state', c.state, { autoComplete: 'address-level1', defaultValue: 'Maharashtra', required: true })}
+          </fieldset>
+        ) : (
         <fieldset className="grid gap-5">
           {legend(1, c.address)}
           {field('pincode', `${c.pincode} (${c.pincodeHint})`, { inputMode: 'numeric', maxLength: 6, autoComplete: 'postal-code', required: true, onChange: (e: { target: HTMLInputElement }) => setPincode(e.target.value.trim()) })}
@@ -458,6 +502,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
           </div>
           {field('note', c.note)}
         </fieldset>
+        )}
         {physical && quote && (
           <fieldset className="grid gap-4">
             <legend className="mb-2 font-heading text-h3">{c.gift}</legend>
@@ -511,7 +556,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
               )}
             </span>
           </label>
-          {cod && (
+          {cod && !courseOnly && (
             <label className={option}>
               <input type="radio" name="paymentMode" value="cod" checked={payMode === 'cod'} disabled={!!codReason} onChange={() => setMode('cod')} className="mt-1 size-5 accent-kumkum" />
               <span className="grid gap-1">
@@ -522,6 +567,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
               </span>
             </label>
           )}
+          {courseCart && <p className="rounded-ui border border-border/40 p-4 font-semibold">{c.courseNoRefund}</p>}
           {message && (
             <p role="alert" tabIndex={-1} data-problem className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
               {message}

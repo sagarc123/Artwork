@@ -1,4 +1,4 @@
-import { Heart, Search, ShoppingCart, User } from 'lucide-react'
+import { Heart, Search, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
@@ -8,6 +8,7 @@ import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
 import { SavedCount } from './SavedCount'
+import { AccountLink } from './AccountLink'
 import { BrandMark } from './Art'
 import { getBusiness, getSiteExtras } from '@/server/content'
 import { hashString } from '@/lib/seed'
@@ -127,12 +128,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             <Heart aria-hidden="true" className="size-6" />
             {t.nav.saved}
           </Link>
-          {site.accountsLive && (
-            <Link href={p('/account')} className={iconLink}>
-              <User aria-hidden="true" className="size-6" />
-              {t.nav.me}
-            </Link>
-          )}
+          {site.accountsLive && <AccountLink account={t.nav.account} signIn={t.nav.signIn} accountHref={p('/account')} loginHref={p('/login')} className={iconLink} />}
           <Link href={p('/cart')} data-pinch="cart" className={`relative ${iconLink}`}>
             <CartCount label={t.cart.items} />
             <ShoppingCart aria-hidden="true" className="size-6" />

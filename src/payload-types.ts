@@ -77,6 +77,9 @@ export interface Config {
     media: Media;
     courses: Course;
     lessons: Lesson;
+    enrolments: Enrolment;
+    customers: Customer;
+    'otp-codes': OtpCode;
     categories: Category;
     mediums: Medium;
     'tax-classes': TaxClass;
@@ -98,6 +101,9 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
+    enrolments: EnrolmentsSelect<false> | EnrolmentsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     mediums: MediumsSelect<false> | MediumsSelect<true>;
     'tax-classes': TaxClassesSelect<false> | TaxClassesSelect<true>;
@@ -186,6 +192,9 @@ export interface Order {
     | {
         product?: (number | null) | Product;
         title?: string | null;
+        course?: (number | null) | Course;
+        childFirstName?: string | null;
+        guardianConsent?: boolean | null;
         variantId?: string | null;
         variantLabel?: string | null;
         frameLabel?: string | null;
@@ -224,6 +233,7 @@ export interface Order {
   razorpayPaymentId?: string | null;
   paidAt?: string | null;
   reservedUntil?: string | null;
+  account?: (number | null) | Customer;
   locale?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -443,6 +453,101 @@ export interface TaxClass {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses".
+ */
+export interface Course {
+  id: number;
+  title: string;
+  subtitle?: string | null;
+  category: number | Category;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  languages: ('en' | 'mr' | 'hi')[];
+  /**
+   * In ₹, including GST. 0 = free course.
+   */
+  price: number;
+  /**
+   * In ₹ (rupees), including GST.
+   */
+  salePrice?: number | null;
+  thumbnail: number | Media;
+  /**
+   * The free preview. Paste its video ID from Bunny Stream.
+   */
+  introVideoId?: string | null;
+  outcomes?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  materials?:
+    | {
+        text: string;
+        /**
+         * Optional: link to buy it in the shop
+         */
+        product?: (number | null) | Product;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Web address. Made from the English title; change it only if you need to.
+   */
+  slug: string;
+  /**
+   * Under-18 courses are bought by a parent, with a consent step and no tracking.
+   */
+  audience?: ('all' | 'teens' | 'kids') | null;
+  /**
+   * Students can ask questions under each lesson.
+   */
+  qaEnabled?: boolean | null;
+  certificateEnabled?: boolean | null;
+  featured?: boolean | null;
+  /**
+   * Optional. Shown in Google results; filled from the title if empty.
+   */
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * People who signed in on the website. To give someone a course by hand, add them here (phone number only) and then add them under "Course students".
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  phone: string;
+  name?: string | null;
+  savedSlugs?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  deletedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * Made automatically when an order is paid online, or when a cash-on-delivery order is delivered. They cannot be changed. Open one and tap the eye button for the PDF.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -614,78 +719,6 @@ export interface Testimonial {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "courses".
- */
-export interface Course {
-  id: number;
-  title: string;
-  subtitle?: string | null;
-  category: number | Category;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  languages: ('en' | 'mr' | 'hi')[];
-  /**
-   * In ₹, including GST. 0 = free course.
-   */
-  price: number;
-  /**
-   * In ₹ (rupees), including GST.
-   */
-  salePrice?: number | null;
-  thumbnail: number | Media;
-  /**
-   * The free preview. Paste its video ID from Bunny Stream.
-   */
-  introVideoId?: string | null;
-  outcomes?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
-  materials?:
-    | {
-        text: string;
-        /**
-         * Optional: link to buy it in the shop
-         */
-        product?: (number | null) | Product;
-        id?: string | null;
-      }[]
-    | null;
-  faq?:
-    | {
-        question: string;
-        answer: string;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Web address. Made from the English title; change it only if you need to.
-   */
-  slug: string;
-  /**
-   * Under-18 courses are bought by a parent, with a consent step and no tracking.
-   */
-  audience?: ('all' | 'teens' | 'kids') | null;
-  /**
-   * Students can ask questions under each lesson.
-   */
-  qaEnabled?: boolean | null;
-  certificateEnabled?: boolean | null;
-  featured?: boolean | null;
-  /**
-   * Optional. Shown in Google results; filled from the title if empty.
-   */
-  seo?: {
-    title?: string | null;
-    description?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lessons".
  */
 export interface Lesson {
@@ -710,6 +743,38 @@ export interface Lesson {
    */
   isFreePreview?: boolean | null;
   transcript?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Who can watch which course (for life). Paid orders add people here by themselves. For someone who paid you on WhatsApp, add them yourself: pick the student (add them under "Students" first if they are new) and the course.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrolments".
+ */
+export interface Enrolment {
+  id: number;
+  customer: number | Customer;
+  course: number | Course;
+  source: 'paid' | 'free' | 'manual';
+  order?: (number | null) | Order;
+  childFirstName?: string | null;
+  guardianConsentAt?: string | null;
+  firstAccessedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "otp-codes".
+ */
+export interface OtpCode {
+  id: number;
+  phone: string;
+  codeHash: string;
+  expiresAt: string;
+  sentAt: string;
+  attempts: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -808,6 +873,18 @@ export interface PayloadLockedDocument {
         value: number | Lesson;
       } | null)
     | ({
+        relationTo: 'enrolments';
+        value: number | Enrolment;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'otp-codes';
+        value: number | OtpCode;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -881,6 +958,9 @@ export interface OrdersSelect<T extends boolean = true> {
     | {
         product?: T;
         title?: T;
+        course?: T;
+        childFirstName?: T;
+        guardianConsent?: T;
         variantId?: T;
         variantLabel?: T;
         frameLabel?: T;
@@ -919,6 +999,7 @@ export interface OrdersSelect<T extends boolean = true> {
   razorpayPaymentId?: T;
   paidAt?: T;
   reservedUntil?: T;
+  account?: T;
   locale?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1213,6 +1294,46 @@ export interface LessonsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enrolments_select".
+ */
+export interface EnrolmentsSelect<T extends boolean = true> {
+  customer?: T;
+  course?: T;
+  source?: T;
+  order?: T;
+  childFirstName?: T;
+  guardianConsentAt?: T;
+  firstAccessedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  phone?: T;
+  name?: T;
+  savedSlugs?: T;
+  deletedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "otp-codes_select".
+ */
+export interface OtpCodesSelect<T extends boolean = true> {
+  phone?: T;
+  codeHash?: T;
+  expiresAt?: T;
+  sentAt?: T;
+  attempts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
@@ -1471,6 +1592,10 @@ export interface CommerceSetting {
     defaultTaxClassOriginal?: (number | null) | TaxClass;
     defaultTaxClassPrint?: (number | null) | TaxClass;
     /**
+     * Online courses are a service, not goods. Ask your CA for the SAC code and rate.
+     */
+    defaultTaxClassCourse?: (number | null) | TaxClass;
+    /**
      * Products take their GST from their type. A tax class set on a product (under Advanced) overrides these.
      */
     defaultTaxClass?: (number | null) | TaxClass;
@@ -1703,6 +1828,7 @@ export interface CommerceSettingsSelect<T extends boolean = true> {
         sellerState?: T;
         defaultTaxClassOriginal?: T;
         defaultTaxClassPrint?: T;
+        defaultTaxClassCourse?: T;
         defaultTaxClass?: T;
       };
   festivalSale?:

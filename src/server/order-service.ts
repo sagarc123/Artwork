@@ -4,6 +4,7 @@ import { sql } from '@payloadcms/db-postgres'
 import { getPayload, type Where } from 'payload'
 import type { QuoteLine } from '@/lib/cart'
 import { reservedFixes, type CancelPlan } from '@/lib/orders'
+import { enrolFromOrder } from './enrol'
 import { issueInvoice } from './invoices'
 
 export const HOLD_MINUTES = 15
@@ -147,6 +148,9 @@ export async function markPaid(razorpayOrderId: string, paymentId: string) {
   if (changed === 'paid') await issueInvoice(order.id).catch((error) => console.error('Invoice not issued', order.id, error))
   // A repeat call (webhook after the browser, or a retry) reports where the order is now.
   const status = changed ?? (await payload.findByID({ collection: 'orders', id: order.id, depth: 0, select: { status: true } })).status
+  // Course lines become seats. Not swallowed: if it fails, the webhook gets an error and retries, and the repeat call (status
+  // is already paid) comes back here. Only a verified payment ever reaches this line.
+  if (['paid', 'packed', 'shipped', 'delivered'].includes(status) && order.items?.some((it) => it.course)) await enrolFromOrder(order.id)
   return { order, status }
 }
 

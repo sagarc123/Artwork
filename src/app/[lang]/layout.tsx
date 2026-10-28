@@ -10,7 +10,7 @@ import { ArtDefs } from '@/components/StandIns'
 import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { locales } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { site, whatsappLink } from '@/lib/site'
+import { site } from '@/lib/site'
 import { InlineScript } from '@/components/InlineScript'
 import { FESTIVE_KINDS, festiveWindows, fixedSeason } from '@/lib/festive'
 import { getFestivals, getSiteExtras } from '@/server/content'
@@ -75,7 +75,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />
         <LanguageChooser current={locale} labels={t.langStrip} />
-        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} whatsappHref={whatsappLink(t.whatsapp.message)} />
+        <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
       </body>
     </html>
   )

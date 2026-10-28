@@ -22,7 +22,9 @@
     "close": "Close",
     "language": "Language",
     "skip": "Skip to main content",
-    "mainNav": "Main menu"
+    "mainNav": "Main menu",
+    "account": "Account",
+    "signIn": "Sign in"
   },
   "tabs": {
     "home": "Home",
@@ -478,7 +480,10 @@
     "giftWrap": "Gift wrap",
     "removedOne": "1 piece was taken out of your cart because it is no longer in the shop.",
     "removedMany": "{n} pieces were taken out of your cart because they are no longer in the shop.",
-    "emptyBody": "Pick a print or an original from the shop. It will wait here until you are ready to pay."
+    "emptyBody": "Pick a print or an original from the shop. It will wait here until you are ready to pay.",
+    "courseLine": "Online course · lifetime access",
+    "forChild": "For {name}",
+    "signInNote": "You will sign in with your mobile number at checkout."
   },
   "checkout": {
     "title": "Almost there",
@@ -514,7 +519,10 @@
       "quote": "Could not check prices. Please check your connection.",
       "retry": "Try again",
       "gstin": "This GSTIN does not look right. Please check the 15 characters.",
-      "businessName": "Please write the business name."
+      "businessName": "Please write the business name.",
+      "login": "Please sign in first.",
+      "consent": "Please tick the parent box on the course page.",
+      "enrolled": "You already have this course:"
     },
     "payOnline": "UPI, card or net banking",
     "payOnlineOff": "UPI and card payment are coming soon. For now, pay cash when your parcel arrives.",
@@ -546,7 +554,10 @@
       "Step 2 of 3",
       "Step 3 of 3"
     ],
-    "showSummary": "Your order · {total}"
+    "showSummary": "Your order · {total}",
+    "stateOnly": "Your state (needed for the GST invoice)",
+    "courseNoRefund": "Courses can't be refunded once you open the first lesson. That is why there is a free lesson to try first.",
+    "signedInAs": "Signed in as +91 {phone}"
   },
   "order": {
     "metaTitle": "Your order",
@@ -598,7 +609,10 @@
     },
     "expected": "Expected delivery: {from} – {to}",
     "orderAgain": "Order again",
-    "track": "Track another order"
+    "track": "Track another order",
+    "courseReady": "Your course is ready",
+    "courseBody": "It is saved in your account for life.",
+    "myCourses": "Go to my courses"
   },
   "ownerNote": "Note for the owner (only shown while developing): sample text — replace it in src/i18n/messages before launch.",
   "missing": "to be filled in",
@@ -1175,6 +1189,86 @@
     "parentBody": "This course is bought and managed by you, and your child watches on your phone or laptop. I only ask for their first name, to print on the certificate. Nothing about your child is tracked.",
     "sampleTitle": "Free lesson",
     "sampleFrom": "From the course",
-    "continueCourse": "See the full course"
+    "continueCourse": "See the full course",
+    "goToCourse": "Go to my course",
+    "childName": "Child's first name (for the certificate)",
+    "childNameHint": "Only a first name, printed on the certificate. Nothing else about your child is kept.",
+    "consent": "I am the parent or guardian, and I agree.",
+    "consentError": "Please tick the box to continue.",
+    "noRefund": "Courses can't be refunded once you open the first lesson. Try the free lesson first.",
+    "working": "Please wait…",
+    "enrolFailed": "Something went wrong. Please try again.",
+    "enrolAbove": "Enrol my child (see the form above)"
+  },
+  "login": {
+    "metaTitle": "Sign in",
+    "title": "Welcome! Let's get you in",
+    "sub": "New here? Same steps. I'll create your account.",
+    "phone": "Mobile number",
+    "age": "I am 18 or older, or I am a parent or guardian",
+    "under18": "Please ask a parent to sign in. They can add you as a learner.",
+    "send": "Send OTP",
+    "sending": "Sending…",
+    "codeLabel": "6-digit code",
+    "sentTo": "We sent a code by SMS to +91 {phone}.",
+    "testMode": "Test mode: your code is {code}",
+    "verify": "Verify",
+    "verifying": "Checking…",
+    "change": "Change number",
+    "resendIn": "Send a new code in {s} seconds",
+    "resend": "Send a new code",
+    "privacy": "I use your number only to sign you in, and for your orders and courses.",
+    "nameTitle": "What should I call you?",
+    "nameLabel": "Your first name",
+    "save": "Save and continue",
+    "skip": "Skip for now",
+    "checkoutTitle": "Sign in to buy this course",
+    "checkoutBody": "Courses belong to your account, so you can watch them any time. Enter your mobile number to continue.",
+    "errors": {
+      "invalid": "Please enter your 10-digit mobile number.",
+      "codeInvalid": "Please enter the 6-digit code.",
+      "wrong": "That code doesn't match. Please check the SMS.",
+      "expired": "This code has expired. Please ask for a new one.",
+      "locked": "Too many tries. Please wait 10 minutes.",
+      "rate": "Too many tries in a short time. Please wait a few minutes.",
+      "wait": "Please wait 30 seconds before asking for a new code.",
+      "failed": "We could not send the code. Please try again, or message me on WhatsApp.",
+      "name": "Please write your name."
+    }
+  },
+  "account": {
+    "metaTitle": "My account",
+    "hi": "Hi, {name}",
+    "hello": "Welcome",
+    "tabsLabel": "Account sections",
+    "tabs": {
+      "courses": "My courses",
+      "orders": "My orders",
+      "saved": "Saved",
+      "profile": "Profile"
+    },
+    "coursesEmpty": "No courses yet. Start with a free lesson, it's on me.",
+    "browse": "Browse courses",
+    "goToCourse": "Go to my course",
+    "forChild": "For {name}",
+    "since": "Enrolled on {date}",
+    "lessonsSoon": "The lesson player is being finished. Your courses are saved here for life.",
+    "ordersEmpty": "No orders yet. Find something you love.",
+    "visitShop": "Visit the shop",
+    "viewOrder": "View order",
+    "savedBody": "Pieces you saved on this phone or computer are kept with your account too.",
+    "savedCount": "{n} saved",
+    "seeSaved": "See my saved pieces",
+    "profileName": "Your name",
+    "phoneLabel": "Mobile number (verified)",
+    "saveName": "Save name",
+    "nameSaved": "Saved.",
+    "signOut": "Sign out",
+    "deleteTitle": "Delete my account",
+    "deleteBody": "This removes your name, phone number, saved pieces and any child's name, and your courses stop working. Order and invoice records are kept, as the tax law requires. Your phone number and street address are taken off them.",
+    "deleteConfirm": "Type DELETE to confirm",
+    "deleteButton": "Delete my account",
+    "deleteWrong": "Please type DELETE exactly.",
+    "failed": "Something went wrong. Please try again."
   }
 }

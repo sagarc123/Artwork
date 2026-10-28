@@ -1,6 +1,6 @@
 import type { Access, FieldAccess } from 'payload'
 
-/** Staff roles. Customers never log in here (their accounts come with milestone 4). */
+/** Staff roles. Customers are a separate collection with no login of their own (see Students.ts), so they never reach the admin. */
 export const ROLES = ['owner', 'staff', 'editor'] as const
 export type Role = (typeof ROLES)[number]
 

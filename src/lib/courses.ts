@@ -32,3 +32,25 @@ export function coursePrice(c: { price: number; salePrice?: number | null }) {
 
 /** Under-18 courses are bought by a parent. */
 export const forUnder18 = (audience?: string | null) => audience === 'kids' || audience === 'teens'
+
+type SeatLine = { course?: number | null; childFirstName?: string | null; guardianConsent?: boolean | null }
+
+/**
+ * The seats a paid order should create: one per course line, skipping courses the customer already has and repeats.
+ * Running it again for the same order gives an empty list, which is what makes a repeated webhook harmless
+ * (the database's unique customer + course index is the final guard).
+ */
+export function seatsToCreate(items: SeatLine[], alreadyEnrolled: number[]) {
+  const have = new Set(alreadyEnrolled)
+  const seats: { course: number; childFirstName: string | null; guardianConsent: boolean }[] = []
+  for (const it of items) {
+    if (typeof it.course !== 'number' || have.has(it.course)) continue
+    have.add(it.course)
+    seats.push({ course: it.course, childFirstName: it.childFirstName?.trim() || null, guardianConsent: it.guardianConsent === true })
+  }
+  return seats
+}
+
+/** Where "Go to my course" leads. Part 2b swaps this for the lesson player: `/learn/${slug}`. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const learnPath = (slug: string) => '/account'

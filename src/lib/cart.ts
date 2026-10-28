@@ -1,8 +1,15 @@
 // Cart pricing: the server always recalculates from the database; the browser only sends what was chosen.
 // Prices are whole rupees and already include GST.
-import type { Product } from '@/payload-types'
+import type { Course, Product } from '@/payload-types'
+import { coursePrice, forUnder18 } from './courses.ts'
 
-export type CartLine = { slug: string; variantId: string; frameId?: string; qty: number }
+/** A course line has `slug` = the course's slug and this as its variant. One seat per course; the parent's consent and the child's first name ride along. */
+export const COURSE_VARIANT = 'course'
+export type CartLine = { slug: string; variantId: string; frameId?: string; qty: number; childName?: string; consent?: boolean }
+export const isCourseLine = (l: Pick<CartLine, 'variantId'>) => l.variantId === COURSE_VARIANT
+/** Courses belong to an account (access is tied to it), so checkout asks for sign-in first. */
+export const needsSignIn = (lines: Pick<CartLine, 'variantId'>[]) => lines.some(isCourseLine)
+export const CHILD_NAME_MAX = 40
 
 export const FREE_SHIPPING_FROM = 2999
 export const SHIPPING_FEE = 99
@@ -11,12 +18,17 @@ export const MAX_QTY = 10
 export type QuoteLine = {
   key: string
   slug: string
-  productId: number
+  /** Set for products; courses have `courseId` instead. */
+  productId?: number
+  courseId?: number
+  childName?: string
+  consent?: boolean
   variantId: string
   frameId?: string
   title: string
   variantLabel: string
   frameLabel?: string
+  /** A course is a digital line: nothing ships, no stock, no COD. */
   type: Product['type']
   unitPrice: number
   /** Line total before a sale or "was" price, shown crossed out. */
@@ -39,10 +51,40 @@ export const giftWrapCharge = (wanted: boolean, lines: Pick<QuoteLine, 'type'>[]
 /** What the buyer pays: items and delivery, plus any COD fee and gift wrap. */
 export const orderTotal = (quote: Pick<Quote, 'total'>, codFee = 0, giftWrap = 0) => quote.total + codFee + giftWrap
 
-export function priceCart(lines: CartLine[], products: Product[]): Quote {
+export type CartCourse = Pick<Course, 'id' | 'slug' | 'title' | 'price' | 'salePrice' | 'thumbnail' | 'audience'>
+
+// ponytail: the festival sale applies to shop pieces only; courses charge their own sale price.
+export function priceCart(lines: CartLine[], products: Product[], courses: CartCourse[] = []): Quote {
   const bySlug = new Map(products.map((p) => [p.slug, p]))
+  const courseBySlug = new Map(courses.map((c) => [c.slug, c]))
   const out: QuoteLine[] = []
   for (const line of lines) {
+    if (isCourseLine(line)) {
+      const c = courseBySlug.get(line.slug)
+      if (!c || out.some((l) => l.courseId === c.id)) continue // unpublished, or the same course twice
+      const price = coursePrice(c).now
+      const thumb = typeof c.thumbnail === 'object' && c.thumbnail?.url ? c.thumbnail : null
+      const under18 = forUnder18(c.audience)
+      out.push({
+        key: `${c.slug}:${COURSE_VARIANT}:`,
+        slug: c.slug,
+        courseId: c.id,
+        variantId: COURSE_VARIANT,
+        title: c.title,
+        variantLabel: '',
+        type: 'digital',
+        unitPrice: price,
+        qty: 1,
+        lineTotal: price,
+        maxQty: 1,
+        available: true,
+        image: thumb?.url ? { url: thumb.url, alt: thumb.alt || c.title } : null,
+        // Only under-18 courses carry a child's first name, and only with the parent's tick.
+        consent: under18 ? line.consent === true : undefined,
+        childName: under18 && line.childName ? line.childName.trim().slice(0, CHILD_NAME_MAX) : undefined,
+      })
+      continue
+    }
     const p = bySlug.get(line.slug)
     const v = p?.variants.find((x) => x.id === line.variantId)
     if (!p || !v?.id) continue // removed from the shop: dropped from the cart
