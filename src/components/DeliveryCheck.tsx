@@ -72,10 +72,10 @@ export function DeliveryCheck({ locale, t, codOk }: { locale: string; t: Diction
           pattern="[0-9]*"
           maxLength={6}
           autoComplete="postal-code"
-          placeholder="411004"
+          placeholder={t.placeholder}
           aria-invalid={result === 'invalid'}
           aria-describedby={`${id}-out`}
-          className="h-12 w-full min-w-0 rounded-ui border border-border bg-surface px-4 tracking-widest text-charcoal aria-invalid:border-2 aria-invalid:border-kumkum"
+          className="h-12 w-full min-w-0 rounded-ui border border-border bg-surface px-4 tracking-widest text-charcoal placeholder:tracking-normal aria-invalid:border-2 aria-invalid:border-kumkum"
         />
         <button type="submit" disabled={checking} className="press h-12 shrink-0 rounded-ui border-[1.5px] border-charcoal px-5 font-semibold hover:bg-charcoal hover:text-paper disabled:opacity-60">
           {checking ? t.checking : t.button}

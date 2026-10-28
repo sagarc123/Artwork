@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { site, whatsappLink } from '@/lib/site'
-import { LanguageSwitcher } from './LanguagePicker'
+import { LanguageLinks, LanguageSwitcher } from './LanguagePicker'
 import { MobileMenu } from './MobileMenu'
 import { NavLink } from './NavLink'
 import { CartCount } from './CartCount'
@@ -57,6 +57,12 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
   return (
     <header className="site-header sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
       {ann && <style>{`html[data-ann-off="${ann.id}"] .ann,html:not([data-ann-off="${ann.id}"]) .ann-alt{display:none}`}</style>}
+      {/* Phones and tablets: language links on a slim row (the desktop bar's twin), then the announcement. */}
+      <div className="border-b border-border/20 lg:hidden">
+        <div className="wrap">
+          <LanguageLinks current={locale} label={t.nav.language} />
+        </div>
+      </div>
       {/* Phones and tablets: the announcement as a slim line above the menu (at most 44px). */}
       {ann && (
         <div role="region" aria-label={t.header.announceLabel} className="ann bg-charcoal text-paper lg:hidden">

@@ -23,9 +23,9 @@ export function FestivalTiles({ festivals, t, locale, remind }: { festivals: Fes
   const day = (ymd: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(`${ymd}T00:00:00Z`))
 
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <ul className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       {list.map((f, i) => (
-        <li key={f.slug} className={i === 0 ? 'grid content-start gap-3 sm:col-span-2' : ''}>
+        <li key={f.slug} className={i === 0 ? 'col-span-2 grid content-start gap-3' : i > 2 ? 'max-lg:hidden' : ''}>
           <Link
             href={f.href}
             className={`card fest-tile group relative flex h-full min-h-40 flex-col justify-between gap-6 overflow-hidden rounded-ui p-5 text-paper grain-dark ${f.floor} ${i === 0 ? 'lg:min-h-72' : ''}`}
@@ -34,7 +34,7 @@ export function FestivalTiles({ festivals, t, locale, remind }: { festivals: Fes
             <FestivalMotif
               kind={f.kind}
               live="scroll"
-              className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-32 sm:w-44 lg:w-52' : 'w-28'}`}
+              className={`absolute -right-3 -bottom-3 opacity-90 transition-transform duration-500 group-hover:scale-105 ${i === 0 ? 'w-32 sm:w-44 lg:w-52' : 'w-20 sm:w-28'}`}
             />
             {/* Scrim so the countdown stays readable where it runs over the art. */}
             {i === 0 && <span aria-hidden="true" className="absolute inset-0 bg-linear-to-tr from-charcoal/70 via-charcoal/20 to-transparent" />}

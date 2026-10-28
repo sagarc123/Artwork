@@ -2,12 +2,13 @@
 
 import { startTransition, useActionState } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
+import { whatsappLink } from '@/lib/site'
 import { findOrder, type TrackState } from '@/server/track'
 
 const input = 'h-13 w-full rounded-ui border border-border bg-surface px-4 aria-invalid:border-2 aria-invalid:border-kumkum'
 
 /** Phone + order number; the server sends the buyer on to their order page. */
-export function TrackForm({ locale, t, forms }: { locale: string; t: Dictionary['trackPage']; forms: Dictionary['forms'] }) {
+export function TrackForm({ locale, t, forms, waMessage }: { locale: string; t: Dictionary['trackPage']; forms: Dictionary['forms']; waMessage: string }) {
   const [state, action, pending] = useActionState<TrackState, FormData>(findOrder, { status: 'idle' })
   const failed = state.status !== 'idle'
   return (
@@ -24,6 +25,9 @@ export function TrackForm({ locale, t, forms }: { locale: string; t: Dictionary[
       {failed && (
         <p role="alert" className="rounded-ui border-2 border-kumkum bg-surface p-4 font-semibold">
           {state.status === 'rate' ? t.rate : t.notFound}
+          <a href={whatsappLink(waMessage)} target="_blank" rel="noopener noreferrer" className="ink-link mt-2 flex min-h-11 items-center font-semibold text-leaf">
+            {t.whatsapp}
+          </a>
         </p>
       )}
       <div className="grid gap-2">

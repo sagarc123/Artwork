@@ -10,7 +10,7 @@ const COLS = ['', 'mx-auto w-full max-w-2xl', 'md:grid-cols-2', 'lg:grid-cols-3'
 export function Testimonials({ items, t, className = 'bg-paper' }: { items: Testimonial[]; t: Labels; className?: string }) {
   if (items.length === 0) return null
   return (
-    <section className={`py-16 lg:py-24 ${className}`}>
+    <section className={`py-10 lg:py-24 ${className}`}>
       <div className="wrap grid gap-10">
         <div>
           <h2 className="font-heading text-h1">{t.title}</h2>
@@ -18,10 +18,10 @@ export function Testimonials({ items, t, className = 'bg-paper' }: { items: Test
         </div>
         {/* Columns follow the count, so one or two quotes never leave an empty slot. */}
         <ul className={`grid gap-6 ${COLS[Math.min(items.length, 3)]}`}>
-          {items.map((q) => {
+          {items.map((q, i) => {
             const rating = Math.min(5, Math.max(1, Math.round(q.rating ?? 5)))
             return (
-              <li key={q.id}>
+              <li key={q.id} className={i > 0 ? 'max-lg:hidden' : undefined}>
                 <figure className="grid h-full content-start gap-4 rounded-ui bg-surface p-6 shadow-frame">
                   <p className="text-h3-sm tracking-widest text-accent">
                     <span className="sr-only">{t.rating.replace('{n}', String(rating))}</span>

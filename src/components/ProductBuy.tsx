@@ -29,14 +29,13 @@ const btn = 'press inline-flex items-center justify-center gap-2 rounded-ui font
 const primary = `${btn} text-white`
 const outline = `${btn} border-[1.5px] border-leaf text-leaf hover:bg-leaf hover:text-white`
 
-/** True once `ref` has scrolled up past the top of the screen (not while it is still below). */
-function useScrolledPast(ref: RefObject<HTMLElement | null>) {
+/** True while `ref` is out of reach: scrolled away above, or still below the fold (the bottom 140px are the bar and tab bar). */
+function useOutOfReach(ref: RefObject<HTMLElement | null>) {
   const [past, setPast] = useState(false)
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    // The root reaches far below the screen, so only "above the top" counts as out: a jump straight past it (anchor, fling) still flips it.
-    const io = new IntersectionObserver(([e]) => setPast(!e.isIntersecting), { rootMargin: '0px 0px 100000px 0px' })
+    const io = new IntersectionObserver(([e]) => setPast(!e.isIntersecting), { rootMargin: '0px 0px -140px 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [ref])
@@ -49,7 +48,7 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
   const [v, setV] = useState(Math.max(0, variants.findIndex((x) => x.stock > 0)))
   const [f, setF] = useState(-1)
   const actions = useRef<HTMLDivElement>(null)
-  const barShown = useScrolledPast(actions)
+  const barShown = useOutOfReach(actions)
   const variant = variants[v]
   const frame = f >= 0 ? framing[f] : null
   const total = variant.price + (frame?.extraPrice ?? 0)
@@ -134,14 +133,17 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
               </a>
             )}
           </div>
-          {added && (
-            <p role="status" className="flex flex-wrap items-center gap-x-3 font-semibold text-leaf">
-              {cart.added} ✓
-              <Link href={cartHref} className="ink-link text-peacock">
-                {cart.view}
-              </Link>
-            </p>
-          )}
+          {/* Always in the page so screen readers announce it when it fills. */}
+          <div role="status" className="grid gap-3 empty:hidden">
+            {added && (
+              <>
+                <p className="font-semibold text-leaf">{cart.added} ✓</p>
+                <Link href={cartHref} className={`${btn} h-13 border-[1.5px] border-charcoal px-6 hover:bg-charcoal hover:text-paper`}>
+                  {cart.view}
+                </Link>
+              </>
+            )}
+          </div>
           {!physical && (
             <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-leaf">
               <MessageCircle aria-hidden="true" className="size-5" />

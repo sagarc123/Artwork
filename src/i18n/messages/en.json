@@ -30,7 +30,7 @@
     "learn": "Learn",
     "cart": "Cart",
     "me": "Me",
-    "book": "Book",
+    "book": "Events",
     "whatsapp": "WhatsApp"
   },
   "header": {
@@ -197,6 +197,7 @@
     "optional": "(optional)",
     "name": "Your name",
     "phone": "WhatsApp number",
+    "moreDetails": "Add more details",
     "phoneHint": "10-digit mobile number",
     "email": "Email",
     "city": "City / area",
@@ -429,9 +430,10 @@
     "waOrder": "Namaste! I would like to order",
     "save": "Save",
     "saved": "Saved",
+    "shareShort": "Share",
     "share": "Share with family",
     "shareText": "Look at this piece by Siddesh Mokashi:",
-    "deliveredBy": "Delivered by {from} – {to}",
+    "deliveredBy": "Usually delivered by {from} – {to}",
     "codAvailable": "Cash on delivery available",
     "soldSimilar": "Ask me to make one like it",
     "similarMessage": "Namaste! I saw that this piece has sold. Could you make something similar?",
@@ -441,9 +443,10 @@
     "buyBar": "Quick buy",
     "delivery": {
       "title": "Check delivery",
-      "button": "Check",
+      "button": "Check my pincode",
+      "placeholder": "e.g. 411004",
       "checking": "Checking…",
-      "result": "Delivers by {from} – {to}",
+      "result": "Usually delivered by {from} – {to}",
       "cod": "Cash on delivery available",
       "noCod": "Cash on delivery is not available here. Pay online by UPI or card.",
       "invalid": "Enter a 6-digit PIN code, for example 411004.",
@@ -469,7 +472,7 @@
     "unavailable": "No longer available — please remove it.",
     "added": "Added to your cart",
     "add": "Add to cart",
-    "view": "View cart",
+    "view": "Go to cart",
     "loading": "Checking prices…",
     "items": "items",
     "giftWrap": "Gift wrap",
@@ -1062,7 +1065,8 @@
     "button": "Show my order",
     "finding": "Looking…",
     "notFound": "No order matches this mobile number and order number. Please check both, or message me on WhatsApp.",
-    "rate": "Too many tries. Please wait a few minutes, or message me on WhatsApp."
+    "rate": "Too many tries. Please wait a few minutes, or message me on WhatsApp.",
+    "whatsapp": "Message me on WhatsApp"
   },
   "remind": {
     "button": "Remind me before {name}",
@@ -1138,6 +1142,7 @@
     "back": "All courses",
     "breadcrumb": "Courses",
     "introVideo": "Introduction to the course",
+    "previewSoon": "Free preview (video coming soon)",
     "videoSoon": "Video coming soon",
     "videoSoonNote": "I am still recording this lesson.",
     "certificate": "Certificate when you finish",

@@ -9,6 +9,7 @@ import { pickMedium } from '@/lib/art'
 import { galleryDocs, type GalleryDoc } from '@/lib/gallery'
 import { hashString } from '@/lib/seed'
 import { pickTestimonials } from '@/lib/testimonials'
+import { videoReady } from '@/lib/courses'
 import { applySale, FREE_SHIPPING_FROM, nextSaleChange, parsePincodes, SHIPPING_FEE } from '@/lib/cart'
 import { formatPrice, site } from '@/lib/site'
 import type { GalleryItem } from '@/components/Gallery'
@@ -188,7 +189,7 @@ export async function getCourses(locale: Locale) {
   return docs.map((c) => {
     const mine = lessons.filter((l) => l.course === c.id)
     const sample = mine.find((l) => l.isFreePreview)
-    return { ...c, lessonCount: mine.length, seconds: mine.reduce((n, l) => n + (l.durationSeconds ?? 0), 0), sample: sample ? { id: sample.id, title: sample.title, seconds: sample.durationSeconds ?? 0 } : null }
+    return { ...c, lessonCount: mine.length, seconds: mine.reduce((n, l) => n + (l.durationSeconds ?? 0), 0), sample: sample ? { id: sample.id, title: sample.title, seconds: sample.durationSeconds ?? 0, video: videoReady(sample.bunnyVideoId) } : null }
   })
 }
 export type CourseCard = Awaited<ReturnType<typeof getCourses>>[number]

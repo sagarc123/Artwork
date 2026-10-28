@@ -6,7 +6,7 @@ import { EnrolButton } from '@/components/CourseEnrol'
 import { CourseVideo } from '@/components/CourseVideo'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { formatDuration } from '@/lib/courses'
+import { formatDuration, videoReady } from '@/lib/courses'
 import { getCourse, getCourses } from '@/server/content'
 
 // Unknown or locked lessons must wait for the full render so notFound() can still send a real 404.
@@ -51,7 +51,7 @@ export default async function SampleLessonPage({ params }: PageProps<'/[lang]/co
         </Link>
         <CourseVideo videoId={lesson.bunnyVideoId} title={lesson.title} soon={c.videoSoon} soonNote={c.videoSoonNote} seed={`${course.slug}-${lesson.id}`} />
         <div className="grid gap-2">
-          <p className="font-semibold text-accent">{c.sampleTitle}</p>
+          <p className="font-semibold text-accent">{videoReady(lesson.bunnyVideoId) ? c.sampleTitle : c.previewSoon}</p>
           <h1 className="font-heading text-h1">{lesson.title}</h1>
           {!!lesson.durationSeconds && <p className="text-muted">{formatDuration(lesson.durationSeconds, c.units)}</p>}
         </div>

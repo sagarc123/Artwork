@@ -20,7 +20,7 @@ export default async function TrackPage() {
       <section className="bg-paper pb-20 lg:pb-28">
         <div className="wrap">
           <div className="grid max-w-xl gap-6 rounded-ui bg-surface p-6 shadow-frame lg:p-10">
-            <TrackForm locale={locale} t={t.trackPage} forms={t.forms} />
+            <TrackForm locale={locale} t={t.trackPage} forms={t.forms} waMessage={t.whatsapp.message} />
             <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold text-leaf">
               {t.order.whatsapp}
             </a>

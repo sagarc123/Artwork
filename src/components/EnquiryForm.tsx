@@ -102,6 +102,12 @@ export function EnquiryForm({ kind, locale, t, typeLabel, hints }: Props) {
   const described = (id: string, f?: EnquiryField, hint?: boolean) =>
     [hint && `${id}-hint`, f && errors.includes(f) && `${id}-error`].filter(Boolean).join(' ') || undefined
 
+  const message = (
+    <Field id="message" label={`${kind === 'general' ? t.yourMessage : t.message} ${t.optional}`}>
+      <textarea id="message" name="message" rows={4} className="w-full rounded-ui border border-border bg-surface p-4" />
+    </Field>
+  )
+
   if (state.status === 'ok') {
     return (
       <div ref={doneRef} tabIndex={-1} role="status" className="grid justify-items-start gap-4 rounded-ui border-2 border-leaf bg-surface p-6 lg:p-8">
@@ -164,54 +170,19 @@ export function EnquiryForm({ kind, locale, t, typeLabel, hints }: Props) {
         </label>
       </div>
 
-      {kind === 'event' ? (
-        <>
-          <Field id="eventDate" label={`${t.date} ${t.required}`} error={err('date') ?? err('dateRequired')}>
-            <input
-              id="eventDate"
-              name="eventDate"
-              type="date"
-              required
-              className={input}
-              aria-invalid={!!(err('date') ?? err('dateRequired'))}
-              aria-describedby={described('eventDate', errors.includes('dateRequired') ? 'dateRequired' : 'date')}
-            />
-          </Field>
-          <Field id="city" label={`${t.city} ${t.optional}`}>
-            <input id="city" name="city" type="text" autoComplete="address-level2" className={input} />
-          </Field>
-          <Chips legend={t.venue} name="venue" type="radio" options={t.venues} />
-          <Chips legend={t.size} name="size" type="radio" options={t.sizes} hints={hints?.size} />
-          <details className="group rounded-ui border border-border/40 px-4">
-            <summary className="flex min-h-12 cursor-pointer items-center justify-between font-semibold">
-              {t.stylesToggle} {t.optional}
-              <span aria-hidden="true" className="text-xl transition-transform group-open:rotate-45">
-                +
-              </span>
-            </summary>
-            <div className="pb-4">
-              <Chips name="styles" type="checkbox" options={t.styleOptions} />
-            </div>
-          </details>
-        </>
-      ) : kind === 'portrait' ? (
-        <>
-          <Chips legend={t.medium} name="medium" type="radio" options={t.mediums} hints={hints?.medium} />
-          <Chips legend={t.paperSize} name="paperSize" type="radio" options={{ A4: 'A4', A3: 'A3', A2: 'A2' }} hints={hints?.paperSize} />
-          <Field id="faces" label={t.faces}>
-            <input id="faces" name="faces" type="number" inputMode="numeric" min={1} max={12} defaultValue={1} className={`${input} max-w-32`} />
-          </Field>
-          <Field id="eventDate" label={`${t.neededBy} ${t.optional}`} error={err('date')}>
-            <input id="eventDate" name="eventDate" type="date" className={input} aria-invalid={!!err('date')} aria-describedby={described('eventDate', 'date')} />
-          </Field>
-          <label className="flex min-h-12 items-center gap-3">
-            <input type="checkbox" name="framing" value="yes" className="size-6 accent-kumkum" />
-            {t.framing}
-          </label>
-          <p className="rounded-ui bg-placeholder p-4">{t.photoNote}</p>
-        </>
-      ) : null}
-
+      {kind !== 'general' && (
+        <Field id="eventDate" label={`${kind === 'event' ? t.date : t.neededBy} ${kind === 'event' ? t.required : t.optional}`} error={err('date') ?? (kind === 'event' ? err('dateRequired') : undefined)}>
+          <input
+            id="eventDate"
+            name="eventDate"
+            type="date"
+            required={kind === 'event'}
+            className={input}
+            aria-invalid={!!(err('date') ?? (kind === 'event' ? err('dateRequired') : undefined))}
+            aria-describedby={described('eventDate', kind === 'event' && errors.includes('dateRequired') ? 'dateRequired' : 'date')}
+          />
+        </Field>
+      )}
       <Field id="name" label={`${t.name} ${t.required}`} error={err('name')}>
         <input id="name" name="name" type="text" autoComplete="name" required className={input} aria-invalid={!!err('name')} aria-describedby={described('name', 'name')} />
       </Field>
@@ -236,9 +207,45 @@ export function EnquiryForm({ kind, locale, t, typeLabel, hints }: Props) {
           <input id="email" name="email" type="email" autoComplete="email" className={input} aria-invalid={!!err('email')} aria-describedby={described('email', 'email')} />
         </Field>
       )}
-      <Field id="message" label={`${kind === 'general' ? t.yourMessage : t.message} ${t.optional}`}>
-        <textarea id="message" name="message" rows={4} className="w-full rounded-ui border border-border bg-surface p-4" />
-      </Field>
+      {kind === 'portrait' && <p className="rounded-ui bg-placeholder p-4">{t.photoNote}</p>}
+      {kind === 'general' ? (
+        message
+      ) : (
+        // Starts short (date, name, phone); the rest is optional and still sent with the form even while folded.
+        <details className="group rounded-ui border border-border/40 px-4">
+          <summary className="flex min-h-12 cursor-pointer items-center justify-between font-semibold">
+            {t.moreDetails} {t.optional}
+            <span aria-hidden="true" className="text-xl transition-transform group-open:rotate-45">
+              +
+            </span>
+          </summary>
+          <div className="grid gap-6 pt-2 pb-4">
+            {kind === 'event' ? (
+              <>
+                <Field id="city" label={`${t.city} ${t.optional}`}>
+                  <input id="city" name="city" type="text" autoComplete="address-level2" className={input} />
+                </Field>
+                <Chips legend={t.venue} name="venue" type="radio" options={t.venues} />
+                <Chips legend={t.size} name="size" type="radio" options={t.sizes} hints={hints?.size} />
+                <Chips legend={`${t.stylesToggle} ${t.optional}`} name="styles" type="checkbox" options={t.styleOptions} />
+              </>
+            ) : (
+              <>
+                <Chips legend={t.medium} name="medium" type="radio" options={t.mediums} hints={hints?.medium} />
+                <Chips legend={t.paperSize} name="paperSize" type="radio" options={{ A4: 'A4', A3: 'A3', A2: 'A2' }} hints={hints?.paperSize} />
+                <Field id="faces" label={t.faces}>
+                  <input id="faces" name="faces" type="number" inputMode="numeric" min={1} max={12} defaultValue={1} className={`${input} max-w-32`} />
+                </Field>
+                <label className="flex min-h-12 items-center gap-3">
+                  <input type="checkbox" name="framing" value="yes" className="size-6 accent-kumkum" />
+                  {t.framing}
+                </label>
+              </>
+            )}
+            {message}
+          </div>
+        </details>
+      )}
       {/* ponytail: the "festival offers" opt-in left the forms; the wantsOffers field stays for a later newsletter. */}
       <button type="submit" disabled={pending} className="press h-13 rounded-ui bg-kumkum px-6 font-semibold text-white hover:bg-kumkum/90 disabled:opacity-60 sm:justify-self-start">
         {pending ? t.sending : t.submit}

@@ -10,6 +10,9 @@ export function formatDuration(seconds: number, units = { h: 'h', m: 'm' }) {
   return m ? `${h}${units.h} ${m}${units.m}` : `${h}${units.h}`
 }
 
+/** A lesson plays only with a Bunny video id and the library id (same test as CourseVideo); until then "free" would be a promise we can't keep. */
+export const videoReady = (id?: string | null) => !!id && !!process.env.BUNNY_LIBRARY_ID
+
 /** Lessons in teaching order, grouped into sections: a new section starts whenever the section name changes. */
 export function groupSections<T extends Row>(lessons: T[]) {
   const sections: { title: string; lessons: T[] }[] = []

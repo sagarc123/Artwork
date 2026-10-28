@@ -7,7 +7,7 @@ import { EnrolButton, EnrolCard } from '@/components/CourseEnrol'
 import { CourseVideo } from '@/components/CourseVideo'
 import { alternates, localeNames, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { coursePrice, formatDuration, groupSections } from '@/lib/courses'
+import { coursePrice, formatDuration, groupSections, videoReady } from '@/lib/courses'
 import { formatPrice, site } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { getCourse, getCourses, getSlugs } from '@/server/content'
@@ -152,7 +152,7 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
                         <>
                           {l.isFreePreview ? <Play aria-hidden="true" className="size-5 shrink-0 text-leaf" /> : <Lock aria-hidden="true" className="size-5 shrink-0 text-muted" />}
                           <span className="grow">{l.title}</span>
-                          <span className={`shrink-0 font-semibold ${l.isFreePreview ? 'text-leaf' : 'text-muted'}`}>{l.isFreePreview ? c.preview : c.locked}</span>
+                          <span className={`shrink-0 font-semibold ${l.isFreePreview ? 'text-leaf' : 'text-muted'}`}>{l.isFreePreview ? (videoReady(l.bunnyVideoId) ? c.preview : c.previewSoon) : c.locked}</span>
                           {!!l.durationSeconds && <span className="shrink-0 text-muted">{formatDuration(l.durationSeconds, c.units)}</span>}
                         </>
                       )

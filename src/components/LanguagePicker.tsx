@@ -44,6 +44,29 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
   )
 }
 
+/** Phones and tablets: a slim top row of plain links, the same three languages as the desktop bar. */
+export function LanguageLinks({ current, label }: { current: Locale; label: string }) {
+  const switchTo = useSwitchLocale(current)
+  return (
+    <div role="group" aria-label={label} className="flex items-center justify-end gap-x-1 text-[1rem]">
+      {locales.map((l, i) => (
+        <span key={l} className="flex items-center gap-1">
+          {i > 0 && <span aria-hidden="true" className="text-muted">·</span>}
+          <button
+            type="button"
+            lang={l}
+            aria-current={l === current ? 'true' : undefined}
+            onClick={() => switchTo(l)}
+            className="min-h-11 px-2 text-charcoal aria-[current=true]:font-bold aria-[current=true]:underline aria-[current=true]:underline-offset-4"
+          >
+            {localeNames[l]}
+          </button>
+        </span>
+      ))}
+    </div>
+  )
+}
+
 type Labels = { label: string; close: string; choices: Record<Locale, string> }
 
 /**

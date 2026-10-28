@@ -28,6 +28,23 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const n = (i: number) => ({ '--n': i }) as CSSProperties
 
+/** Phones: two equal buttons on the first screen; booking an event stays one tap below them (and in the tab bar). */
+function PhoneCtas({ shop, courses, event, shopHref, coursesHref, eventHref }: { shop: string; courses: string | null; event: string; shopHref: string; coursesHref: string; eventHref: string }) {
+  return (
+    <div className="hero-in grid gap-1 sm:hidden" style={n(2)}>
+      <div className="grid grid-cols-2 gap-3">
+        <ButtonLink href={shopHref} className={courses ? '' : 'col-span-2'}>
+          {shop}
+        </ButtonLink>
+        {courses && <ButtonLink href={coursesHref}>{courses}</ButtonLink>}
+      </div>
+      <Link href={eventHref} className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold text-peacock">
+        {event}
+      </Link>
+    </div>
+  )
+}
+
 export default async function HomePage() {
   const locale = await getLocale()
   const t = await getDictionary()
@@ -77,7 +94,8 @@ export default async function HomePage() {
               <p className="hero-in max-w-[42ch] text-muted" style={n(1)}>
                 {h.studio.sub}
               </p>
-              <div className="hero-in grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
+              <PhoneCtas shop={t.nav.shop} courses={site.coursesLive ? t.nav.courses : null} event={h.hero.ctaEvent} shopHref={p('/shop')} coursesHref={p('/courses')} eventHref={p('/events')} />
+              <div className="hero-in grid gap-3 max-sm:hidden sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
                 <ButtonLink href={p('/events')}>{h.hero.ctaEvent}</ButtonLink>
                 <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
                   {h.hero.ctaShop}
@@ -88,7 +106,7 @@ export default async function HomePage() {
               </div>
             </div>
             {/* Phone: the wall comes first so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
-            <div className="order-first mx-auto w-full max-w-[17rem] sm:max-w-md lg:order-none lg:col-span-7 lg:max-w-none lg:pl-6">
+            <div className="order-first mx-auto w-full max-w-[13rem] sm:max-w-md lg:order-none lg:col-span-7 lg:max-w-none lg:pl-6">
               <StudioWall portrait={wall('portrait', 'drawing')} painting={wall('painting')} rangoli={wall('rangoli')} labels={h.studio.labels} />
             </div>
           </div>
@@ -111,7 +129,8 @@ export default async function HomePage() {
             <p className="hero-in max-w-[42ch] text-muted" style={n(1)}>
               {h.hero.sub}
             </p>
-            <div className="hero-in grid gap-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
+            <PhoneCtas shop={t.nav.shop} courses={site.coursesLive ? t.nav.courses : null} event={h.hero.ctaEvent} shopHref={p('/shop')} coursesHref={p('/courses')} eventHref={p('/events')} />
+              <div className="hero-in grid gap-3 max-sm:hidden sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
               <ButtonLink href={p('/events')}>{h.hero.ctaEvent}</ButtonLink>
               <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
                 {h.hero.ctaShop}
@@ -125,7 +144,7 @@ export default async function HomePage() {
           </div>
           {/* Phone: a smaller tile above the headline so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
           <div className="order-first lg:order-none lg:col-span-7 lg:-mt-14 lg:mr-[calc((min(100vw,77.5rem)_-_100vw)_/_2_-_1.25rem)] lg:self-stretch">
-            <div className="relative mx-auto grid aspect-square w-[60vw] max-w-80 place-items-center bg-charcoal shadow-frame grain-dark lg:aspect-auto lg:h-full lg:min-h-[620px] lg:w-auto lg:max-w-none lg:shadow-none">
+            <div className="relative mx-auto grid aspect-square w-[38vw] max-w-40 sm:w-[60vw] sm:max-w-80 place-items-center bg-charcoal shadow-frame grain-dark lg:aspect-auto lg:h-full lg:min-h-[620px] lg:w-auto lg:max-w-none lg:shadow-none">
               <GenerativeRangoli seed="siddesh-home" style="sanskar" tone="dark" animate className="w-[84%] max-w-[560px] -translate-y-[3%]" />
               {/* Finale: a diya lights at the foot of the rangoli, then he signs it. */}
               <span className="diya hero-diya absolute bottom-[5%] left-1/2 -translate-x-1/2 max-lg:scale-75 lg:bottom-[8%]" />
@@ -139,7 +158,7 @@ export default async function HomePage() {
       <Threshold />
 
       {/* 2 · Event rangoli: three steps to your door. */}
-      <section className="relative overflow-hidden bg-paper py-16 lg:py-28">
+      <section className="relative overflow-hidden bg-paper py-10 lg:py-28">
         <DisplayWord className="absolute top-4 -right-4 text-charcoal/[0.05]">दारी</DisplayWord>
         <div className="wrap relative grid gap-12 lg:grid-cols-12">
           <div className="grid content-start gap-6 lg:col-span-5">
@@ -152,7 +171,7 @@ export default async function HomePage() {
               {h.events.cta}
             </ButtonLink>
           </div>
-          <div className="grid grid-cols-3 items-start gap-3 sm:gap-5 lg:col-span-7">
+          <div className="grid grid-cols-3 items-start gap-3 max-lg:hidden sm:gap-5 lg:col-span-7">
             {h.events.scenes.map((label, i) => (
               <DoorstepScene key={label} seed={`doorstep-${i}`} style={(['phool', 'kolam', 'poster'] as const)[i]} label={label} className={['', 'lg:mt-14', 'lg:mt-28'][i]} />
             ))}
@@ -163,7 +182,7 @@ export default async function HomePage() {
       <Threshold />
 
       {/* 3 · Custom portraits: your photo → drawn by hand. Kumkum floor when festive, an ink-wash sheet on everyday days. */}
-      <section className="floor floor-kumkum py-16 lg:py-28">
+      <section className="floor floor-kumkum py-10 lg:py-28">
         <div className="wrap grid gap-12 lg:grid-cols-12 lg:items-center">
           <div className="grid gap-5 lg:col-span-5">
             <h2 className="font-heading text-h1">{h.portraits.title}</h2>
@@ -173,7 +192,7 @@ export default async function HomePage() {
               {h.portraits.cta}
             </ButtonLink>
           </div>
-          <div className="scroll-draw px-2 lg:col-span-6 lg:col-start-7">
+          <div className="scroll-draw px-2 max-lg:hidden lg:col-span-6 lg:col-start-7">
             <PortraitPair photoLabel={h.portraits.photo} drawingLabel={h.portraits.drawing} />
           </div>
         </div>
@@ -182,7 +201,7 @@ export default async function HomePage() {
       <Threshold />
 
       {/* 5 · New from the studio: framed, taped, different sizes. */}
-      <section className="bg-paper grain py-16 lg:py-28">
+      <section className="bg-paper grain py-10 lg:py-28">
         <div className="wrap grid gap-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -196,9 +215,9 @@ export default async function HomePage() {
           {featured.length === 0 ? (
             <p className="rounded-ui bg-surface p-8 text-center text-muted">{h.featured.empty}</p>
           ) : (
-            <ul className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4 lg:gap-x-8">
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4 lg:gap-y-10 lg:gap-x-8">
               {featured.map((f, i) => (
-                <li key={f.slug} className={i === 0 ? 'col-span-2 lg:row-span-2' : ''}>
+                <li key={f.slug} className={[i === 0 && 'lg:col-span-2 lg:row-span-2', i === 4 && 'max-lg:hidden'].filter(Boolean).join(' ')}>
                   <Link href={f.href} className="card grid gap-3">
                     <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
                       <ViewTransition name={`art-${f.slug}`} share="morph" default="none">
@@ -240,10 +259,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Threshold />
-
-      {/* 5b · Watch it being made: the time-lapse (or a drawn stand-in). */}
-      <MakingOf t={t.makingOf} makingOf={makingOf} />
+      {/* 5b · Watch it being made: the time-lapse (or a drawn stand-in). Phones skip it to keep the page short. */}
+      <div className="max-lg:hidden">
+        <Threshold />
+        <MakingOf t={t.makingOf} makingOf={makingOf} />
+      </div>
 
       {/* Phones skip the artist section (About is one tap away in the menu) to keep the home page short. */}
       <Threshold className="max-lg:hidden" />
@@ -267,13 +287,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7 · Course on a peacock floor: a kolam line weaves through the dots as you scroll. */}
-      {site.coursesLive && <Threshold />}
+      {/* 7 · Course on a peacock floor: a kolam line weaves through the dots as you scroll. (phones: the hero Courses button covers it) */}
+      {site.coursesLive && <Threshold className="max-lg:hidden" />}
       {site.coursesLive && (
-      <section className="floor floor-peacock py-16 lg:py-28">
+      <section className="floor floor-peacock py-10 max-lg:hidden lg:py-28">
         <div className="wrap grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
-            <KolamWeave className="scroll-draw mx-auto w-full max-w-sm" />
+            <KolamWeave className="scroll-draw mx-auto w-full max-w-sm max-lg:hidden" />
           </div>
           <div className="grid gap-5 lg:col-span-6 lg:col-start-7">
             <p className="font-semibold text-on/85">{h.course.kicker}</p>
@@ -294,7 +314,7 @@ export default async function HomePage() {
 
       {/* 8 · Festival calendar: the next festival is the big tile, with a countdown. */}
       {festivals.length > 0 && (
-        <section className="bg-paper py-16 lg:py-24">
+        <section className="bg-paper py-10 lg:py-24">
           <div className="wrap grid gap-8">
             <h2 className="font-heading text-h1">{h.festivals.title}</h2>
             <FestivalTiles festivals={festivals} t={h.festivals} locale={locale} remind={{ t: t.remind, forms: { errors: t.forms.errors, required: t.forms.required } }} />
@@ -304,7 +324,9 @@ export default async function HomePage() {
 
       <Testimonials items={testimonials} t={t.testimonials} />
 
-      <InstagramStrip {...instagram} t={h.instagram} />
+      <div className="max-lg:hidden">
+        <InstagramStrip {...instagram} t={h.instagram} />
+      </div>
 
       {/* 9 · A note for first-time online buyers. */}
       <section className="bg-paper pt-4 pb-20 lg:pb-28">

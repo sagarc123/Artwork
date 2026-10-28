@@ -19,7 +19,7 @@ async function photoFile(src: string, title: string) {
  * "Share with family": the phone's own share sheet, or WhatsApp where there is none (most desktops).
  * An empty href shares the page you are on. `image` (a real photo, never a code-drawn stand-in) goes along as a file where the phone allows it.
  */
-export function ShareButton({ label, text, links, image, className = '' }: { label: string; text: string; links: { title: string; href: string }[]; image?: string | null; className?: string }) {
+export function ShareButton({ label, text, links, image, shortLabel, className = '' }: { label: string; shortLabel?: string; text: string; links: { title: string; href: string }[]; image?: string | null; className?: string }) {
   async function share() {
     const full = links.map((l) => ({ ...l, url: new URL(l.href || location.href, location.origin).toString() }))
     const message = [text, ...full.map((l) => `• ${l.title} — ${l.url}`)].join('\n')
@@ -46,7 +46,16 @@ export function ShareButton({ label, text, links, image, className = '' }: { lab
       className={`press inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-[1.5px] border-charcoal bg-surface px-4 font-semibold text-charcoal hover:bg-charcoal hover:text-paper ${className}`}
     >
       <Share2 aria-hidden="true" className="size-5" />
-      {label}
+      {shortLabel ? (
+        <>
+          <span aria-hidden="true" className="sm:hidden">
+            {shortLabel}
+          </span>
+          <span className="max-sm:sr-only">{label}</span>
+        </>
+      ) : (
+        label
+      )}
     </button>
   )
 }

@@ -87,15 +87,15 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
     <article className="bg-paper grain pb-20 lg:pb-28">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       {/* Two columns from tablets up, so price and Add to cart sit beside the photo instead of a screen below it. */}
-      <div className="wrap grid gap-6 pt-4 md:grid-cols-12 md:gap-8 lg:gap-12 lg:pt-10">
+      <div className="wrap grid gap-4 pt-4 md:grid-cols-12 md:gap-8 lg:gap-12 lg:pt-10">
         <Link href={localePath(locale, '/shop')} className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-peacock md:col-span-12">
           <ArrowLeft aria-hidden="true" className="size-5" />
           {s.back}
         </Link>
 
         <div className="grid content-start gap-4 md:col-span-6 lg:col-span-7">
-          {/* Phones: capped so the price peeks in on the first screen. */}
-          <div className="tape relative mx-auto w-full max-w-[calc(48svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
+          {/* Phones: small, so title and price show on the first screen (the buy bar below carries Add to cart). */}
+          <div className="tape relative mx-auto w-full max-w-[calc(32svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
             {/* Shares its name with the card that opened it (shop, home, gallery), so the artwork morphs across. */}
             <ViewTransition name={`art-${product.slug}`} share="morph" default="none">
               <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 100vw" priority />
@@ -112,11 +112,11 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
           )}
         </div>
 
-        <div className="grid content-start gap-6 md:col-span-6 lg:sticky lg:top-32 lg:col-span-5">
+        <div className="grid content-start gap-4 md:col-span-6 md:gap-6 lg:sticky lg:top-32 lg:col-span-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="font-semibold text-accent">{s.types[product.type]}</p>
-            <div className="flex flex-wrap justify-end gap-2">
-              <ShareButton label={s.share} text={s.shareText} links={[{ title: product.title, href: localePath(locale, `/shop/p/${product.slug}`) }]} />
+            <p className="font-semibold text-accent max-[359px]:sr-only">{s.types[product.type]}</p>
+            <div className="flex justify-end gap-2 whitespace-nowrap max-[359px]:w-full">
+              <ShareButton label={s.share} shortLabel={s.shareShort} text={s.shareText} links={[{ title: product.title, href: localePath(locale, `/shop/p/${product.slug}`) }]} />
               <SaveButton slug={product.slug} title={product.title} labels={s} />
             </div>
           </div>

@@ -49,8 +49,8 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
   return (
     <footer className="site-footer bg-charcoal pb-40 text-paper grain-dark lg:pb-20">
       <div aria-hidden="true" className="paithani" />
-      <div className="wrap grid gap-10 py-16 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-        <div className="grid content-start gap-4">
+      <div className="wrap grid grid-cols-2 gap-x-6 gap-y-8 py-10 lg:gap-10 lg:py-16 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+        <div className="col-span-2 grid content-start gap-4 lg:col-span-1">
           <p className="font-heading text-h2-sm">{t.brand}</p>
           <p className="max-w-[40ch] text-paper/85">{t.footer.brandLine}</p>
           {/* Desktop only: on phones the empty space before it draws in read as a gap. */}

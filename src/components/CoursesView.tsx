@@ -32,7 +32,7 @@ export async function CoursesView({ locale, t, categorySlug }: { locale: Locale;
         artOnPhones={false}
         art={<GenerativeRangoli seed="courses-hero" style="kolam" tone="dark" className="ml-auto w-56 xl:w-64" />}
       >
-        {samples.length > 0 && (
+        {samples.some((x) => x.sample!.video) && (
           <a href="#free" className="press inline-flex h-13 items-center justify-center gap-2 rounded-ui bg-(--btn-bg) px-6 font-semibold text-(--btn-fg) sm:h-12">
             <Play aria-hidden="true" className="size-5" />
             {c.ctaFree}
@@ -86,7 +86,7 @@ export async function CoursesView({ locale, t, categorySlug }: { locale: Locale;
                   <Link href={localePath(locale, `/courses/${x.slug}/sample/${x.sample!.id}`)} className="card grid h-full gap-2 rounded-ui bg-surface p-5 shadow-frame">
                     <span className="inline-flex w-fit items-center gap-2 rounded-ui bg-marigold px-3 py-1 font-semibold text-charcoal">
                       <Play aria-hidden="true" className="size-4" />
-                      {c.freeBadge}
+                      {x.sample!.video ? c.freeBadge : c.previewSoon}
                     </span>
                     <span className="font-heading text-h3-sm">{x.sample!.title}</span>
                     <span className="text-muted">{x.title}</span>
