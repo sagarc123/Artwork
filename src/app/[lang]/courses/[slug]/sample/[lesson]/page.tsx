@@ -44,7 +44,7 @@ export default async function SampleLessonPage({ params }: PageProps<'/[lang]/co
   const courseHref = localePath(locale, `/courses/${course.slug}`)
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
-      {forUnder18(course.audience) && <span hidden data-no-signup />}
+      {forUnder18(course.audience) && <span hidden data-under18 />}
       <div className="wrap grid max-w-4xl gap-6 pt-4 lg:pt-10">
         <Link href={courseHref} className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-peacock">
           <ArrowLeft aria-hidden="true" className="size-5" />

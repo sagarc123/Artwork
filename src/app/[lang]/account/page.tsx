@@ -44,6 +44,8 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
   const payload = await getPayload({ config })
   const date = (iso: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso))
   const reviewed = await reviewedBy(me.id)
+  // A parent with a kids or teen course seat: no trackers, cookie box or newsletter box on any account page.
+  const under18 = (await payload.count({ collection: 'enrolments', where: { and: [{ customer: { equals: me.id } }, { 'course.audience': { in: ['kids', 'teens'] } }] } })).totalDocs > 0
   const reviewLink = 'ink-link inline-flex min-h-12 items-center font-semibold text-peacock'
   const link = 'press inline-flex h-13 items-center justify-center rounded-ui bg-kumkum px-6 font-semibold text-white'
 
@@ -176,11 +178,12 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
       </div>
     )
   } else {
-    body = <AccountProfile locale={locale} t={a} n={t.newsletter} name={me.name} phone={me.phone} />
+    body = <AccountProfile locale={locale} t={a} n={t.newsletter} p={t.accountPrivacy} name={me.name} phone={me.phone} />
   }
 
   return (
     <>
+      {under18 && <span hidden data-under18 />}
       <PageHero title={me.name ? a.hi.replace('{name}', me.name) : a.hello} />
       <section className="bg-paper pt-4 pb-20 lg:pt-8 lg:pb-28">
         <div className="wrap grid gap-8">

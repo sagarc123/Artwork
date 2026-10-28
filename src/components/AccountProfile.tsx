@@ -10,7 +10,7 @@ import { stopNewsletter } from '@/server/newsletter-actions'
 const input = 'h-13 w-full rounded-ui border border-border bg-surface px-4'
 
 /** Profile tab: name, the verified phone, sign out, and "delete my account". */
-export function AccountProfile({ locale, t, n, name, phone }: { locale: Locale; t: Dictionary['account']; n: Dictionary['newsletter']; name: string; phone: string }) {
+export function AccountProfile({ locale, t, n, p, name, phone }: { locale: Locale; t: Dictionary['account']; n: Dictionary['newsletter']; p: Dictionary['accountPrivacy']; name: string; phone: string }) {
   const router = useRouter()
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -74,6 +74,15 @@ export function AccountProfile({ locale, t, n, name, phone }: { locale: Locale; 
             </p>
           )}
         </div>
+      </form>
+
+      {/* A plain form POST: the browser downloads the file, and a link on another site cannot trigger it with your sign-in. */}
+      <form method="post" action="/api/account/export" className="grid gap-3">
+        <h2 className="font-heading text-h3">{p.title}</h2>
+        <p className="text-muted">{p.body}</p>
+        <button type="submit" className="press h-13 justify-self-start rounded-ui border border-border px-6 font-semibold hover:bg-charcoal/5">
+          {p.download}
+        </button>
       </form>
 
       <form onSubmit={stop} noValidate className="grid gap-3">

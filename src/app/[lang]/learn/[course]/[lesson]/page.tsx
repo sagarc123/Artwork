@@ -92,7 +92,7 @@ export default async function LessonPage({ params }: PageProps<'/[lang]/learn/[c
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
       {/* Learners may be under 18: no newsletter box in the footer here. */}
-      <span hidden data-no-signup />
+      <span hidden data-under18 />
       <div className="wrap grid gap-8 pt-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10 lg:pt-8">
         <div className="grid min-w-0 content-start gap-6">
           <div className="grid gap-3">

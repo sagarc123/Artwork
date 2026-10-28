@@ -50,17 +50,32 @@ export const Subscribers: CollectionConfig = {
   ],
 }
 
-/** The record of what each person agreed to, under which wording and where. A withdrawal is written on the same row. */
+/**
+ * The record of what each person agreed to, under which wording and where (newsletter sign-ups and the cookie banner).
+ * A withdrawal is written on the same row. Cookie choices are tied to a signed visitor id, and to the account when signed in.
+ */
 export const Consents: CollectionConfig = {
   slug: 'consents',
   labels: { singular: 'Consent record', plural: 'Consent records' },
-  admin: { group: 'Newsletter', useAsTitle: 'email', defaultColumns: ['email', 'purpose', 'source', 'grantedAt', 'withdrawnAt'], description: 'Who agreed to what, and when. For your records; nothing to do here.', hidden: hideFromNonOwners },
+  admin: { group: 'Newsletter', useAsTitle: 'purpose', defaultColumns: ['purpose', 'email', 'source', 'grantedAt', 'withdrawnAt'], description: 'Who agreed to what, and when (newsletter and cookie choices). For your records; nothing to do here.', hidden: hideFromNonOwners },
   access: { read: isOwner, create: () => false, update: () => false, delete: isOwner },
   disableDuplicate: true,
   defaultSort: '-grantedAt',
   fields: [
-    { name: 'email', type: 'email', required: true, index: true, access: locked },
-    { name: 'purpose', type: 'select', required: true, access: locked, options: [{ label: 'Newsletter', value: 'newsletter' }] },
+    { name: 'email', type: 'email', index: true, access: locked },
+    { name: 'subject', label: 'Visitor id (cookie choices)', type: 'text', index: true, access: locked },
+    { name: 'customer', type: 'relationship', relationTo: 'customers', index: true, access: locked },
+    {
+      name: 'purpose',
+      type: 'select',
+      required: true,
+      access: locked,
+      options: [
+        { label: 'Newsletter', value: 'newsletter' },
+        { label: 'Analytics cookies', value: 'analytics' },
+        { label: 'Marketing cookies', value: 'marketing_cookies' },
+      ],
+    },
     { name: 'noticeVersion', label: 'Wording version', type: 'text', required: true, access: locked },
     { name: 'source', type: 'text', required: true, access: locked },
     { type: 'row', fields: [{ name: 'grantedAt', label: 'Agreed on', type: 'date', required: true, access: locked }, { name: 'withdrawnAt', label: 'Withdrawn on', type: 'date', access: locked }] },

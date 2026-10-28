@@ -82,7 +82,7 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
   return (
     <article className="bg-paper grain pb-40 lg:pb-28">
       {/* Under-18 courses: no newsletter box in the footer here. */}
-      {forUnder18(course.audience) && <span hidden data-no-signup />}
+      {forUnder18(course.audience) && <span hidden data-under18 />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <div className="wrap grid gap-6 pt-4 lg:grid-cols-12 lg:gap-12 lg:pt-10">
         <nav aria-label={c.breadcrumb} className="flex flex-wrap items-center gap-x-2 lg:col-span-12">

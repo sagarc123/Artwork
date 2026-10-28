@@ -85,6 +85,7 @@ export interface Config {
     'otp-codes': OtpCode;
     subscribers: Subscriber;
     consents: Consent;
+    'data-requests': DataRequest;
     categories: Category;
     mediums: Medium;
     'tax-classes': TaxClass;
@@ -114,6 +115,7 @@ export interface Config {
     'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     consents: ConsentsSelect<false> | ConsentsSelect<true>;
+    'data-requests': DataRequestsSelect<false> | DataRequestsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     mediums: MediumsSelect<false> | MediumsSelect<true>;
     'tax-classes': TaxClassesSelect<false> | TaxClassesSelect<true>;
@@ -858,19 +860,38 @@ export interface Subscriber {
   createdAt: string;
 }
 /**
- * Who agreed to what, and when. For your records; nothing to do here.
+ * Who agreed to what, and when (newsletter and cookie choices). For your records; nothing to do here.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "consents".
  */
 export interface Consent {
   id: number;
-  email: string;
-  purpose: 'newsletter';
+  email?: string | null;
+  subject?: string | null;
+  customer?: (number | null) | Customer;
+  purpose: 'newsletter' | 'analytics' | 'marketing_cookies';
   noticeVersion: string;
   source: string;
   grantedAt: string;
   withdrawnAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Each time someone downloads their data or deletes their account, a line is added here. The website does the work straight away, so these show as "Done". The "Answer by" date is the 30 days the law allows.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "data-requests".
+ */
+export interface DataRequest {
+  id: number;
+  type: 'export' | 'erase';
+  status: 'open' | 'done';
+  customer?: (number | null) | Customer;
+  source?: ('account' | 'admin') | null;
+  dueAt: string;
+  doneAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -999,6 +1020,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'consents';
         value: number | Consent;
+      } | null)
+    | ({
+        relationTo: 'data-requests';
+        value: number | DataRequest;
       } | null)
     | ({
         relationTo: 'categories';
@@ -1513,11 +1538,27 @@ export interface SubscribersSelect<T extends boolean = true> {
  */
 export interface ConsentsSelect<T extends boolean = true> {
   email?: T;
+  subject?: T;
+  customer?: T;
   purpose?: T;
   noticeVersion?: T;
   source?: T;
   grantedAt?: T;
   withdrawnAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "data-requests_select".
+ */
+export interface DataRequestsSelect<T extends boolean = true> {
+  type?: T;
+  status?: T;
+  customer?: T;
+  source?: T;
+  dueAt?: T;
+  doneAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

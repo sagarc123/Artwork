@@ -33,6 +33,7 @@ export const TONE: Record<string, 'urgent' | 'busy' | 'done' | 'off'> = {
   approved: 'done',
   rejected: 'off',
   confirmed: 'done',
+  open: 'busy',
   unsubscribed: 'off',
 }
 

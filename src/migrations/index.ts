@@ -13,6 +13,7 @@ import * as migration_20261028_074026_website_look_tabs from './20261028_074026_
 import * as migration_20261028_080827_courses_part2a from './20261028_080827_courses_part2a';
 import * as migration_20261028_082925_courses_part2b from './20261028_082925_courses_part2b';
 import * as migration_20261028_091233_reviews_newsletter from './20261028_091233_reviews_newsletter';
+import * as migration_20261028_093903_privacy from './20261028_093903_privacy';
 
 export const migrations = [
   {
@@ -88,6 +89,11 @@ export const migrations = [
   {
     up: migration_20261028_091233_reviews_newsletter.up,
     down: migration_20261028_091233_reviews_newsletter.down,
-    name: '20261028_091233_reviews_newsletter'
+    name: '20261028_091233_reviews_newsletter',
+  },
+  {
+    up: migration_20261028_093903_privacy.up,
+    down: migration_20261028_093903_privacy.down,
+    name: '20261028_093903_privacy'
   },
 ];

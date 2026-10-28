@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
+import { GA_ID, META_ID } from '@/lib/consent'
 import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
+import { CookieSettingsLink } from './CookieBanner'
 import { MotionToggle } from './MotionSettings'
 import { NewsletterSignup } from './NewsletterSignup'
 import { Signature } from './Signature'
@@ -96,7 +98,7 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
         ))}
       </div>
 
-      {/* Hidden on the lesson player and the kids' course pages (they carry data-no-signup): no marketing for under-18 learners. */}
+      {/* Hidden on the lesson player and the kids' course pages (they carry data-under18): no marketing for under-18 learners. */}
       <div className="newsletter-signup border-t border-paper/15">
         <div className="wrap grid gap-6 py-8 lg:grid-cols-2 lg:gap-10 lg:py-10">
           <div className="grid content-start gap-2">
@@ -122,6 +124,7 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-4 lg:col-span-2">
             <p className="text-paper/70">© {t.brand}</p>
+            {(GA_ID || META_ID) && <CookieSettingsLink label={t.cookies.settings} />}
             <MotionToggle stopLabel={t.footer.motionStop} startLabel={t.footer.motionStart} />
           </div>
         </div>

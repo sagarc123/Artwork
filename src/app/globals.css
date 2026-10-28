@@ -1409,8 +1409,8 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
   color: var(--color-paper);
   box-shadow: inset 0 -2px 0 var(--color-paper);
 }
-/* No newsletter box next to under-18 learners: pages mark themselves with data-no-signup. */
-body:has([data-no-signup]) .newsletter-signup {
+/* No newsletter box, cookie banner or cookie link next to under-18 learners: pages mark themselves with data-under18. */
+body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-settings-link) {
   display: none;
 }
 /* Error outlines in the footer box: marigold on the dark festive wall, kumkum on the light everyday one (both clear 3:1). */

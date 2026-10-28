@@ -13,6 +13,6 @@ export async function eraseStudent(id: number) {
   if (!hasRole(user, 'owner')) return { status: 'forbidden' as const }
   const c = await payload.findByID({ collection: 'customers', id, depth: 0 }).catch(() => null)
   if (!c || c.deletedAt) return { status: 'missing' as const }
-  await eraseCustomer(c.id, c.phone)
+  await eraseCustomer(c.id, c.phone, 'admin')
   return { status: 'ok' as const }
 }

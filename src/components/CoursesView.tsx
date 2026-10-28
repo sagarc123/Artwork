@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
-import { formatDuration } from '@/lib/courses'
+import { formatDuration, forUnder18 } from '@/lib/courses'
 import { getCourses } from '@/server/content'
 import { CourseCard } from './CourseCard'
 import { EmptyState } from './EmptyState'
@@ -22,9 +22,12 @@ export async function CoursesView({ locale, t, categorySlug }: { locale: Locale;
   const courses = all.filter((x) => !categorySlug || (typeof x.category === 'object' && x.category.slug === categorySlug))
   const tabs = [{ href: localePath(locale, '/courses'), name: c.all, active: !categorySlug }, ...[...cats].map(([slug, name]) => ({ href: localePath(locale, `/courses/category/${slug}`), name, active: slug === categorySlug }))]
   const samples = courses.filter((x) => x.sample)
+  // A listing made only of under-18 courses (Kids Art): the parent note, and no trackers, cookie box or newsletter box.
+  const kidsOnly = courses.length > 0 && courses.every((x) => forUnder18(x.audience))
 
   return (
     <>
+      {kidsOnly && <span hidden data-under18 />}
       <PageHero
         floor="leaf"
         title={categorySlug ? cats.get(categorySlug)! : c.title}
@@ -57,6 +60,12 @@ export async function CoursesView({ locale, t, categorySlug }: { locale: Locale;
               </Link>
             ))}
           </nav>
+          {kidsOnly && (
+            <aside className="grid max-w-[65ch] gap-1 rounded-ui border border-border/40 bg-surface p-5">
+              <p className="font-semibold">{c.parentTitle}</p>
+              <p className="text-muted">{c.parentBody}</p>
+            </aside>
+          )}
           {courses.length === 0 ? (
             <EmptyState title={c.empty}>
               <a href={whatsappLink(c.title)} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center rounded-ui border-[1.5px] border-leaf px-6 font-semibold text-leaf">

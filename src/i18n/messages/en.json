@@ -978,19 +978,28 @@
         {
           "h": "Your rights",
           "p": [
-            "You can ask to see the data I hold about you, correct it, or delete it (except records the law makes me keep). You can withdraw your permission for messages at any time, and you can name someone to act for you. Message me on WhatsApp or write to {email}. I will reply quickly, and always within 30 days."
+            "You can ask to see the data I hold about you, correct it, or delete it (except records the law makes me keep). You can withdraw your permission for messages at any time, and you can name someone to act for you. You can also do it yourself: in My account, under Profile, tap “Download my data” for a copy as a file, or “Delete my account” to have it erased. I will reply to any other request quickly, and always within 30 days. Message me on WhatsApp or write to {email}."
           ]
         },
         {
           "h": "Cookies and your device",
           "p": [
-            "This site uses no advertising or tracking cookies. It keeps a few small things on your own device so the site works: your language choice (a cookie), your cart and saved pieces, and your animation setting (stored in your browser). You can clear them any time in your browser settings."
+            "The site keeps a few small things on your own device so it works: your language choice (a cookie), your cart and saved pieces, your animation setting, and your sign-in. These are essential and need no permission.",
+            "Some pages can also use optional cookies: analytics (to see which pages people enjoy) and marketing (the Meta pixel, to see which posts and ads bring people here). They are off until you tap Accept or choose them under Choose, and Reject keeps them off. Your choice is stored in a cookie on your device and recorded with the wording you saw. You can change it any time with “Cookie settings” in the footer.",
+            "Optional cookies are never used on pages for learners under 18 (see Children), whatever you choose."
           ]
         },
         {
           "h": "Children",
           "p": [
-            "Anyone under 18 should use this site with a parent or guardian. Courses for under-18 learners are bought by the parent, and they are not tracked or sent offers."
+            "Everyone under 18 counts as a child under the law. A learner under 18 does not get an account of their own: a parent or guardian signs in, buys the course, ticks that they agree, and may add the child’s first name (only to print on the certificate).",
+            "On pages for under-18 learners (kids and teen courses, their sample lessons, the lesson player, and the account of a parent who has such a course) I load no analytics or advertising pixels and show no cookie or newsletter box, and no offers or marketing messages are sent."
+          ]
+        },
+        {
+          "h": "See, download or delete your data yourself",
+          "p": [
+            "In My account, under Profile, “Download my data” gives you a file with your profile, orders, courses, progress, certificates, reviews and your cookie and newsletter choices. “Delete my account” removes your name, phone number, saved pieces and any child’s name, and takes your phone number and street address off old orders; invoices stay as tax law requires. Each request is noted in a log with the date it must be answered by (within 30 days). This page is a draft and is to be reviewed by a lawyer."
           ]
         },
         {
@@ -1421,5 +1430,28 @@
     },
     "back": "Back to my account",
     "reviewed": "You reviewed this. Thank you!"
+  },
+  "cookies": {
+    "title": "Cookies",
+    "body": "Some cookies help me see which pages people enjoy. They are optional and stay off unless you say yes.",
+    "accept": "Accept",
+    "reject": "Reject",
+    "choose": "Choose",
+    "region": "Cookie choices",
+    "panelTitle": "Choose your cookies",
+    "panelBody": "The site works without these. Pick what you are happy with, and change your mind any time from the footer.",
+    "analytics": "Analytics",
+    "analyticsNote": "Counts visits and pages (Google Analytics) so I can see what people enjoy.",
+    "marketing": "Marketing",
+    "marketingNote": "Lets Meta measure which of my posts and ads bring people here (Meta pixel).",
+    "save": "Save my choices",
+    "close": "Close",
+    "settings": "Cookie settings",
+    "saved": "Saved."
+  },
+  "accountPrivacy": {
+    "title": "Your data",
+    "body": "Download everything this website holds about you as one file: your profile, orders, courses, progress, certificates, reviews and the choices you made about cookies and the newsletter.",
+    "download": "Download my data"
   }
 }

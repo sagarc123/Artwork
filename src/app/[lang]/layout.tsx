@@ -3,12 +3,15 @@ import { Hanken_Grotesk, Mukta, Rozha_One, Tiro_Devanagari_Marathi } from 'next/
 import { ViewTransition } from 'react'
 import '../globals.css'
 import { BottomTabBar } from '@/components/BottomTabBar'
+import { ConsentTrackers } from '@/components/ConsentTrackers'
+import { CookieBanner } from '@/components/CookieBanner'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LanguageChooser } from '@/components/LanguagePicker'
 import { ArtDefs } from '@/components/StandIns'
 import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { locales } from '@/i18n/config'
+import { GA_ID, META_ID } from '@/lib/consent'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { site } from '@/lib/site'
 import { InlineScript } from '@/components/InlineScript'
@@ -68,6 +71,9 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
           {t.nav.skip}
         </a>
         <ArtDefs />
+        {/* At the very top, in the flow: it never covers the tab bar or a buy bar. Only when there is something to ask about. */}
+        <CookieBanner configured={{ analytics: !!GA_ID, marketing: !!META_ID }} t={t.cookies} />
+        <ConsentTrackers />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>
