@@ -115,7 +115,7 @@ export default async function CustomPortraitsPage() {
           {rows.length > 0 && (
             <div className="grid content-start gap-4 lg:col-span-7">
               <h2 className="font-heading text-h1">{p.prices.title}</h2>
-              <div className="overflow-x-auto rounded-ui bg-surface shadow-frame">
+              <div role="region" aria-label={p.prices.title} tabIndex={0} className="overflow-x-auto rounded-ui bg-surface shadow-frame">
                 <table className="w-full min-w-[22rem] text-left">
                   <thead>
                     <tr className="border-b border-border/30">

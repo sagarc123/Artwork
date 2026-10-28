@@ -18,8 +18,8 @@ const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center le
 function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
-      <BrandMark className="size-9 shrink-0" />
-      <span className="font-heading text-[1.375rem] leading-none whitespace-nowrap xl:text-[1.625rem]">{brand}</span>
+      <BrandMark className="size-8 shrink-0 min-[360px]:size-9" />
+      <span className="font-heading text-[1.125rem] leading-none whitespace-nowrap min-[360px]:text-[1.375rem] xl:text-[1.625rem]">{brand}</span>
     </Link>
   )
 }

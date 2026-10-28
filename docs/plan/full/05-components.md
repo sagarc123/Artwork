@@ -833,23 +833,23 @@ Spacing steps required: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128px. **These map 1:1
 Run this on **every** page before sign-off; page-specific rows follow the global list.
 
 ### Global (every page, every language)
-- [ ] `<html lang="en">` and switches to `lang="mr"`/`lang="hi"` correctly when the language switcher is used (3.1.1, 3.1.2).
-- [ ] Skip link is the first focusable element and jumps to `<main>` (2.4.1).
-- [ ] Heading order is logical (one `<h1>`, no skipped levels) (1.3.1, 2.4.6).
-- [ ] Every image has correct `alt` (descriptive for art/content images, `alt=""` for decorative) (1.1.1).
-- [ ] Colour contrast: body text ≥4.5:1, large text/UI components ≥3:1 — spot-check `marigold`/`turmeric` are never used as text (1.4.3, 1.4.11).
-- [ ] Zoom to 400%/reflow to 320px wide: no horizontal scroll, no content/functionality loss (1.4.10).
-- [ ] Text spacing override (line-height 1.5×, paragraph spacing 2×, etc.) doesn't clip or overlap content (1.4.12).
-- [ ] All interactive elements reachable and operable by keyboard alone, in a logical order matching visual order (2.1.1, 2.4.3).
-- [ ] No keyboard trap anywhere outside intentional dialogs (and those release correctly) (2.1.2).
-- [ ] Focus indicator visible on every focused element, 2px `peacock`, never suppressed (2.4.7, 2.4.11, 2.4.13).
-- [ ] Every icon-only button/link has an accessible name (`aria-label` or visually-hidden text) (4.1.2).
-- [ ] Every touch target ≥24×24px minimum, ≥44×44px on primary actions, with adequate spacing (2.5.8).
-- [ ] Any drag/swipe interaction has a button alternative (2.5.7).
-- [ ] No content flashes more than 3×/second (2.3.1) — relevant to the loader/animations.
-- [ ] `prefers-reduced-motion: reduce` disables hover-zoom, scroll-reveal, rangoli self-draw, carousel auto-rotate, count-up, shimmer (per brainstorm §5).
-- [ ] Status messages (toasts, cart updates, form results) use `aria-live`/`role="status"`/`role="alert"` appropriately, without moving focus unexpectedly (4.1.3).
-- [ ] WhatsApp FAB doesn't overlap/obscure other controls at any breakpoint and has an accessible name (2.4.11, 4.1.2).
+- [x] `<html lang="en">` and switches to `lang="mr"`/`lang="hi"` correctly when the language switcher is used (3.1.1, 3.1.2).
+- [x] Skip link is the first focusable element and jumps to `<main>` (2.4.1).
+- [x] Heading order is logical (one `<h1>`, no skipped levels) (1.3.1, 2.4.6).
+- [x] Every image has correct `alt` (descriptive for art/content images, `alt=""` for decorative) (1.1.1).
+- [x] Colour contrast: body text ≥4.5:1, large text/UI components ≥3:1 — spot-check `marigold`/`turmeric` are never used as text (1.4.3, 1.4.11).
+- [x] Zoom to 400%/reflow to 320px wide: no horizontal scroll, no content/functionality loss (1.4.10).
+- [x] Text spacing override (line-height 1.5×, paragraph spacing 2×, etc.) doesn't clip or overlap content (1.4.12).
+- [x] All interactive elements reachable and operable by keyboard alone, in a logical order matching visual order (2.1.1, 2.4.3).
+- [x] No keyboard trap anywhere outside intentional dialogs (and those release correctly) (2.1.2).
+- [x] Focus indicator visible on every focused element, 2px `peacock`, never suppressed (2.4.7, 2.4.11, 2.4.13).
+- [x] Every icon-only button/link has an accessible name (`aria-label` or visually-hidden text) (4.1.2).
+- [x] Every touch target ≥24×24px minimum, ≥44×44px on primary actions, with adequate spacing (2.5.8).
+- [x] Any drag/swipe interaction has a button alternative (2.5.7).
+- [x] No content flashes more than 3×/second (2.3.1) — relevant to the loader/animations.
+- [x] `prefers-reduced-motion: reduce` disables hover-zoom, scroll-reveal, rangoli self-draw, carousel auto-rotate, count-up, shimmer (per brainstorm §5).
+- [x] Status messages (toasts, cart updates, form results) use `aria-live`/`role="status"`/`role="alert"` appropriately, without moving focus unexpectedly (4.1.3).
+- [x] WhatsApp FAB doesn't overlap/obscure other controls at any breakpoint and has an accessible name (2.4.11, 4.1.2).
 - [ ] Cookie/consent banner (brainstorm §8) doesn't trap focus and is dismissible by keyboard (2.1.2).
 
 ### Home
@@ -867,7 +867,7 @@ Run this on **every** page before sign-off; page-specific rows follow the global
 ### Product detail
 - [ ] Image gallery zoom has a non-gesture (button) alternative (2.5.7).
 - [ ] Variant/framing `radiogroup` is keyboard-operable, selected state isn't colour-only (4.1.2, 1.4.1).
-- [ ] Pincode checker result announced via `aria-live`, input has `autocomplete="postal-code"` (4.1.3, 1.3.5).
+- [x] Pincode checker result announced via `aria-live`, input has `autocomplete="postal-code"` (4.1.3, 1.3.5).
 - [ ] Sticky Add-to-Cart bar (mobile) sits in correct tab order matching the visual flow, doesn't cover the WhatsApp FAB in a way that both become untappable (2.4.3, 2.5.8).
 - [ ] Add to Cart success is confirmed via a toast/live region, not colour change alone (4.1.3).
 
@@ -882,7 +882,7 @@ Run this on **every** page before sign-off; page-specific rows follow the global
 
 ### Artwork (gallery)
 - [ ] Masonry grid tab order is sensible even where CSS column order diverges slightly from strict visual row order; verify it doesn't actively confuse (2.4.3).
-- [ ] Lightbox: focus trapped, prev/next have visible buttons (not swipe-only), Esc returns focus to the originating grid item (2.1.2, 2.5.7, 2.4.3).
+- [x] Lightbox: focus trapped, prev/next have visible buttons (not swipe-only), Esc returns focus to the originating grid item (2.1.2, 2.5.7, 2.4.3).
 - [ ] Not-for-sale artworks still get full artist-written alt text and story content, exactly like purchasable ones (1.1.1).
 - [ ] Filter tabs (All/Drawings/Paintings/Rangoli/Festival/Commissions) use the ARIA Tabs keyboard pattern (4.1.2).
 

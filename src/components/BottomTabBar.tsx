@@ -55,7 +55,7 @@ export function BottomTabBar({ locale, labels, navLabel, itemsLabel, whatsappHre
         <li>
           <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className={`${tab} font-semibold text-leaf`}>
             <MessageCircle aria-hidden="true" className="size-6" strokeWidth={1.75} />
-            <span className="text-base">{labels.whatsapp}</span>
+            <span className="text-[0.8125rem] min-[360px]:text-base">{labels.whatsapp}</span>
           </a>
         </li>
       </ul>
