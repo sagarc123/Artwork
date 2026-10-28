@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
 import { anyone, canEditContent, isOwner, publishedOrStaff } from '../access'
-import { rupeesField, seoFields, slugField } from '../fields'
+import { englishRequired, rupeesField, seoFields, slugField } from '../fields'
 import { site } from '../../lib/site'
 
 // Out of the menu until the courses section goes live.
@@ -14,7 +14,8 @@ export const Courses: CollectionConfig = {
   versions: { drafts: true },
   access: { read: publishedOrStaff, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [
-    { name: 'title', type: 'text', required: true, localized: true },
+    // Needed in English only: saving in Marathi or Hindi with an empty title used to fail (and left the form "unsaved").
+    { name: 'title', type: 'text', required: true, localized: true, validate: englishRequired },
     slugField(),
     { name: 'subtitle', type: 'text', localized: true },
     { name: 'category', type: 'relationship', relationTo: 'categories', required: true, filterOptions: { scope: { equals: 'course' } } },
@@ -92,12 +93,12 @@ export const Lessons: CollectionConfig = {
   // Titles are public (course curriculum); the video itself is protected by signed links (milestone 12).
   access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [
-    { name: 'title', type: 'text', required: true, localized: true },
+    { name: 'title', type: 'text', required: true, localized: true, validate: englishRequired },
     { name: 'course', type: 'relationship', relationTo: 'courses', required: true, index: true },
     {
       type: 'row',
       fields: [
-        { name: 'section', type: 'text', required: true, localized: true, admin: { description: 'e.g. "Getting started"' } },
+        { name: 'section', type: 'text', required: true, localized: true, validate: englishRequired, admin: { description: 'e.g. "Getting started"' } },
         { name: 'order', type: 'number', required: true, defaultValue: 1, min: 1, admin: { step: 1 } },
       ],
     },

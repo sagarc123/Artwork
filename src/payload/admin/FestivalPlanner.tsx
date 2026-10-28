@@ -1,5 +1,6 @@
 import type { AdminViewServerProps, UIFieldServerComponent } from 'payload'
 import Link from 'next/link'
+import { connection } from 'next/server'
 import { isLocale, localePath } from '../../i18n/config'
 import { customerChat, festivalReminder } from '../../lib/admin'
 import { festivalPlan, PLAN_DAYS, saleCovers, saleState, shortDay } from '../../lib/admin-tools'
@@ -74,6 +75,7 @@ async function ReminderList({ view, festival }: { view: AdminViewServerProps; fe
 
 /** Festival planner: the next 90 days of festivals, their deadlines, the sale and who asked for a reminder. */
 export async function FestivalPlannerView(view: AdminViewServerProps) {
+  await connection() // "Sale on" depends on today: render per visit, never in the prerendered shell
   const payload = view.initPageResult.req.payload
   const owner = hasRole(view.initPageResult.req.user, 'owner')
   const [festivals, reminders, preset] = owner

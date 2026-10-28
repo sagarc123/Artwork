@@ -984,6 +984,12 @@ body:has(.payload-settings) #force-unlock {
     background: var(--theme-bg);
     border-top: 1px solid var(--theme-elevation-150);
   }
+  /* Messages ("Saved") sat on top of the fixed save bar and hid its buttons: lift them above it. */
+  .payload-toast-container {
+    --offset: 5.5rem !important;
+    --mobile-offset: 5.5rem !important;
+    --mobile-offset-bottom: 5.5rem !important;
+  }
   .doc-controls .btn {
     min-height: 48px;
     padding-inline: 0.5rem;
