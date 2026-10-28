@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin', '/api', '/cms-api', ...['', '/mr', '/hi'].flatMap((l) => ['/account', '/cart', '/checkout', '/order', '/track', '/search', '/wishlist'].map((p) => l + p))],
+      disallow: ['/admin', '/api', '/cms-api', ...['', '/mr', '/hi'].flatMap((l) => ['/account', '/cart', '/checkout', '/order', '/learn', '/certificate', '/verify', '/review', '/newsletter', '/login', '/track', '/search', '/wishlist'].map((p) => l + p))],
     },
     host: new URL(site.url).host,
     sitemap: new URL('/sitemap.xml', site.url).toString(),

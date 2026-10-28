@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { FestivalMotif, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
+import { Breadcrumbs } from '@/components/JsonLd'
 import { EmptyState } from '@/components/EmptyState'
 import { Gallery } from '@/components/Gallery'
 import { photoSrc } from '@/components/MediaImage'
@@ -36,7 +37,7 @@ async function load(params: PageProps<'/[lang]/festivals/[slug]'>['params']) {
 export async function generateMetadata({ params }: PageProps<'/[lang]/festivals/[slug]'>): Promise<Metadata> {
   const { festival, locale } = await load(params)
   const t = await getDictionary()
-  return { title: festival.name, description: festival.intro || t.festivalsPage.metaDesc, alternates: alternates(locale, `/festivals/${festival.slug}`) }
+  return { title: festival.name, description: (festival.intro?.trim().length ?? 0) > 20 ? festival.intro! : t.festivalsPage.metaDesc, alternates: alternates(locale, `/festivals/${festival.slug}`) }
 }
 
 export default async function FestivalPage({ params }: PageProps<'/[lang]/festivals/[slug]'>) {
@@ -50,6 +51,7 @@ export default async function FestivalPage({ params }: PageProps<'/[lang]/festiv
 
   return (
     <>
+      <Breadcrumbs locale={locale} items={[[t.nav.home, '/'], [t.festivalsPage.metaTitle, '/festivals'], [festival.name, `/festivals/${festival.slug}`]]} />
       {/* Wedding: a marigold garland sways in across the top of the page, once. */}
       {look.kind === 'wedding' && (
         <div aria-hidden="true" className="floor floor-keep floor-leaf overflow-hidden">

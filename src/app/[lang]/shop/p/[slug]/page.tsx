@@ -6,6 +6,7 @@ import { ViewTransition } from 'react'
 import { DeliveryCheck } from '@/components/DeliveryCheck'
 import { DeliveryPromise } from '@/components/DeliveryPromise'
 import { MediaImage } from '@/components/MediaImage'
+import { Breadcrumbs } from '@/components/JsonLd'
 import { ReviewList } from '@/components/ReviewList'
 import { ProductBuy } from '@/components/ProductBuy'
 import { SaveButton } from '@/components/SaveButton'
@@ -88,6 +89,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
 
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
+      <Breadcrumbs locale={locale} items={[[t.nav.home, '/'], [t.nav.shop, '/shop'], [product.title, `/shop/p/${product.slug}`]]} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       {/* Two columns from tablets up, so price and Add to cart sit beside the photo instead of a screen below it. */}
       <div className="wrap grid gap-4 pt-4 md:grid-cols-12 md:gap-8 lg:gap-12 lg:pt-10">

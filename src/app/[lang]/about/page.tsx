@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { DisplayWord, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
+import { JsonLd, artist } from '@/components/JsonLd'
 import { MakingOf } from '@/components/MakingOf'
 import { DevNote } from '@/components/OwnerText'
 import { PageHero } from '@/components/PageHero'
@@ -30,6 +31,7 @@ export default async function AboutPage() {
 
   return (
     <>
+      <JsonLd data={artist} />
       <PageHero
         kicker={a.kicker}
         title={a.title}

@@ -5,6 +5,7 @@ import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, S
 import { ButtonLink } from '@/components/ButtonLink'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
+import { JsonLd, org } from '@/components/JsonLd'
 import { InstagramStrip } from '@/components/InstagramStrip'
 import { MakingOf } from '@/components/MakingOf'
 import { MediaImage, photoSrc } from '@/components/MediaImage'
@@ -82,6 +83,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={{ '@graph': [org, { '@type': 'WebSite', name: site.brandName, url: new URL(localePath(locale, '/'), site.url).toString(), inLanguage: locale, potentialAction: { '@type': 'SearchAction', target: `${new URL(localePath(locale, '/search'), site.url)}?q={search_term_string}`, 'query-input': 'required name=search_term_string' } }] }} />
       {/* 1 (everyday) · The studio wall: his range, a charcoal portrait, a watercolour and an ink rangoli, drawn in pencil and ink. */}
       {season !== 'festive' && (
         <section className="look-everyday relative overflow-hidden bg-paper grain">

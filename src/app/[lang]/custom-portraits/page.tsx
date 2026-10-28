@@ -8,10 +8,11 @@ import { MediaImage } from '@/components/MediaImage'
 import { PageHero } from '@/components/PageHero'
 import { PhotoStandIn, SketchStandIn } from '@/components/StandIns'
 import { Testimonials } from '@/components/Testimonials'
-import { alternates } from '@/i18n/config'
+import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { PAPER_SIZES, PORTRAIT_MEDIUMS, portraitHints } from '@/lib/prices'
-import { formatPrice } from '@/lib/site'
+import { PAPER_SIZES, PORTRAIT_MEDIUMS, portraitFrom, portraitHints } from '@/lib/prices'
+import { formatPrice, site } from '@/lib/site'
+import { JsonLd, service } from '@/components/JsonLd'
 import { getServicePrices, getTestimonials, portraitExamples } from '@/server/content'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,6 +35,7 @@ export default async function CustomPortraitsPage() {
 
   return (
     <>
+      <JsonLd data={service(p.metaTitle, p.metaDesc, new URL(localePath(locale, '/custom-portraits'), site.url).toString(), portraitFrom(prices) ?? undefined)} />
       <PageHero floor="kumkum" title={h.title} sub={h.sub} word="चित्र" art={<PortraitPair photoLabel={h.photo} drawingLabel={h.drawing} draw />}>
         <ButtonLink href="#enquire" variant="light">
           {h.cta}

@@ -8,8 +8,9 @@ import { PhotoPlaceholder, type Floor } from '@/components/PhotoPlaceholder'
 import { Testimonials } from '@/components/Testimonials'
 import { alternates, localePath } from '@/i18n/config'
 import { STYLES } from '@/lib/art'
-import { EVENT_SIZES, eventSizeHints } from '@/lib/prices'
-import { formatPrice } from '@/lib/site'
+import { EVENT_SIZES, eventFrom, eventSizeHints } from '@/lib/prices'
+import { formatPrice, site } from '@/lib/site'
+import { JsonLd, service } from '@/components/JsonLd'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { getServicePrices, getTestimonials } from '@/server/content'
 
@@ -31,6 +32,7 @@ export default async function EventsPage() {
 
   return (
     <>
+      <JsonLd data={service(e.metaTitle, e.metaDesc.replace('{hours}', '24'), new URL(localePath(locale, '/events'), site.url).toString(), eventFrom(prices) ?? undefined)} />
       <PageHero floor="charcoal" kicker={h.kicker} title={h.title} sub={h.sub} word="दारी" art={<DoorstepScene seed="events-hero" style="phool" draw className="mx-auto max-w-sm" />}>
         <ButtonLink href="#enquire" variant="light">
           {h.cta}
