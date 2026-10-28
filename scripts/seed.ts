@@ -42,7 +42,8 @@ async function rangoliPng(seed: string) {
 const payload = await getPayload({ config })
 
 // Remove earlier samples (only "sample-" slugs).
-for (const collection of ['artworks', 'products', 'festivals', 'categories', 'mediums'] as const) {
+await payload.delete({ collection: 'lessons', where: { 'course.slug': { like: 'sample-' } } })
+for (const collection of ['courses', 'artworks', 'products', 'festivals', 'categories', 'mediums'] as const) {
   await payload.delete({ collection, where: { slug: { like: 'sample-' } } })
 }
 await payload.delete({ collection: 'media', where: { alt: { like: 'Sample:' } } })
@@ -225,5 +226,81 @@ for (const [i, [slug, title, category, festival]] of artworks.entries()) {
   })
 }
 
-console.log(`Seeded ${products.length} sample products, ${artworks.length} artworks, 4 festivals, ${reviews.length} reviews and sample service prices.`)
+
+// Sample courses (the Marathi and Hindi updates resend the English rows with their ids, or the rows' text and shop links are lost): one rangoli for beginners, one pencil portrait, one for kids (under 18). Each has one free lesson.
+const courseCats = {
+  rangoli: await named('categories', 'course-rangoli', { en: 'Rangoli for Beginners', mr: 'नवशिक्यांसाठी रांगोळी', hi: 'शुरुआती रंगोली' }, { scope: 'course', order: 1 }),
+  portrait: await named('categories', 'course-portrait', { en: 'Portrait Drawing', mr: 'पोर्ट्रेट चित्रकला', hi: 'पोर्ट्रेट ड्रॉइंग' }, { scope: 'course', order: 2 }),
+  kids: await named('categories', 'course-kids', { en: 'Kids Art', mr: 'मुलांसाठी चित्रकला', hi: 'बच्चों की चित्रकला' }, { scope: 'course', order: 3 }),
+}
+const courses = [
+  {
+    slug: 'rangoli-beginners', cat: courseCats.rangoli, level: 'beginner', languages: ['mr', 'hi', 'en'], price: 1499, audience: 'all', featured: true,
+    title: { en: 'Rangoli for Beginners', mr: 'नवशिक्यांसाठी रांगोळी', hi: 'शुरुआती के लिए रंगोली' },
+    subtitle: { en: 'Draw your first doorstep rangoli in a weekend, with nothing but powder and a steady hand. (sample text)', mr: 'फक्त रांगोळी आणि स्थिर हात, एका आठवड्यात तुमची पहिली दारातली रांगोळी. (नमुना)', hi: 'सिर्फ़ रंगोली पाउडर और स्थिर हाथ से एक सप्ताहांत में अपनी पहली रंगोली। (नमूना)' },
+    outcomes: ['Hold the powder and draw a clean, steady line', 'Make a perfect circle and a six-petal flower', 'Space dots evenly and join them into a kolam', 'Fill colour without smudging the lines', 'Finish a full festival rangoli for your own door'],
+    materials: ['Rangoli powder in 6 colours', 'A rangoli comb or a small funnel', 'Chalk for the guide lines', 'A clean, dry floor or a board'],
+    sections: [
+      ['Getting started', [['Welcome and what you need', 420, true], ['How to hold the powder', 600, false], ['Your first straight lines', 780, false]]],
+      ['Your first designs', [['The circle and the flower', 900, false], ['A simple dot kolam', 1020, false], ['Border patterns', 840, false]]],
+      ['Colour and finishing', [['Filling colour cleanly', 960, false], ['A full Diwali rangoli, start to finish', 1800, false]]],
+    ],
+  },
+  {
+    slug: 'pencil-portrait', cat: courseCats.portrait, level: 'intermediate', languages: ['mr', 'en'], price: 2499, salePrice: 1999, audience: 'all',
+    title: { en: 'Pencil Portrait Drawing', mr: 'पेन्सिल पोर्ट्रेट चित्रकला', hi: 'पेंसिल पोर्ट्रेट ड्रॉइंग' },
+    subtitle: { en: 'Draw a lifelike face from a photo: proportions, shading and the eyes that make it look alive. (sample text)', mr: 'फोटोवरून हुबेहूब चेहरा काढा: प्रमाण, छायांकन आणि चेहऱ्याला जिवंतपणा देणारे डोळे. (नमुना)', hi: 'फ़ोटो से हूबहू चेहरा बनाएँ: अनुपात, शेडिंग और आँखें जो चित्र को जीवंत बनाती हैं। (नमूना)' },
+    outcomes: ['Measure the face with simple guide lines', 'Shade skin tones smoothly', 'Draw eyes that look alive', 'Draw hair without outlining every strand', 'Finish and protect your portrait'],
+    materials: ['HB, 2B, 4B and 6B pencils', 'A kneaded eraser', 'Drawing paper, A4 or A3', 'A printed reference photo'],
+    sections: [
+      ['Seeing the face', [['Proportions with guide lines', 900, true], ['Placing the features', 1200, false]]],
+      ['Shading', [['Smooth skin tones', 1500, false], ['Eyes and eyebrows', 1380, false], ['Lips and nose', 1260, false]]],
+      ['Finishing', [['Hair and background', 1620, false], ['Final touches', 600, false]]],
+    ],
+  },
+  {
+    slug: 'kids-rangoli-drawing', cat: courseCats.kids, level: 'beginner', languages: ['mr', 'hi'], price: 799, audience: 'kids',
+    title: { en: 'Rangoli and Drawing for Kids', mr: 'मुलांसाठी रांगोळी आणि चित्रकला', hi: 'बच्चों के लिए रंगोली और ड्रॉइंग' },
+    subtitle: { en: 'Short, playful lessons for ages 8 to 14. A parent buys the course and watches along. (sample text)', mr: '8 ते 14 वयाच्या मुलांसाठी छोटे, खेळकर धडे. पालक कोर्स घेतात आणि सोबत पाहतात. (नमुना)', hi: '8 से 14 साल के बच्चों के लिए छोटे, मज़ेदार पाठ। माता-पिता कोर्स ख़रीदते हैं और साथ देखते हैं। (नमूना)' },
+    outcomes: ['Draw a simple rangoli with dots and lines', 'Colour inside the lines', 'Make a festival card for your family', 'Draw a peacock, a diya and a lotus'],
+    materials: ['Colour pencils or crayons', 'Plain paper', 'Rangoli colours (with a grown-up nearby)'],
+    sections: [
+      ['Let us begin', [['Meet your teacher', 300, true], ['Dots and lines', 600, false]]],
+      ['Festival drawings', [['A diya for Diwali', 720, false], ['A peacock to colour', 840, false], ['Your own festival card', 900, false]]],
+    ],
+  },
+] as const
+for (const c of courses) {
+  const doc = await payload.create({
+    collection: 'courses',
+    locale: 'en',
+    data: {
+      title: c.title.en,
+      slug: `sample-${c.slug}`,
+      subtitle: c.subtitle.en,
+      category: c.cat,
+      level: c.level,
+      languages: [...c.languages],
+      price: c.price,
+      salePrice: 'salePrice' in c ? c.salePrice : undefined,
+      audience: c.audience,
+      thumbnail: await photo(`course-${c.slug}`, c.title.en),
+      outcomes: c.outcomes.map((text) => ({ text })),
+      materials: c.materials.map((text, i) => ({ text, product: i === 0 && c.slug === 'rangoli-beginners' ? productIds['lotus-stencil'] : undefined })),
+      featured: 'featured' in c,
+      _status: 'published',
+    } as never,
+  })
+  for (const locale of ['mr', 'hi'] as const) {
+    await payload.update({ collection: 'courses', id: doc.id, locale, draft: false, data: { title: c.title[locale], subtitle: c.subtitle[locale], outcomes: doc.outcomes, materials: doc.materials } as never })
+  }
+  let order = 1
+  for (const [section, lessons] of c.sections) {
+    for (const [title, durationSeconds, isFreePreview] of lessons) {
+      await payload.create({ collection: 'lessons', locale: 'en', data: { title, course: doc.id, section, order: order++, durationSeconds, isFreePreview } })
+    }
+  }
+}
+
+console.log(`Seeded ${products.length} sample products, ${artworks.length} artworks, 4 festivals, ${reviews.length} reviews, sample service prices and ${courses.length} courses.`)
 process.exit(0)

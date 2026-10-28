@@ -211,7 +211,7 @@ Follow the 16 milestones in `03-architecture.md` §8:
 2. Real starting prices for events and portraits. The specs use placeholders such as ₹4,500 and ₹2,500.
 
 **Policies**
-3. Course access: lifetime, or 12 months?
+3. ~~Course access: lifetime, or 12 months?~~ **Lifetime** (owner, 28 Oct 2026).
 4. Return windows. Proposed: prints within 7 days; originals within 3 days, only if damaged.
 5. Should lesson Q&A be on by default?
 6. Is a ₹5,000 default COD limit acceptable?

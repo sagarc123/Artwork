@@ -1086,5 +1086,90 @@
     "caption": "Time-lapse of Siddesh making a rangoli by hand, from the first dots to the finished colours.",
     "standInFestive": "A rangoli comes together: dots first, then one line round them, then the colours.",
     "standInEveryday": "A pencil portrait comes together, line by line, then the shading."
+  },
+  "courses": {
+    "metaTitle": "Online drawing and rangoli courses",
+    "metaDesc": "Step-by-step video lessons by Siddesh Mokashi: rangoli for beginners, pencil portraits and art for kids. Learn at home, at your own pace.",
+    "title": "Learn Drawing and Rangoli From Home",
+    "intro": "Step-by-step video lessons I recorded in my studio. Learn at your own pace, in English, Marathi or Hindi.",
+    "ctaFree": "Watch a free lesson",
+    "ctaAll": "See all courses",
+    "typeLabel": "Course type",
+    "all": "All",
+    "empty": "I am still recording lessons for this one. Message me on WhatsApp and I will tell you when it is ready.",
+    "lessons": "{n} lessons",
+    "lessonOne": "1 lesson",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "languagesLabel": "Lessons in",
+    "free": "Free",
+    "newCourse": "New course",
+    "view": "View course",
+    "under18": "For under 18. A parent buys it.",
+    "freeTitle": "Try a lesson free",
+    "freeSub": "No sign-up needed. If you enjoy it, the full course is waiting.",
+    "freeBadge": "Free lesson",
+    "faqTitle": "Questions you may have",
+    "faq": [
+      {
+        "q": "Do I need to know drawing already?",
+        "a": "No. The beginner courses start from the very first line. Watch, pause and practise at your own speed."
+      },
+      {
+        "q": "How long do I have access?",
+        "a": "For life. Once you enrol, the course stays yours to watch again whenever you like."
+      },
+      {
+        "q": "Which materials do I need?",
+        "a": "Each course lists what you need near the top, mostly simple things like a pencil, paper or rangoli colours. Many are in my shop."
+      },
+      {
+        "q": "Will I get a certificate?",
+        "a": "Yes, when you finish every lesson, you get a certificate with your name on it."
+      },
+      {
+        "q": "Can I get my money back?",
+        "a": "Courses cannot be refunded once you have started watching the lessons. That is why every course has a free lesson to try first."
+      }
+    ],
+    "back": "All courses",
+    "breadcrumb": "Courses",
+    "introVideo": "Introduction to the course",
+    "videoSoon": "Video coming soon",
+    "videoSoonNote": "I am still recording this lesson.",
+    "certificate": "Certificate when you finish",
+    "access": "Lifetime access",
+    "devices": "Watch on phone or laptop",
+    "lessonsMeta": "{lessons} lessons · {time}",
+    "learn": "What you will learn",
+    "curriculum": "Course lessons",
+    "summary": "{sections} sections · {lessons} lessons · {time}",
+    "preview": "Free to watch",
+    "locked": "Locked",
+    "lockedHint": "Enrol to unlock this lesson.",
+    "units": {
+      "h": "h",
+      "m": "m"
+    },
+    "materials": "What you will need",
+    "buyInShop": "Buy in my shop",
+    "teacher": "Your teacher",
+    "teacherBody": "I am Siddesh Mokashi. I have drawn rangoli and portraits for years, and I love teaching what I know in a simple, calm way.",
+    "readStory": "Read my story",
+    "related": "More courses for you",
+    "enrol": "Enrol for {price}",
+    "enrolFree": "Enrol free",
+    "enrolChild": "Enrol my child",
+    "enrolNote": "Online enrolment opens soon. For now, tap the button and message me on WhatsApp. I will enrol you myself.",
+    "waEnrol": "Namaste! I would like to enrol in the course",
+    "waEnrolChild": "Namaste! I am a parent and would like to enrol my child in the course",
+    "parentTitle": "A note for parents",
+    "parentBody": "This course is bought and managed by you, and your child watches on your phone or laptop. I only ask for their first name, to print on the certificate. Nothing about your child is tracked.",
+    "sampleTitle": "Free lesson",
+    "sampleFrom": "From the course",
+    "continueCourse": "See the full course"
   }
 }

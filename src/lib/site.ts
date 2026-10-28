@@ -11,7 +11,9 @@ export const site = {
   youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL || '',
   facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL || '',
   // Sections still being built: every link to them stays hidden until the flag is switched on.
-  coursesLive: false,
+  coursesLive: true,
+  // Courses part 1: "Enrol" opens a WhatsApp chat. Part 2 (login + payment) sets this to false and the button goes to the real enrolment instead.
+  enrolByWhatsApp: true,
   accountsLive: false,
 }
 

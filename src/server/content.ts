@@ -3,7 +3,7 @@ import config from '@payload-config'
 import { cacheLife, cacheTag } from 'next/cache'
 import { getPayload } from 'payload'
 import type { Locale } from '@/i18n/config'
-import type { Category, Media, Product } from '@/payload-types'
+import type { Category, Lesson, Media, Product } from '@/payload-types'
 import { localePath } from '@/i18n/config'
 import { pickMedium } from '@/lib/art'
 import { galleryDocs, type GalleryDoc } from '@/lib/gallery'
@@ -161,14 +161,49 @@ export async function getFestivals(locale: Locale) {
 }
 
 /** Slugs for pre-building detail pages. Cache Components needs at least one, so "_" stands in (it 404s). */
-export async function getSlugs(collection: 'products' | 'festivals') {
+export async function getSlugs(collection: 'products' | 'festivals' | 'courses') {
   'use cache'
   cacheLife('max')
   cacheTag(collection)
-  const where = collection === 'products' ? published : undefined
+  const where = collection === 'festivals' ? undefined : published
   const { docs } = await (await db()).find({ collection, where, limit: 1000, depth: 0, select: { slug: true } })
   const slugs = docs.map((d) => d.slug).filter(Boolean)
   return slugs.length ? slugs : ['_']
+}
+
+/** What the course pages read from a lesson: titles and lengths are public, the video id only plays free previews. */
+const lessonFields = { title: true, course: true, section: true, order: true, bunnyVideoId: true, durationSeconds: true, isFreePreview: true } as const
+export type CourseLesson = Pick<Lesson, 'id' | keyof typeof lessonFields>
+
+/** Published courses with their lesson count, total length and first free-preview lesson, for the listing and home. */
+export async function getCourses(locale: Locale) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('courses', 'lessons', 'categories', 'media')
+  const payload = await db()
+  const [{ docs }, { docs: lessons }] = await Promise.all([
+    payload.find({ collection: 'courses', locale, where: published, sort: '-createdAt', limit: 200, depth: 1 }),
+    payload.find({ collection: 'lessons', locale, sort: 'order', limit: 3000, depth: 0, select: lessonFields }),
+  ])
+  return docs.map((c) => {
+    const mine = lessons.filter((l) => l.course === c.id)
+    const sample = mine.find((l) => l.isFreePreview)
+    return { ...c, lessonCount: mine.length, seconds: mine.reduce((n, l) => n + (l.durationSeconds ?? 0), 0), sample: sample ? { id: sample.id, title: sample.title, seconds: sample.durationSeconds ?? 0 } : null }
+  })
+}
+export type CourseCard = Awaited<ReturnType<typeof getCourses>>[number]
+
+/** One published course and its lessons in teaching order, or null (the page then sends a 404). */
+export async function getCourse(locale: Locale, slug: string) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('courses', 'lessons', 'categories', 'media', 'products')
+  const payload = await db()
+  const { docs } = await payload.find({ collection: 'courses', locale, where: { and: [published, { slug: { equals: slug } }] }, limit: 1, depth: 2 })
+  const course = docs[0]
+  if (!course) return null
+  const { docs: lessons } = await payload.find({ collection: 'lessons', locale, where: { course: { equals: course.id } }, sort: 'order', limit: 500, depth: 0, select: lessonFields })
+  return { course, lessons }
 }
 
 /** Business, contact and COD details for Contact, Help and the policies. Empty site-settings fields fall back to env (src/lib/site.ts). */
