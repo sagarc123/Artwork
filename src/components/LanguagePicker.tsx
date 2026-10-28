@@ -26,7 +26,7 @@ function useSwitchLocale(current: Locale) {
 export function LanguageSwitcher({ current, label }: { current: Locale; label: string }) {
   const switchTo = useSwitchLocale(current)
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-1">
+    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-1">
       <Languages aria-hidden="true" className="mr-1 size-5 text-muted" />
       {locales.map((l) => (
         <button

@@ -396,7 +396,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref }: { locale: strin
         box
       )}
       {errors.includes(name as CheckoutField) && (
-        <p id={`${name}-error`} className="font-semibold text-kumkum">
+        <p id={`${name}-error`} role="alert" className="font-semibold text-kumkum">
           {c.errors[name as CheckoutField]}
         </p>
       )}

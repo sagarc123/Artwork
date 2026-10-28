@@ -860,30 +860,30 @@ Run this on **every** page before sign-off; page-specific rows follow the global
 ### Shop (listing)
 - [ ] Filter sidebar (desktop)/bottom sheet (mobile): sheet traps focus, closes on Esc, returns focus to trigger (2.4.3, 2.1.2).
 - [ ] Sort `<select>` is a real native select or fully keyboard-operable custom listbox (4.1.2).
-- [ ] Badges ("Sold," "New," "Sale") communicated via text, not colour alone (1.4.1).
+- [x] Badges ("Sold," "New," "Sale") communicated via text, not colour alone (1.4.1).
 - [ ] "Load more"/pagination announces newly loaded item count via a live region without stealing focus (4.1.3).
 - [ ] Empty filter-result state has a real heading and a "Clear filters" action (2.4.6).
 
 ### Product detail
 - [ ] Image gallery zoom has a non-gesture (button) alternative (2.5.7).
-- [ ] Variant/framing `radiogroup` is keyboard-operable, selected state isn't colour-only (4.1.2, 1.4.1).
+- [x] Variant/framing `radiogroup` is keyboard-operable, selected state isn't colour-only (4.1.2, 1.4.1).
 - [x] Pincode checker result announced via `aria-live`, input has `autocomplete="postal-code"` (4.1.3, 1.3.5).
-- [ ] Sticky Add-to-Cart bar (mobile) sits in correct tab order matching the visual flow, doesn't cover the WhatsApp FAB in a way that both become untappable (2.4.3, 2.5.8).
-- [ ] Add to Cart success is confirmed via a toast/live region, not colour change alone (4.1.3).
+- [x] Sticky Add-to-Cart bar (mobile) sits in correct tab order matching the visual flow, doesn't cover the WhatsApp FAB in a way that both become untappable (2.4.3, 2.5.8).
+- [x] Add to Cart success is confirmed via a toast/live region, not colour change alone (4.1.3).
 
 ### Cart & checkout
 - [ ] Cart drawer traps focus, closes on Esc, returns focus to the cart icon (2.1.2, 2.4.3).
 - [ ] Guest checkout works end to end with no forced account creation (brainstorm §7 rule 8).
 - [ ] Checkout stepper: completed steps are real, keyboard-operable links back; upcoming steps correctly `aria-disabled` (4.1.2).
-- [ ] Payment method list has UPI listed first in both visual and DOM order (brainstorm §7 rule 7).
-- [ ] All address/payment fields: label above field, correct `type`/`inputmode`/`autocomplete`, inline + summary error handling (3.3.1, 3.3.2, 1.3.5).
+- [x] Payment method list has UPI listed first in both visual and DOM order (brainstorm §7 rule 7).
+- [x] All address/payment fields: label above field, correct `type`/`inputmode`/`autocomplete`, inline + summary error handling (3.3.1, 3.3.2, 1.3.5).
 - [ ] No information already given earlier in the same checkout session is re-requested (3.3.7).
 - [ ] Order summary total updates are announced via `aria-live` after any recalculation (4.1.3).
 
 ### Artwork (gallery)
 - [ ] Masonry grid tab order is sensible even where CSS column order diverges slightly from strict visual row order; verify it doesn't actively confuse (2.4.3).
 - [x] Lightbox: focus trapped, prev/next have visible buttons (not swipe-only), Esc returns focus to the originating grid item (2.1.2, 2.5.7, 2.4.3).
-- [ ] Not-for-sale artworks still get full artist-written alt text and story content, exactly like purchasable ones (1.1.1).
+- [x] Not-for-sale artworks still get full artist-written alt text and story content, exactly like purchasable ones (1.1.1).
 - [ ] Filter tabs (All/Drawings/Paintings/Rangoli/Festival/Commissions) use the ARIA Tabs keyboard pattern (4.1.2).
 
 ### Courses (listing + detail)

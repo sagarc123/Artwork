@@ -19,7 +19,7 @@ function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
       <BrandMark className="size-8 shrink-0 min-[360px]:size-9" />
-      <span className="font-heading text-[1.125rem] leading-none whitespace-nowrap min-[360px]:text-[1.375rem] xl:text-[1.625rem]">{brand}</span>
+      <span className="font-heading text-[1.125rem] leading-[1.1] lg:whitespace-nowrap min-[375px]:text-[1.375rem] xl:text-[1.625rem]">{brand}</span>
     </Link>
   )
 }
@@ -145,7 +145,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           whatsappHref={whatsappLink(t.whatsapp.message)}
           phone={phone}
         />
-        <div className="flex justify-center">
+        <div className="flex min-w-0 justify-center">
           <Logo locale={locale} brand={t.brand} />
         </div>
         <Link href={p('/search')} className={iconLink}>
