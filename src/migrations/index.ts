@@ -9,6 +9,7 @@ import * as migration_20261026_113923_round2_simpler from './20261026_113923_rou
 import * as migration_20261026_122645_round3a_features from './20261026_122645_round3a_features';
 import * as migration_20261027_063103_site_look from './20261027_063103_site_look';
 import * as migration_20261027_074127_motion_pass_2 from './20261027_074127_motion_pass_2';
+import * as migration_20261028_074026_website_look_tabs from './20261028_074026_website_look_tabs';
 
 export const migrations = [
   {
@@ -64,6 +65,11 @@ export const migrations = [
   {
     up: migration_20261027_074127_motion_pass_2.up,
     down: migration_20261027_074127_motion_pass_2.down,
-    name: '20261027_074127_motion_pass_2'
+    name: '20261027_074127_motion_pass_2',
+  },
+  {
+    up: migration_20261028_074026_website_look_tabs.up,
+    down: migration_20261028_074026_website_look_tabs.down,
+    name: '20261028_074026_website_look_tabs'
   },
 ];

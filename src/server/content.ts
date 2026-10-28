@@ -291,8 +291,8 @@ export async function getSiteExtras(locale: Locale) {
   const posts = (s.instagram?.posts ?? []).filter((m): m is Media => typeof m === 'object' && m !== null).slice(0, 6)
   return {
     announcement: message ? { message, href: a?.link || null } : null,
-    festiveLook: a?.festiveLook ?? 'auto',
-    siteLook: a?.siteLook ?? 'auto',
+    festiveLook: s.festiveLook ?? 'auto',
+    siteLook: s.siteLook ?? 'auto',
     instagram: { href: s.instagram?.profileUrl || s.social?.instagram || site.instagram, posts, caption: s.instagram?.caption || '' },
     makingOf: { video: firstMedia([s.makingOf?.video]), poster: firstMedia([s.makingOf?.poster]), caption: s.makingOf?.caption?.trim() || '' },
   }

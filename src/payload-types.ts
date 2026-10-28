@@ -619,10 +619,6 @@ export interface Testimonial {
 export interface Course {
   id: number;
   title: string;
-  /**
-   * Web address. Filled from the English title if left empty.
-   */
-  slug: string;
   subtitle?: string | null;
   category: number | Category;
   level: 'beginner' | 'intermediate' | 'advanced';
@@ -637,7 +633,7 @@ export interface Course {
   salePrice?: number | null;
   thumbnail: number | Media;
   /**
-   * Bunny Stream video ID of the free preview.
+   * The free preview. Paste its video ID from Bunny Stream.
    */
   introVideoId?: string | null;
   outcomes?:
@@ -664,14 +660,18 @@ export interface Course {
       }[]
     | null;
   /**
+   * Web address. Made from the English title; change it only if you need to.
+   */
+  slug: string;
+  /**
    * Under-18 courses are bought by a parent, with a consent step and no tracking.
    */
   audience?: ('all' | 'teens' | 'kids') | null;
+  /**
+   * Students can ask questions under each lesson.
+   */
   qaEnabled?: boolean | null;
   certificateEnabled?: boolean | null;
-  /**
-   * Show on the home page
-   */
   featured?: boolean | null;
   /**
    * Optional. Shown in Google results; filled from the title if empty.
@@ -696,12 +696,18 @@ export interface Lesson {
    * e.g. "Getting started"
    */
   section: string;
+  /**
+   * 1 comes first.
+   */
   order: number;
   /**
-   * Filled automatically once video upload is added (milestone 11).
+   * Paste the lesson video ID from Bunny Stream.
    */
   bunnyVideoId?: string | null;
   durationSeconds?: number | null;
+  /**
+   * Anyone can watch it without buying the course.
+   */
   isFreePreview?: boolean | null;
   transcript?: string | null;
   updatedAt: string;
@@ -1146,7 +1152,6 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CoursesSelect<T extends boolean = true> {
   title?: T;
-  slug?: T;
   subtitle?: T;
   category?: T;
   level?: T;
@@ -1175,6 +1180,7 @@ export interface CoursesSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  slug?: T;
   audience?: T;
   qaEnabled?: T;
   certificateEnabled?: T;
@@ -1304,7 +1310,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * Your name, contact numbers and business details, shown in the footer, policies and invoices.
+ * Your contact details, how the website looks, the home page photos and video, and your business details for invoices.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -1319,18 +1325,6 @@ export interface SiteSetting {
    * One short line under your name.
    */
   tagline?: string | null;
-  business?: {
-    /**
-     * As on your PAN or GST certificate.
-     */
-    legalName?: string | null;
-    /**
-     * Leave empty until GST registration is done.
-     */
-    gstin?: string | null;
-    address?: string | null;
-    city?: string | null;
-  };
   contact?: {
     /**
      * With country code, digits only, e.g. 919800000000
@@ -1344,6 +1338,22 @@ export interface SiteSetting {
     replyHours?: number | null;
   };
   /**
+   * Full links, e.g. https://instagram.com/yourname
+   */
+  social?: {
+    instagram?: string | null;
+    youtube?: string | null;
+    facebook?: string | null;
+  };
+  /**
+   * Everyday: a calm studio look (paper, charcoal, peacock). Festive: the full colour look with the festival decoration. Automatic: festive for 3 weeks before each festival that has a date, everyday the rest of the year.
+   */
+  siteLook?: ('auto' | 'everyday' | 'festive') | null;
+  /**
+   * The decoration under the menu while the site looks festive. Automatic: the next festival with a date. Picking a festival also keeps the site festive when "Site look" is Automatic.
+   */
+  festiveLook?: ('off' | 'auto' | 'diwali' | 'ganesh' | 'gudi' | 'wedding') | null;
+  /**
    * One short line at the very top of every page, e.g. "Diwali parcels: order by 1 Nov". Visitors can close it.
    */
   announcement?: {
@@ -1356,14 +1366,6 @@ export interface SiteSetting {
      * A page of this website, e.g. /festivals/diwali, or a full https:// link.
      */
     link?: string | null;
-    /**
-     * Everyday: a calm studio look (paper, charcoal, peacock). Festive: the full colour look with the festival decoration. Automatic: festive for 3 weeks before each festival that has a date, everyday the rest of the year.
-     */
-    siteLook?: ('auto' | 'everyday' | 'festive') | null;
-    /**
-     * The decoration under the menu while the site looks festive. Automatic: the next festival with a date. Picking a festival also keeps the site festive when "Site look" is Automatic.
-     */
-    festiveLook?: ('off' | 'auto' | 'diwali' | 'ganesh' | 'gudi' | 'wedding') | null;
   };
   /**
    * Pick 3 to 6 photos you have posted on Instagram. They show on the home page and open your Instagram.
@@ -1396,20 +1398,24 @@ export interface SiteSetting {
      */
     caption?: string | null;
   };
+  business?: {
+    /**
+     * As on your PAN or GST certificate.
+     */
+    legalName?: string | null;
+    /**
+     * Leave empty until GST registration is done.
+     */
+    gstin?: string | null;
+    address?: string | null;
+    city?: string | null;
+  };
   /**
    * Required by the E-Commerce Rules: who customers can complain to.
    */
   grievanceOfficer?: {
     name?: string | null;
     email?: string | null;
-  };
-  /**
-   * Full links, e.g. https://instagram.com/yourname
-   */
-  social?: {
-    instagram?: string | null;
-    youtube?: string | null;
-    facebook?: string | null;
   };
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1606,14 +1612,6 @@ export interface ServicePrice {
 export interface SiteSettingsSelect<T extends boolean = true> {
   brandName?: T;
   tagline?: T;
-  business?:
-    | T
-    | {
-        legalName?: T;
-        gstin?: T;
-        address?: T;
-        city?: T;
-      };
   contact?:
     | T
     | {
@@ -1622,14 +1620,21 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         replyHours?: T;
       };
+  social?:
+    | T
+    | {
+        instagram?: T;
+        youtube?: T;
+        facebook?: T;
+      };
+  siteLook?: T;
+  festiveLook?: T;
   announcement?:
     | T
     | {
         enabled?: T;
         message?: T;
         link?: T;
-        siteLook?: T;
-        festiveLook?: T;
       };
   instagram?:
     | T
@@ -1645,18 +1650,19 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         poster?: T;
         caption?: T;
       };
+  business?:
+    | T
+    | {
+        legalName?: T;
+        gstin?: T;
+        address?: T;
+        city?: T;
+      };
   grievanceOfficer?:
     | T
     | {
         name?: T;
         email?: T;
-      };
-  social?:
-    | T
-    | {
-        instagram?: T;
-        youtube?: T;
-        facebook?: T;
       };
   updatedAt?: T;
   createdAt?: T;

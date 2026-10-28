@@ -37,6 +37,7 @@ export const Products: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
+            { name: 'viewOnSite', type: 'ui', admin: { components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
             { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             {
               name: 'title',
@@ -210,7 +211,7 @@ export const Products: CollectionConfig = {
             slugField('title', 'Web address. Made from the English title; change it only if you need to.', undefined),
             {
               name: 'taxClass',
-              label: 'GST class',
+              label: 'GST rate',
               type: 'relationship',
               relationTo: 'tax-classes',
               admin: { description: 'Leave empty: GST is set from the product type (Shop settings → Tax).' },

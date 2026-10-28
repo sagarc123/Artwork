@@ -156,21 +156,21 @@ export async function Today({ payload, user }: ServerProps) {
         {content && (
           <>
             <Link href="/admin/collections/products/create" className="today__add-btn">
-              <Plus size={22} aria-hidden="true" /> Painting / original
+              <Plus size={22} aria-hidden="true" /> New painting for sale
             </Link>
             <Link href="/admin/collections/products/create?type=print" className="today__add-btn">
-              <Plus size={22} aria-hidden="true" /> Print
+              <Plus size={22} aria-hidden="true" /> New print for sale
             </Link>
           </>
         )}
         {orders && (
           <Link href="/admin/add-call" className="today__add-btn">
-            <Plus size={22} aria-hidden="true" /> Enquiry from a call
+            <Plus size={22} aria-hidden="true" /> Note down a phone enquiry
           </Link>
         )}
         {content && (
           <Link href="/admin/collections/testimonials/create" className="today__add-btn">
-            <Plus size={22} aria-hidden="true" /> Review
+            <Plus size={22} aria-hidden="true" /> Add a customer review
           </Link>
         )}
       </nav>
@@ -194,7 +194,7 @@ export async function Today({ payload, user }: ServerProps) {
           {info.map(card)}
         </div>
       )}
-      <h2 className="today__all">Everything else</h2>
+      <h2 className="today__all">All sections</h2>
     </div>
   )
 }

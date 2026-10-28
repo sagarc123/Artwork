@@ -529,13 +529,8 @@ h1,
 .quick-filters {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
   margin: 0 0 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-  scrollbar-width: none;
-}
-.quick-filters::-webkit-scrollbar {
-  display: none;
 }
 .quick-filters__tab {
   display: inline-flex;
@@ -1073,6 +1068,24 @@ body:has(.payload-settings) #force-unlock {
   }
   body {
     padding-bottom: 5rem;
+  }
+  /* Forms: the last field and the focused field stay clear of the fixed save bar. */
+  body:has(.doc-controls__controls-wrapper) {
+    padding-bottom: 7rem;
+  }
+  html {
+    scroll-padding-bottom: 7rem;
+  }
+  /* The menu tiles on the home page: one short row each, so the list is a few swipes, not five screens. */
+  .collections__card-list {
+    gap: 0.4rem;
+  }
+  .collections__card-list .card {
+    min-height: 56px;
+    padding: 0.25rem 0.9rem;
+  }
+  .collections__group {
+    gap: 0.4rem;
   }
   .today__top h1 {
     font-size: 2.2rem;
@@ -1773,4 +1786,18 @@ html[data-theme='dark'] .bulk-bar {
   max-height: none;
   object-fit: cover;
   pointer-events: none;
+}
+
+.view-on-site {
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+.view-on-site.is-draft {
+  font-weight: 400;
+  color: var(--theme-elevation-600);
+}
+.view-on-site a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }

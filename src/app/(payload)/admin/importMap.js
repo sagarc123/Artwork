@@ -8,6 +8,7 @@ import { OrderBulk as OrderBulk_e3585f670ff671b3f00ee98df5be6f62 } from '../../.
 import { EnquiryActions as EnquiryActions_4dce3c7f6604d66bca7fcb51855c485e } from '../../../payload/admin/EnquiryActions'
 import { ChoiceButtons as ChoiceButtons_1780d8ca05d1beedbfbada6acfac1a48 } from '../../../payload/admin/ChoiceButtons'
 import { ReplyCell as ReplyCell_4dce3c7f6604d66bca7fcb51855c485e } from '../../../payload/admin/EnquiryActions'
+import { ViewOnSite as ViewOnSite_b1b8a0c77273d6b9c8ee6e8616bdf4f7 } from '../../../payload/admin/ViewOnSite'
 import { LocaleSwitch as LocaleSwitch_374d6527cb4a40dfa90368b0e2c3f767 } from '../../../payload/admin/LocaleNote'
 import { ThumbCell as ThumbCell_6ad2bf8381d5a2730091b1470fced514 } from '../../../payload/admin/Cells'
 import { PhotoTaker as PhotoTaker_c937241029b123b7e313211ecb0ab64f } from '../../../payload/admin/PhotoTaker'
@@ -39,6 +40,7 @@ export const importMap = {
   "/payload/admin/EnquiryActions#EnquiryActions": EnquiryActions_4dce3c7f6604d66bca7fcb51855c485e,
   "/payload/admin/ChoiceButtons#ChoiceButtons": ChoiceButtons_1780d8ca05d1beedbfbada6acfac1a48,
   "/payload/admin/EnquiryActions#ReplyCell": ReplyCell_4dce3c7f6604d66bca7fcb51855c485e,
+  "/payload/admin/ViewOnSite#ViewOnSite": ViewOnSite_b1b8a0c77273d6b9c8ee6e8616bdf4f7,
   "/payload/admin/LocaleNote#LocaleSwitch": LocaleSwitch_374d6527cb4a40dfa90368b0e2c3f767,
   "/payload/admin/Cells#ThumbCell": ThumbCell_6ad2bf8381d5a2730091b1470fced514,
   "/payload/admin/PhotoTaker#PhotoTaker": PhotoTaker_c937241029b123b7e313211ecb0ab64f,

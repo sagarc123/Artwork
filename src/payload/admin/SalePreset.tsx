@@ -21,7 +21,7 @@ const ids = (c: Sale['categories']) => (c ?? []).map((x) => (typeof x === 'objec
 
 /**
  * "Start a festival sale" in one go: percent and days (editable), optional categories, a confirm step, then the
- * festival sale in Shop settings is filled in (from today, India time). Undo and "Turn sale off" put it back.
+ * festival sale in Shop settings is filled in (from today, India time). Undo and "End it" put it back.
  */
 export function SalePreset({ name, today, sale, state, categories, reload }: Props) {
   const { config } = useConfig()
@@ -67,12 +67,12 @@ export function SalePreset({ name, today, sale, state, categories, reload }: Pro
       {state !== 'off' && sale && (
         <div className={`sale-preset__now is-${state}`}>
           <p>
-            <strong>{state === 'on' ? 'Festival sale is on' : `Festival sale starts ${shortDay(istDay(sale.startsAt!))}`}:</strong> {sale.percent}% off
+            <strong>{state === 'on' ? 'Sale is running' : `Sale starts ${shortDay(istDay(sale.startsAt!))}`}</strong> · {sale.percent}% off
             {sale.endsAt ? ` until ${shortDay(istDay(sale.endsAt))}` : ' until you turn it off'}
             {ids(sale.categories).length ? ' (some categories)' : ''}.
           </p>
-          <button type="button" className="one-tap__btn" disabled={busy} onClick={() => void save({ ...before, enabled: false }, 'Sale turned off', before)}>
-            Turn sale off
+          <button type="button" className="one-tap__btn" disabled={busy} onClick={() => void save({ ...before, enabled: false }, 'Sale ended', before)}>
+            End it
           </button>
         </div>
       )}
@@ -106,7 +106,7 @@ export function SalePreset({ name, today, sale, state, categories, reload }: Pro
             </details>
           )}
           <button type="button" className="one-tap__btn is-primary" disabled={busy || !validPercent} onClick={() => setConfirming(true)}>
-            {state === 'off' ? `Start ${label}` : `Replace with ${label}`}
+            {validPercent ? `${state === 'off' ? 'Take' : 'Change the sale: take'} ${percent}% off ${only.length ? where : 'everything'} until ${shortDay(plan.last)}` : state === 'off' ? `Start ${label}` : `Replace with ${label}`}
           </button>
         </div>
       ) : (

@@ -8,7 +8,7 @@ const refuse = (message: string) => Object.assign(new APIError(message, 400, nul
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
   slug: 'users',
-  labels: { singular: 'Account', plural: 'Accounts' },
+  labels: { singular: 'Login', plural: 'Logins' },
   admin: {
     useAsTitle: 'name',
     group: 'Settings',

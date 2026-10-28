@@ -7,7 +7,7 @@ import { anyone, canEditContent, hideFromHelpers, isOwner } from '../access'
 export const Media: CollectionConfig = {
   slug: 'media',
   hooks: refreshOnChange('media'),
-  labels: { singular: 'Photo', plural: 'Photos' },
+  labels: { singular: 'Photo', plural: 'Photo library' },
   admin: {
     group: 'Gallery & Festivals',
     description: 'Every photo you have uploaded. Usually you add photos straight from a painting; come here to fix a description.',

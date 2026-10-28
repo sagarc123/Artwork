@@ -4,7 +4,7 @@ import { hideFromNonOwners, isOwner, isStaff } from '../access'
 /** HSN/SAC codes and GST rates, set by the CA. Rates are never hard-coded: they change. */
 export const TaxClasses: CollectionConfig = {
   slug: 'tax-classes',
-  labels: { singular: 'GST class', plural: 'GST classes' },
+  labels: { singular: 'GST rate', plural: 'GST rates' },
   admin: {
     useAsTitle: 'name',
     group: 'Lists',

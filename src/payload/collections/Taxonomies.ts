@@ -33,6 +33,7 @@ export const Categories: CollectionConfig = {
 
 export const Mediums: CollectionConfig = {
   slug: 'mediums',
+  labels: { singular: 'Art material', plural: 'Art materials' },
   hooks: refreshOnChange('mediums'),
   admin: { useAsTitle: 'name', group: 'Lists', description: 'What a piece is made with (pencil, charcoal, acrylic, rangoli colours…). Shown under its name.', hidden: hideFromHelpers },
   access,

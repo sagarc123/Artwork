@@ -14,7 +14,7 @@ const clamp = (n: number) => Math.min(1, Math.max(0, n))
 /**
  * "Take or choose photo" on a painting or gallery piece: the phone's camera (or gallery), then the photo is turned the
  * right way up, made at most 2400 px and compressed (WebP, JPEG where the browser can't) before it uploads, so it is
- * quick on mobile data. Optional 4:5 crop with drag to position. The photo is added to "Photos"; Save keeps it.
+ * quick on mobile data. Optional 4:5 crop with drag to position. The photo is added to the Photo library; Save keeps it.
  */
 export const PhotoTaker: UIFieldClientComponent = () => {
   const { config } = useConfig()

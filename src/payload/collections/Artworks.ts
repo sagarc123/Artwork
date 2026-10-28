@@ -33,6 +33,7 @@ export const Artworks: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
+            { name: 'viewOnSite', type: 'ui', admin: { components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
             { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             {
               name: 'title',
