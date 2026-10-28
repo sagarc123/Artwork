@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
-import { anyone, canEditContent, isOwner, publishedOrStaff } from '../access'
+import { anyone, canEditContent, isOwner, publishedOrStaff, staffOnlyField } from '../access'
 import { englishRequired, rupeesField, seoFields, slugField } from '../fields'
 import { site } from '../../lib/site'
 import { sitePath } from '../../lib/admin'
@@ -131,9 +131,10 @@ export const Lessons: CollectionConfig = {
         { name: 'order', label: 'Position', type: 'number', required: true, defaultValue: 1, min: 1, admin: { step: 1, description: '1 comes first.' } },
       ],
     },
-    { name: 'bunnyVideoId', label: 'Video (from Bunny)', type: 'text', admin: { description: 'Paste the lesson video ID from Bunny Stream.' } },
+    // Not sent by the public CMS API: a paid lesson's video id is read only by the site's own server code, after it has checked the enrolment.
+    { name: 'bunnyVideoId', label: 'Video (from Bunny)', type: 'text', access: { read: staffOnlyField }, admin: { description: 'Paste the lesson video ID from Bunny Stream.' } },
     { name: 'durationSeconds', label: 'Length (seconds)', type: 'number', min: 0 },
     { name: 'isFreePreview', label: 'Free sample lesson', type: 'checkbox', admin: { description: 'Anyone can watch it without buying the course.' } },
-    { name: 'transcript', label: 'Written version of the lesson', type: 'textarea', localized: true },
+    { name: 'transcript', label: 'Written version of the lesson', type: 'textarea', localized: true, access: { read: staffOnlyField } },
   ],
 }

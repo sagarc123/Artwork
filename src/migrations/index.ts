@@ -11,6 +11,7 @@ import * as migration_20261027_063103_site_look from './20261027_063103_site_loo
 import * as migration_20261027_074127_motion_pass_2 from './20261027_074127_motion_pass_2';
 import * as migration_20261028_074026_website_look_tabs from './20261028_074026_website_look_tabs';
 import * as migration_20261028_080827_courses_part2a from './20261028_080827_courses_part2a';
+import * as migration_20261028_082925_courses_part2b from './20261028_082925_courses_part2b';
 
 export const migrations = [
   {
@@ -76,6 +77,11 @@ export const migrations = [
   {
     up: migration_20261028_080827_courses_part2a.up,
     down: migration_20261028_080827_courses_part2a.down,
-    name: '20261028_080827_courses_part2a'
+    name: '20261028_080827_courses_part2a',
+  },
+  {
+    up: migration_20261028_082925_courses_part2b.up,
+    down: migration_20261028_082925_courses_part2b.down,
+    name: '20261028_082925_courses_part2b'
   },
 ];

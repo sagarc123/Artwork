@@ -78,6 +78,8 @@ export interface Config {
     courses: Course;
     lessons: Lesson;
     enrolments: Enrolment;
+    certificates: Certificate;
+    'lesson-progress': LessonProgress;
     customers: Customer;
     'otp-codes': OtpCode;
     categories: Category;
@@ -102,6 +104,8 @@ export interface Config {
     courses: CoursesSelect<false> | CoursesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     enrolments: EnrolmentsSelect<false> | EnrolmentsSelect<true>;
+    certificates: CertificatesSelect<false> | CertificatesSelect<true>;
+    'lesson-progress': LessonProgressSelect<false> | LessonProgressSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -761,6 +765,38 @@ export interface Enrolment {
   childFirstName?: string | null;
   guardianConsentAt?: string | null;
   firstAccessedAt?: string | null;
+  lastLesson?: (number | null) | Lesson;
+  progress?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Certificates are made by themselves when a student finishes every lesson. Open one to withdraw it or give it a new number.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates".
+ */
+export interface Certificate {
+  id: number;
+  publicId: string;
+  nameOnCert: string;
+  course: number | Course;
+  issuedAt: string;
+  enrolment: number | Enrolment;
+  customer: number | Customer;
+  status: 'valid' | 'revoked';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lesson-progress".
+ */
+export interface LessonProgress {
+  id: number;
+  enrolment: number | Enrolment;
+  lesson: number | Lesson;
+  completedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -875,6 +911,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'enrolments';
         value: number | Enrolment;
+      } | null)
+    | ({
+        relationTo: 'certificates';
+        value: number | Certificate;
+      } | null)
+    | ({
+        relationTo: 'lesson-progress';
+        value: number | LessonProgress;
       } | null)
     | ({
         relationTo: 'customers';
@@ -1304,6 +1348,34 @@ export interface EnrolmentsSelect<T extends boolean = true> {
   childFirstName?: T;
   guardianConsentAt?: T;
   firstAccessedAt?: T;
+  lastLesson?: T;
+  progress?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "certificates_select".
+ */
+export interface CertificatesSelect<T extends boolean = true> {
+  publicId?: T;
+  nameOnCert?: T;
+  course?: T;
+  issuedAt?: T;
+  enrolment?: T;
+  customer?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lesson-progress_select".
+ */
+export interface LessonProgressSelect<T extends boolean = true> {
+  enrolment?: T;
+  lesson?: T;
+  completedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

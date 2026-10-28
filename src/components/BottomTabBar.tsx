@@ -3,17 +3,19 @@
 import { GraduationCap, Home, ShoppingBag, ShoppingCart, User, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { localePath, stripLocale, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { site } from '@/lib/site'
+import { learnTarget } from '@/server/learn-actions'
 import { CartCount } from './CartCount'
 
 // The five tabs from the plan: Home · Shop · Learn · Cart · Me. Five fit at 360px (72px each), so Events (with portraits one tap
 // away on that page) and WhatsApp live in the menu and footer instead. Learn and Me show once courses and accounts are live.
-const TABS: { href: string; key: 'home' | 'shop' | 'learn' | 'cart' | 'me'; Icon: LucideIcon }[] = [
+const TABS: { href: string; key: 'home' | 'shop' | 'learn' | 'cart' | 'me'; Icon: LucideIcon; also?: string }[] = [
   { href: '/', key: 'home', Icon: Home },
   { href: '/shop', key: 'shop', Icon: ShoppingBag },
-  ...(site.coursesLive ? [{ href: '/courses', key: 'learn' as const, Icon: GraduationCap }] : []),
+  ...(site.coursesLive ? [{ href: '/courses', key: 'learn' as const, Icon: GraduationCap, also: '/learn' }] : []),
   { href: '/cart', key: 'cart', Icon: ShoppingCart },
   ...(site.accountsLive ? [{ href: '/account', key: 'me' as const, Icon: User }] : []),
 ]
@@ -23,6 +25,15 @@ const tab = 'relative flex h-full flex-col items-center justify-center gap-0.5 l
 /** Phone/tablet bottom navigation: 5 labelled tabs. The colour bar slides to the active tab between pages. */
 export function BottomTabBar({ locale, labels, navLabel, itemsLabel }: { locale: Locale; labels: Dictionary['tabs']; navLabel: string; itemsLabel: string }) {
   const current = stripLocale(usePathname())
+  // Learn: My courses, or straight to the course when there is only one (the course list for visitors with none).
+  const [learnHref, setLearnHref] = useState('/courses')
+  useEffect(() => {
+    let live = true
+    learnTarget().then((h) => live && setLearnHref(h)).catch(() => {})
+    return () => {
+      live = false
+    }
+  }, [current])
   const under = (href: string) => (href === '/' ? current === '/' : current === href || current.startsWith(`${href}/`))
 
   return (
@@ -34,10 +45,10 @@ export function BottomTabBar({ locale, labels, navLabel, itemsLabel }: { locale:
       <ul className="mx-auto flex h-16 max-w-lg">
         {TABS.map((t) => {
           const { href, key, Icon } = t
-          const active = under(href)
+          const active = under(href) || (!!t.also && under(t.also))
           return (
             <li key={href} className="min-w-0 flex-1">
-              <Link href={localePath(locale, href)} aria-current={active ? 'page' : undefined} className={`${tab} text-muted aria-[current=page]:font-semibold aria-[current=page]:text-peacock`}>
+              <Link href={localePath(locale, key === 'learn' ? learnHref : href)} aria-current={active ? 'page' : undefined} className={`${tab} text-muted aria-[current=page]:font-semibold aria-[current=page]:text-peacock`}>
                 {active && (
                   <span
                     aria-hidden="true"

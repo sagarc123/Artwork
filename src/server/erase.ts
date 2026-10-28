@@ -16,6 +16,8 @@ export async function eraseCustomer(id: number, phone: string) {
     await tx.execute(sql`
       UPDATE payload.orders SET customer_name = '[deleted]', customer_phone = NULL, customer_email = NULL, address_line1 = NULL, address_line2 = NULL
       WHERE account_id = ${id} OR customer_phone = ${phone}`)
+    // A certificate stays (others may verify it); the name on it shrinks to initials.
+    await tx.execute(sql`UPDATE payload.certificates SET name_on_cert = regexp_replace(name_on_cert, '(\\S)\\S*', '\\1.', 'g') WHERE customer_id = ${id}`)
     await tx.execute(sql`UPDATE payload.orders_items SET child_first_name = NULL WHERE _parent_id IN (SELECT id FROM payload.orders WHERE account_id = ${id})`)
     await tx.execute(sql`UPDATE payload.customers SET name = NULL, phone = ${`deleted-${id}`}, saved_slugs = NULL, deleted_at = now() WHERE id = ${id}`)
   })

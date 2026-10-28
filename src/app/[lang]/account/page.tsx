@@ -7,6 +7,7 @@ import { getPayload } from 'payload'
 import { AccountProfile } from '@/components/AccountProfile'
 import { EmptyState } from '@/components/EmptyState'
 import { MediaImage } from '@/components/MediaImage'
+import { ProgressBar } from '@/components/ProgressBar'
 import { PageHero } from '@/components/PageHero'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -14,11 +15,13 @@ import { learnPath } from '@/lib/courses'
 import { formatPrice } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { getCustomer } from '@/server/customer'
+import { progressFor } from '@/server/learn'
+import { showCertId } from '@/lib/learn'
 
 // Private and per person: always rendered on the server for the signed-in customer.
 export const instant = false
 
-const TABS = ['courses', 'orders', 'saved', 'profile'] as const
+const TABS = ['courses', 'certificates', 'orders', 'saved', 'profile'] as const
 type Tab = (typeof TABS)[number]
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -45,9 +48,9 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
     // Only this customer's own seats: the query is pinned to the signed-in id.
     const { docs } = await payload.find({ collection: 'enrolments', where: { customer: { equals: me.id } }, sort: '-createdAt', limit: 100, depth: 2, locale })
     const seats = docs.flatMap((e) => (typeof e.course === 'object' ? [{ ...e, course: e.course }] : []))
+    const progress = await progressFor(payload, seats.map((e) => ({ id: e.id, course: e.course.id })))
     body = seats.length ? (
       <>
-        <p className="mb-6 text-muted">{a.lessonsSoon}</p>
         <ul className="grid gap-6 md:grid-cols-2">
           {seats.map((e) => (
             <li key={e.id} className="grid grid-cols-[6rem_1fr] gap-4 rounded-ui bg-surface p-4 shadow-frame">
@@ -56,10 +59,11 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
                 <p className="font-heading text-h3-sm">{e.course.title}</p>
                 {e.childFirstName && <p className="text-muted">{a.forChild.replace('{name}', e.childFirstName)}</p>}
                 <p className="text-muted">{a.since.replace('{date}', date(e.createdAt))}</p>
-                {/* Part 2b points this at the lesson player. */}
+                {progress.get(e.id) && <ProgressBar done={progress.get(e.id)!.done} total={progress.get(e.id)!.total} label={a.progress.replace('{done}', String(progress.get(e.id)!.done)).replace('{total}', String(progress.get(e.id)!.total))} />}
+                {/* Opens the lesson you were last on, or the first. */}
                 <Link href={p(learnPath(e.course.slug))} className="press mt-1 inline-flex h-12 items-center justify-center gap-2 rounded-ui bg-kumkum px-5 font-semibold text-white">
                   <Check aria-hidden="true" className="size-5" />
-                  {t.courses.goToCourse}
+                  {progress.get(e.id)?.done ? t.courses.goToCourse : a.start}
                 </Link>
               </div>
             </li>
@@ -72,6 +76,32 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
           {a.browse}
         </Link>
       </EmptyState>
+    )
+  } else if (tab === 'certificates') {
+    const { docs } = await payload.find({ collection: 'certificates', where: { customer: { equals: me.id } }, sort: '-issuedAt', limit: 100, depth: 1, locale })
+    body = docs.length ? (
+      <ul className="grid gap-4 md:grid-cols-2">
+        {docs.map((c) => (
+          <li key={c.id} className="grid gap-2 rounded-ui bg-surface p-5 shadow-frame">
+            <p className="font-heading text-h3-sm">{typeof c.course === 'object' ? c.course.title : ''}</p>
+            <p className="text-muted">
+              {showCertId(c.publicId)} · {c.status === 'valid' ? a.certIssued.replace('{date}', date(c.issuedAt)) : a.certWithdrawn}
+            </p>
+            {c.status === 'valid' && (
+              <div className="flex flex-wrap gap-x-6">
+                <Link href={p(`/certificate/${c.publicId}`)} className="ink-link inline-flex min-h-12 items-center font-semibold text-peacock">
+                  {a.certView}
+                </Link>
+                <Link href={p(`/verify/${c.publicId}`)} className="ink-link inline-flex min-h-12 items-center font-semibold text-peacock">
+                  {a.certCheck}
+                </Link>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <EmptyState title={a.certsEmpty} />
     )
   } else if (tab === 'orders') {
     // Orders placed from this account, plus earlier ones placed with the phone number it just proved it owns.

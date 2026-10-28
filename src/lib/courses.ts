@@ -51,6 +51,5 @@ export function seatsToCreate(items: SeatLine[], alreadyEnrolled: number[]) {
   return seats
 }
 
-/** Where "Go to my course" leads. Part 2b swaps this for the lesson player: `/learn/${slug}`. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const learnPath = (slug: string) => '/account'
+/** Where "Go to my course" leads: the player, which opens the last lesson (or the first). */
+export const learnPath = (slug: string) => `/learn/${slug}`

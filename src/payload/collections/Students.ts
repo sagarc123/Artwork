@@ -64,7 +64,7 @@ export const Enrolments: CollectionConfig = {
   admin: {
     useAsTitle: 'id',
     group: 'Courses',
-    defaultColumns: ['customer', 'course', 'source', 'createdAt'],
+    defaultColumns: ['customer', 'course', 'progress', 'source', 'createdAt'],
     description: 'Who can watch which course (for life). Paid orders add people here by themselves. For someone who paid you on WhatsApp, add them yourself: pick the student (add them under "Students" first if they are new) and the course.',
     hidden: hideUnlessOrderStaff,
   },
@@ -90,7 +90,75 @@ export const Enrolments: CollectionConfig = {
     // Under-18 courses: a parent buys, and gives the child's first name only for the certificate.
     { name: 'childFirstName', label: "Child's first name (for the certificate)", type: 'text' },
     { name: 'guardianConsentAt', label: 'Parent agreed on', type: 'date', admin: { readOnly: true, condition: (d) => !!d?.guardianConsentAt } },
-    // Set by the lesson player (part 2b) the first time a lesson is opened. After that the course cannot be refunded.
+    // Set by the lesson player the first time a lesson is opened. After that the course cannot be refunded.
     { name: 'firstAccessedAt', label: 'First opened a lesson', type: 'date', admin: { readOnly: true, condition: (d) => !!d?.firstAccessedAt } },
+    { name: 'lastLesson', label: 'Last lesson opened', type: 'relationship', relationTo: 'lessons', admin: { readOnly: true, condition: (d) => !!d?.lastLesson } },
+    // "3/5 done, certificate issued on 4 Nov 2026": worked out when shown, never stored.
+    {
+      name: 'progress',
+      label: 'Progress',
+      type: 'text',
+      virtual: true,
+      admin: { readOnly: true },
+      hooks: {
+        afterRead: [
+          async ({ data, req }) => {
+            // Only for staff looking at the admin: the site's own reads of enrolments skip the extra queries.
+            if (!data?.id || !req.user) return undefined
+            const { progressText } = await import('../../server/learn')
+            return progressText(req.payload, data.id, typeof data.course === 'object' ? data.course?.id : data.course)
+          },
+        ],
+      },
+    },
+  ],
+}
+
+/** Lessons a student has marked done. Written only by the player's server code, after it has checked the enrolment. */
+export const LessonProgress: CollectionConfig = {
+  slug: 'lesson-progress',
+  admin: { hidden: true },
+  access: { read: isOrderStaff, create: () => false, update: () => false, delete: isOwner },
+  indexes: [{ fields: ['enrolment', 'lesson'], unique: true }],
+  fields: [
+    { name: 'enrolment', type: 'relationship', relationTo: 'enrolments', required: true, index: true },
+    { name: 'lesson', type: 'relationship', relationTo: 'lessons', required: true },
+    { name: 'completedAt', type: 'date', required: true },
+  ],
+}
+
+/** One certificate per enrolment. The owner can withdraw or reissue one with the buttons on its page. */
+export const Certificates: CollectionConfig = {
+  slug: 'certificates',
+  labels: { singular: 'Certificate', plural: 'Certificates' },
+  admin: {
+    useAsTitle: 'publicId',
+    group: 'Courses',
+    defaultColumns: ['nameOnCert', 'course', 'issuedAt', 'status'],
+    listSearchableFields: ['publicId', 'nameOnCert'],
+    description: 'Certificates are made by themselves when a student finishes every lesson. Open one to withdraw it or give it a new number.',
+    hidden: hideUnlessOrderStaff,
+  },
+  access: { read: isOrderStaff, create: () => false, update: isOwner, delete: isOwner },
+  indexes: [{ fields: ['enrolment'], unique: true }],
+  fields: [
+    { name: 'actions', type: 'ui', admin: { components: { Field: '/payload/admin/CertificateActions#CertificateActions' } } },
+    { name: 'publicId', label: 'Certificate number', type: 'text', required: true, unique: true, index: true, admin: { readOnly: true } },
+    { name: 'nameOnCert', label: 'Name on the certificate', type: 'text', required: true },
+    { type: 'row', fields: [{ name: 'course', type: 'relationship', relationTo: 'courses', required: true, admin: { readOnly: true } }, { name: 'issuedAt', label: 'Issued on', type: 'date', required: true, admin: { readOnly: true } }] },
+    { name: 'enrolment', type: 'relationship', relationTo: 'enrolments', required: true, admin: { readOnly: true } },
+    { name: 'customer', label: 'Student', type: 'relationship', relationTo: 'customers', required: true, index: true, admin: { readOnly: true } },
+    {
+      name: 'status',
+      label: 'Status',
+      type: 'select',
+      required: true,
+      defaultValue: 'valid',
+      admin: { readOnly: true },
+      options: [
+        { label: 'Genuine', value: 'valid' },
+        { label: 'Withdrawn', value: 'revoked' },
+      ],
+    },
   ],
 }
