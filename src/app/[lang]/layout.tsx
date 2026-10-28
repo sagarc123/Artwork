@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Mukta, Rozha_One, Tiro_Devanagari_Marathi } from 'next/font/google'
+import { Hanken_Grotesk, Mukta, Rozha_One, Tiro_Devanagari_Marathi } from 'next/font/google'
 import { ViewTransition } from 'react'
 import '../globals.css'
 import { BottomTabBar } from '@/components/BottomTabBar'
@@ -18,6 +18,8 @@ import { getFestivals, getSiteExtras } from '@/server/content'
 const tiro = Tiro_Devanagari_Marathi({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-tiro', display: 'swap' })
 // Festival-poster display face, used only for one giant word per section and step numerals.
 const rozha = Rozha_One({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-rozha', display: 'swap', preload: false })
+// Everyday headings (globals.css --heading-face); Devanagari falls through to Mukta.
+const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' })
 const mukta = Mukta({ weight: ['400', '500', '600', '700'], subsets: ['devanagari', 'latin'], variable: '--font-mukta', display: 'swap' })
 
 export function generateStaticParams() {
@@ -54,7 +56,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
       : ''
 
   return (
-    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable}`} data-festive={fixedLook} data-season={season ?? undefined} suppressHydrationWarning>
+    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable} ${hanken.variable}`} data-festive={fixedLook} data-season={season ?? undefined} suppressHydrationWarning>
       <head>
         {/* Before first paint: a saved "Stop animations" (so the hero doesn't start drawing and then jump), an announcement closed earlier this visit, and the automatic look. */}
         <InlineScript

@@ -50,13 +50,13 @@ export function DoorstepScene({ seed, style, label, draw, className = '' }: { se
   return (
     <figure className={`grid gap-2 ${className}`}>
       <div aria-hidden="true" className="bg-surface p-1.5 shadow-frame sm:p-2 lg:p-3">
-        <div className="relative aspect-[4/5] overflow-hidden bg-charcoal grain-dark">
+        <div className="doorstep relative aspect-[4/5] overflow-hidden bg-charcoal grain-dark">
           <div className="toran absolute inset-x-0 top-0 h-6" />
           <GenerativeRangoli seed={seed} style={style} tone="dark" animate={draw} className="absolute top-1/2 left-1/2 w-[82%] -translate-x-1/2 -translate-y-[45%]" />
           <span className="diya absolute bottom-[16%] left-[8%]" />
           <span className="diya absolute right-[8%] bottom-[16%]" />
           {/* Basalt doorstep with a worn, lighter edge: same stone family as the floor. */}
-          <div className="absolute inset-x-0 bottom-0 h-[12%] border-t-[3px] border-[#8b8178] bg-[#4d4640]" />
+          <div className="doorstep-step absolute inset-x-0 bottom-0 h-[12%] border-t-[3px] border-[#8b8178] bg-[#4d4640]" />
         </div>
       </div>
       {label && <figcaption className="font-heading text-h3">{label}</figcaption>}

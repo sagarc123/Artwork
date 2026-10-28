@@ -28,7 +28,7 @@ export function FestivalTiles({ festivals, t, locale, remind }: { festivals: Fes
         <li key={f.slug} className={i === 0 ? 'grid content-start gap-3 sm:col-span-2' : ''}>
           <Link
             href={f.href}
-            className={`card group relative flex h-full min-h-40 flex-col justify-between gap-6 overflow-hidden rounded-ui p-5 text-paper grain-dark ${f.floor} ${i === 0 ? 'lg:min-h-72' : ''}`}
+            className={`card fest-tile group relative flex h-full min-h-40 flex-col justify-between gap-6 overflow-hidden rounded-ui p-5 text-paper grain-dark ${f.floor} ${i === 0 ? 'lg:min-h-72' : ''}`}
           >
             {i === 0 ? <span className="relative z-10 self-start rounded-full bg-turmeric px-3 font-semibold text-charcoal">{t.next}</span> : <span />}
             <FestivalMotif

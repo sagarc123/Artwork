@@ -259,7 +259,7 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-6 lg:col-span-6 lg:col-start-7">
             <h2 className="font-heading text-h1">{h.artist.title}</h2>
-            <blockquote className="font-heading text-h3 text-paper/95 lg:text-[1.875rem] lg:leading-snug">“{h.artist.body}”</blockquote>
+            <blockquote className="font-heading text-h3 text-on/95 lg:text-[1.875rem] lg:leading-snug">“{h.artist.body}”</blockquote>
             <Link href={p('/about')} className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold">
               {h.artist.cta}
             </Link>
