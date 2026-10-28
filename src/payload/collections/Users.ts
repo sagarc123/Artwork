@@ -1,9 +1,20 @@
-import type { CollectionConfig } from 'payload'
+import { sql } from '@payloadcms/db-postgres'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, hideFromNonOwners, isOwner, ownerOnlyField, ROLES } from '../access'
 
 /** An error whose message shows in the admin (see Orders). */
 const refuse = (message: string) => Object.assign(new APIError(message, 400, null, true), { name: 'APIError' })
+
+/**
+ * Locks every owner row until the surrounding transaction ends, so two owners demoting (or deleting) each other at the same moment
+ * are checked one after the other, and the second sees the first's result. Without a transaction there is nothing to lock.
+ */
+async function lockOwners(req: PayloadRequest) {
+  const id = await req.transactionID
+  const tx = id ? req.payload.db.sessions?.[id]?.db : undefined
+  await (tx as typeof req.payload.db.drizzle | undefined)?.execute(sql`SELECT id FROM payload.users WHERE id IN (SELECT parent_id FROM payload.users_roles WHERE value = 'owner') FOR UPDATE`)
+}
 
 /** Admin panel accounts (the artist and any helpers). */
 export const Users: CollectionConfig = {
@@ -39,6 +50,7 @@ export const Users: CollectionConfig = {
       async ({ data, originalDoc, operation, req }) => {
         if (operation !== 'update' || !Array.isArray(data.roles) || !hasRole(originalDoc, 'owner') || data.roles.includes('owner')) return data
         if (req.user?.id === originalDoc.id) throw refuse('You cannot remove your own Owner role.')
+        await lockOwners(req)
         const { totalDocs } = await req.payload.count({ collection: 'users', where: { and: [{ roles: { in: ['owner'] } }, { id: { not_equals: originalDoc.id } }] }, req })
         if (!totalDocs) throw refuse('Keep at least one owner.')
         return data
@@ -46,6 +58,7 @@ export const Users: CollectionConfig = {
     ],
     beforeDelete: [
       async ({ id, req }) => {
+        await lockOwners(req)
         const { totalDocs } = await req.payload.count({ collection: 'users', where: { and: [{ roles: { in: ['owner'] } }, { id: { not_equals: id } }] }, req })
         const doc = await req.payload.findByID({ collection: 'users', id, depth: 0, req })
         if (hasRole(doc, 'owner') && !totalDocs) throw refuse('Keep at least one owner.')

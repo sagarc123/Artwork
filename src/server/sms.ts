@@ -1,12 +1,16 @@
 import 'server-only'
-import { showTestCode } from '@/lib/auth'
+import { mayLogSecrets, showTestCode } from '@/lib/auth'
 
 /**
  * Sends the sign-in code by SMS (MSG91). Without MSG91_AUTH_KEY it is test mode: the code is written to the server log,
- * and handed back for the page to show only in development (never in production).
+ * and handed back for the page to show only in development. In production there is no test mode: no key means no SMS.
  */
 export async function sendOtp(phone: string, code: string): Promise<{ ok: boolean; testCode?: string }> {
   const key = process.env.MSG91_AUTH_KEY
+  if (!key && !mayLogSecrets(process.env.NODE_ENV)) {
+    console.error('SMS not sent: MSG91_AUTH_KEY is not set (production never logs sign-in codes)')
+    return { ok: false }
+  }
   if (!key) {
     console.log(`[sign-in code, test mode] +91${phone}: ${code}`)
     return { ok: true, testCode: showTestCode(process.env.NODE_ENV, false) ? code : undefined }

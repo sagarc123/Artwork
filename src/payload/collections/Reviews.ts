@@ -1,3 +1,4 @@
+import path from 'node:path'
 import type { Access, CollectionConfig } from 'payload'
 import { canEditContent, hasRole, isOwner, staffOnlyField } from '../access'
 import { refreshOnChange } from '../hooks'
@@ -53,7 +54,7 @@ export const Reviews: CollectionConfig = {
       ],
     },
     { name: 'text', label: 'Their review', type: 'textarea', required: true, maxLength: 1000, admin: { readOnly: true } },
-    { name: 'photo', label: 'Their photo', type: 'upload', relationTo: 'media', admin: { readOnly: true, condition: (d) => !!d?.photo } },
+    { name: 'photo', label: 'Their photo', type: 'upload', relationTo: 'review-photos', admin: { readOnly: true, condition: (d) => !!d?.photo } },
     // Who wrote it: never shown on the website, and hidden from the public API.
     { name: 'customer', label: 'Student account', type: 'relationship', relationTo: 'customers', required: true, index: true, access: { read: staffOnlyField }, admin: { readOnly: true } },
   ],
@@ -61,5 +62,32 @@ export const Reviews: CollectionConfig = {
   indexes: [
     { fields: ['customer', 'product'], unique: true },
     { fields: ['customer', 'course'], unique: true },
+  ],
+}
+
+/** A photo's file is public only while its review is approved (staff always see it). */
+const ofApprovedReview: Access = ({ req }) => hasRole(req.user, 'owner', 'staff', 'editor') || { 'review.status': { equals: 'approved' } }
+
+/**
+ * Photos sent with reviews, kept apart from the photo library so a waiting or hidden review's picture is never public:
+ * the file address answers only once its review is approved. Written only by the review form.
+ */
+export const ReviewPhotos: CollectionConfig = {
+  slug: 'review-photos',
+  labels: { singular: 'Review photo', plural: 'Review photos' },
+  admin: { hidden: true },
+  access: { read: ofApprovedReview, create: () => false, update: () => false, delete: isOwner },
+  upload: {
+    staticDir: path.resolve(process.cwd(), 'review-photos'),
+    mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    adminThumbnail: 'thumb',
+    resizeOptions: { width: 1600, withoutEnlargement: true },
+    formatOptions: { format: 'webp', options: { quality: 82 } },
+    imageSizes: [{ name: 'thumb', width: 400 }],
+  },
+  fields: [
+    { name: 'alt', type: 'text' },
+    // Set by the review form once the review exists; the access rule above follows it.
+    { name: 'review', type: 'relationship', relationTo: 'reviews', index: true },
   ],
 }

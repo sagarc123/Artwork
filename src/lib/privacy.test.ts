@@ -1,12 +1,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { dueAt, orderEmails, scopeExport } from './privacy.ts'
+import { dueAt, myOrdersWhere, orderEmails, ownsOrder, scopeExport } from './privacy.ts'
 
 const rows = {
   orders: [
-    { id: 1, account: 7, customer: { phone: '9000000001', email: 'Me@x.in' } },
-    { id: 2, account: null, customer: { phone: '9000000001', email: 'old@x.in' } }, // placed earlier with her verified phone
-    { id: 3, account: 8, customer: { phone: '9000000002', email: 'other@x.in' } },
+    { id: 1, createdAt: '2026-10-02T00:00:00Z', account: 7, customer: { phone: '9000000001', email: 'Me@x.in' } },
+    { id: 2, createdAt: '2026-10-03T00:00:00Z', account: null, customer: { phone: '9000000001', email: 'old@x.in' } }, // a guest order with her phone, placed after she made the account
+    { id: 4, createdAt: '2026-09-01T00:00:00Z', account: null, customer: { phone: '9000000001', email: 'prev@x.in' } }, // before her account: the number's earlier owner
+    { id: 3, createdAt: '2026-10-02T00:00:00Z', account: 8, customer: { phone: '9000000002', email: 'other@x.in' } },
   ],
   enrolments: [{ id: 10, customer: 7 }, { id: 11, customer: { id: 8 } }],
   progress: [{ id: 100, enrolment: 10 }, { id: 101, enrolment: { id: 11 } }],
@@ -21,10 +22,18 @@ const rows = {
   ],
   subscribers: [{ id: 50, email: 'me@x.in' }, { id: 51, email: 'old@x.in' }, { id: 52, email: 'other@x.in' }],
 }
-const me = { id: 7, phone: '9000000001', visitorId: 'vid-mine' }
+const me = { id: 7, phone: '9000000001', since: '2026-10-01T00:00:00Z', visitorId: 'vid-mine' }
 
-test('the emails come from this customer only', () => {
-  assert.deepEqual(orderEmails(rows.orders, me), ['me@x.in', 'old@x.in'])
+test('the emails come from orders linked to this account only, not guest orders matched by phone', () => {
+  assert.deepEqual(orderEmails(rows.orders, me), ['me@x.in'])
+})
+
+test('guest orders match by phone only if placed after the account was made', () => {
+  assert.equal(ownsOrder(rows.orders[0], me), true) // linked
+  assert.equal(ownsOrder(rows.orders[1], me), true) // guest, after
+  assert.equal(ownsOrder(rows.orders[2], me), false) // guest, before: recycled number
+  assert.equal(ownsOrder(rows.orders[1], { ...me, since: undefined }), false) // no account date: no phone match
+  assert.deepEqual(myOrdersWhere({ id: 7, phone: '9000000001', since: 'S' }).or?.[1], { and: [{ 'customer.phone': { equals: '9000000001' } }, { createdAt: { greater_than_equal: 'S' } }] })
 })
 
 test('an export holds only this customer rows', () => {
@@ -35,7 +44,7 @@ test('an export holds only this customer rows', () => {
   assert.deepEqual(out.certificates.map((o) => o.id), [20])
   assert.deepEqual(out.reviews.map((o) => o.id), [30])
   assert.deepEqual(out.consents.map((o) => o.id), [40, 41, 43])
-  assert.deepEqual(out.subscribers.map((o) => o.id), [50, 51])
+  assert.deepEqual(out.subscribers.map((o) => o.id), [50]) // old@x.in was a guest order's address
 })
 
 test('without a visitor id or emails, nothing extra leaks in', () => {

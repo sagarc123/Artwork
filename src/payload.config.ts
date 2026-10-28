@@ -15,7 +15,7 @@ import { TaxClasses } from './payload/collections/TaxClasses'
 import { Certificates, Customers, Enrolments, LessonProgress, OtpCodes } from './payload/collections/Students'
 import { Consents, Subscribers } from './payload/collections/Newsletter'
 import { DataRequests } from './payload/collections/Privacy'
-import { Reviews } from './payload/collections/Reviews'
+import { ReviewPhotos, Reviews } from './payload/collections/Reviews'
 import { Testimonials } from './payload/collections/Testimonials'
 import { Users } from './payload/collections/Users'
 import { CommerceSettings } from './payload/globals/CommerceSettings'
@@ -109,7 +109,7 @@ export default buildConfig({
     },
   },
   // Menu groups follow this order: Orders & enquiries (orders, invoices, enquiries; the Customers page sits above them), Shop, Gallery & Festivals, (Courses, hidden), Lists (categories, mediums, GST classes), Settings.
-  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Reviews, Media, Courses, Lessons, Enrolments, Certificates, LessonProgress, Customers, OtpCodes, Subscribers, Consents, DataRequests, Categories, Mediums, TaxClasses, Users].map(noApiTab),
+  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Reviews, ReviewPhotos, Media, Courses, Lessons, Enrolments, Certificates, LessonProgress, Customers, OtpCodes, Subscribers, Consents, DataRequests, Categories, Mediums, TaxClasses, Users].map(noApiTab),
   globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {
     locales: [
@@ -122,6 +122,8 @@ export default buildConfig({
   },
   secret: process.env.PAYLOAD_SECRET,
   graphQL: { disable: true },
+  // Biggest upload anywhere (the making-of video). Photos get a smaller cap in the Media collection (see Media.ts).
+  upload: { limits: { fileSize: 200 * 1024 * 1024 } },
   telemetry: false,
   sharp,
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

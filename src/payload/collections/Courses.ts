@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { refreshOnChange } from '../hooks'
-import { anyone, canEditContent, isOwner, publishedOrStaff, staffOnlyField } from '../access'
+import { canEditContent, hasRole, isOwner, publishedOrStaff, staffOnlyField } from '../access'
 import { englishRequired, rupeesField, seoFields, slugField } from '../fields'
 import { site } from '../../lib/site'
 import { sitePath } from '../../lib/admin'
@@ -119,8 +119,9 @@ export const Lessons: CollectionConfig = {
   slug: 'lessons',
   hooks: refreshOnChange('lessons'),
   admin: { useAsTitle: 'title', group: 'Courses', defaultColumns: ['title', 'course', 'section', 'order', 'isFreePreview'], hidden },
-  // Titles are public (course curriculum); the video itself is protected by signed links (milestone 12).
-  access: { read: anyone, create: canEditContent, update: canEditContent, delete: isOwner },
+  // Titles are public (course curriculum), but only for a published course: a draft course's lessons stay with staff.
+  // The video itself is protected by signed links (milestone 12).
+  access: { read: ({ req }) => hasRole(req.user, 'owner', 'staff', 'editor') || { 'course._status': { equals: 'published' } }, create: canEditContent, update: canEditContent, delete: isOwner },
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, validate: englishRequired },
     { name: 'course', type: 'relationship', relationTo: 'courses', required: true, index: true },

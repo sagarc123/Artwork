@@ -1,3 +1,4 @@
+import { sql } from '@payloadcms/db-postgres'
 import type { CollectionConfig, Field } from 'payload'
 import { APIError } from 'payload'
 import { hasRole, isOrderStaff, isOwner } from '../access'
@@ -27,6 +28,8 @@ export const ORDER_STATUSES = [
 ]
 
 const OWNER_ONLY_STATUSES = ['paid', 'needs_refund', 'refunded']
+/** Statuses where the customer no longer has what they bought. */
+const CLOSED = ['cancelled', 'needs_refund', 'refunded']
 
 /** Shop orders. Created only by the website's checkout; staff move them through packing and shipping. */
 export const Orders: CollectionConfig = {
@@ -111,6 +114,18 @@ export const Orders: CollectionConfig = {
         if (doc.status === 'delivered' && previousDoc?.status !== 'delivered') {
           const { issueInvoice } = await import('@/server/invoices')
           await issueInvoice(doc.id, req)
+        }
+        // Confirmed (or cancelled): the stock hold, and with it the 48 hour COD expiry, is over. Written inside this save's own
+        // transaction (a separate connection would wait for the row this save has locked); the field itself is locked for edits.
+        if (doc.reservedUntil && previousDoc?.status && ['pending_payment', 'cod_pending_confirmation'].includes(previousDoc.status) && doc.status !== previousDoc.status) {
+          const txID = await req.transactionID
+          const tx = txID ? req.payload.db.sessions?.[txID]?.db : undefined
+          await (tx as typeof req.payload.db.drizzle | undefined)?.execute(sql`UPDATE payload.orders SET reserved_until = NULL WHERE id = ${doc.id}`)
+        }
+        // Refunded or cancelled: a course in the order stops working (the seat goes; a certificate already issued is withdrawn).
+        if (CLOSED.includes(doc.status) && !CLOSED.includes(previousDoc?.status) && doc.items?.some((it: { course?: unknown }) => it.course)) {
+          const { revokeSeats } = await import('@/server/enrol')
+          await revokeSeats(doc.id)
         }
         return doc
       },
@@ -238,6 +253,8 @@ export const Orders: CollectionConfig = {
         },
         // The signed-in customer who placed it (always set for course orders).
         { name: 'account', label: 'Student account', type: 'relationship', relationTo: 'customers', index: true },
+        // The browser that placed it (signed visitor cookie): lets a retry cancel its own earlier checkout, even when not signed in.
+        { name: 'visitorId', type: 'text', index: true, admin: { hidden: true } },
         { name: 'locale', type: 'text', admin: { hidden: true } },
       ]),
     },

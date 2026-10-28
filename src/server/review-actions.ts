@@ -46,10 +46,11 @@ export async function submitReview(_prev: ReviewState, form: FormData): Promise<
   try {
     const payload = await getPayload({ config })
     const media = photo
-      ? await payload.create({ collection: 'media', data: { alt: 'Photo sent with a review' }, file: { data: Buffer.from(photo.bytes), mimetype: photo.type, name: `review-${randomUUID()}.${EXT[photo.type]}`, size: photo.bytes.length } })
+      ? await payload.create({ collection: 'review-photos', data: { alt: 'Photo sent with a review' }, file: { data: Buffer.from(photo.bytes), mimetype: photo.type, name: `review-${randomUUID()}.${EXT[photo.type]}`, size: photo.bytes.length } })
       : null
     // New reviews wait for approval. The unique (customer, item) index settles two taps at once.
-    await payload.create({ collection: 'reviews', data: { status: 'pending', kind, [kind]: id, customer: me.id, name, rating, text, photo: media?.id } })
+    const review = await payload.create({ collection: 'reviews', data: { status: 'pending', kind, [kind]: id, customer: me.id, name, rating, text, photo: media?.id } })
+    if (media) await payload.update({ collection: 'review-photos', id: media.id, data: { review: review.id } }) // the photo is public only while this review is approved
     return { status: 'ok' }
   } catch (error) {
     if ((await reviewCheck(me, kind, id)) === 'already') return { status: 'blocked', reason: 'already' }

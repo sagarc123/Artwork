@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { hasRole, isOrderStaff, isOwner } from '../access'
+import { hasRole, isOrderStaff, isOwner, ownerOnlyField } from '../access'
 import { normalisePhone } from '../../lib/enquiry'
 
 const hideUnlessOrderStaff = ({ user }: { user: unknown }) => !hasRole(user, 'owner', 'staff')
@@ -33,13 +33,15 @@ export const Customers: CollectionConfig = {
       required: true,
       unique: true,
       index: true,
+      // The phone is the login: a helper must not be able to move an account to a number they hold (they may still add a student).
+      access: { update: ownerOnlyField },
       validate: (v: string | null | undefined) => (typeof v === 'string' && (/^[6-9]\d{9}$/.test(v) || v.startsWith('deleted-')) ? true : 'Please enter a 10-digit mobile number.'),
     },
     { name: 'name', type: 'text' },
     { name: 'erase', type: 'ui', admin: { components: { Field: '/payload/admin/EraseStudent#EraseStudent' }, condition: (d) => !!d?.id && !d?.deletedAt } },
     // The saved ("wishlist") pieces, merged from the device when the customer signs in.
-    { name: 'savedSlugs', type: 'json', admin: { hidden: true } },
-    { name: 'deletedAt', label: 'Deleted their account on', type: 'date', admin: { readOnly: true, condition: (d) => !!d?.deletedAt } },
+    { name: 'savedSlugs', type: 'json', access: { update: ownerOnlyField }, admin: { hidden: true } },
+    { name: 'deletedAt', label: 'Deleted their account on', type: 'date', access: { update: ownerOnlyField }, admin: { readOnly: true, condition: (d) => !!d?.deletedAt } },
   ],
 }
 
@@ -146,7 +148,8 @@ export const Certificates: CollectionConfig = {
     { name: 'publicId', label: 'Certificate number', type: 'text', required: true, unique: true, index: true, admin: { readOnly: true } },
     { name: 'nameOnCert', label: 'Name on the certificate', type: 'text', required: true },
     { type: 'row', fields: [{ name: 'course', type: 'relationship', relationTo: 'courses', required: true, admin: { readOnly: true } }, { name: 'issuedAt', label: 'Issued on', type: 'date', required: true, admin: { readOnly: true } }] },
-    { name: 'enrolment', type: 'relationship', relationTo: 'enrolments', required: true, admin: { readOnly: true } },
+    // Empty once a refund removes the seat; the certificate itself stays (withdrawn).
+    { name: 'enrolment', type: 'relationship', relationTo: 'enrolments', admin: { readOnly: true } },
     { name: 'customer', label: 'Student', type: 'relationship', relationTo: 'customers', required: true, index: true, admin: { readOnly: true } },
     {
       name: 'status',

@@ -1,6 +1,7 @@
 import 'server-only'
 import config from '@payload-config'
 import { getPayload } from 'payload'
+import { myOrdersWhere } from '@/lib/privacy'
 import { checkCourseReview, checkProductReview, productBought, type ReviewCheck } from '@/lib/reviews'
 import { enrolmentOf, progressFor } from './learn'
 
@@ -24,12 +25,12 @@ export async function reviewedBy(customerId: number) {
  * May this signed-in customer review this item right now? The one place the rule is decided, for the form page and the
  * submit action alike: products need a delivered order (or a paid digital one), courses a seat with 30% of lessons done.
  */
-export async function reviewCheck(me: { id: number; phone: string }, kind: ReviewKind, id: number): Promise<ReviewCheck> {
+export async function reviewCheck(me: { id: number; phone: string; createdAt: string }, kind: ReviewKind, id: number): Promise<ReviewCheck> {
   const payload = await getPayload({ config })
   const existing = await hasReviewed(me.id, kind, id)
   if (kind === 'product') {
-    // Same orders as "My orders": placed from this account, or earlier with the phone number it has proved.
-    const { docs } = await payload.find({ collection: 'orders', where: { or: [{ account: { equals: me.id } }, { 'customer.phone': { equals: me.phone } }] }, limit: 200, depth: 0, select: { status: true, items: true } })
+    // Same orders as "My orders": placed from this account, or as a guest with its phone after the account was made.
+    const { docs } = await payload.find({ collection: 'orders', where: myOrdersWhere({ ...me, since: me.createdAt }), limit: 200, depth: 0, select: { status: true, items: true } })
     const orders = docs.map((o) => ({ status: o.status, items: (o.items ?? []).map((i) => ({ product: typeof i.product === 'number' ? i.product : null, type: i.type })) }))
     return checkProductReview(productBought(orders, id), existing)
   }

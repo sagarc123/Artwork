@@ -35,3 +35,22 @@ export async function createRazorpayOrder(amountPaise: number, receipt: string) 
   if (!res.ok) throw new Error(`Razorpay order failed: ${res.status} ${await res.text()}`)
   return (await res.json()) as { id: string; amount: number }
 }
+
+/** The request body as text, or null once it goes past `max` bytes (reading stops there). */
+export async function readCapped(request: Request, max: number) {
+  const reader = request.body?.getReader()
+  if (!reader) return ''
+  const chunks: Uint8Array[] = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.length
+    if (size > max) {
+      await reader.cancel()
+      return null
+    }
+    chunks.push(value)
+  }
+  return Buffer.concat(chunks).toString('utf8')
+}

@@ -1,12 +1,23 @@
 import path from 'node:path'
 import { refreshOnChange } from '../hooks'
-import type { CollectionConfig } from 'payload'
+import { APIError, type CollectionConfig } from 'payload'
 import { anyone, canEditContent, hideFromHelpers, isOwner } from '../access'
+
+const PHOTO_MAX_BYTES = 15 * 1024 * 1024
 
 /** Photos for products, artworks, courses and pages, plus the making-of video (Website details). */
 export const Media: CollectionConfig = {
   slug: 'media',
-  hooks: refreshOnChange('media'),
+  hooks: {
+    ...refreshOnChange('media'),
+    // The config-wide upload cap fits the making-of video; a photo is held to 15 MB.
+    beforeOperation: [
+      ({ req, operation }) => {
+        const file = req.file
+        if ((operation === 'create' || operation === 'update') && file && !file.mimetype.startsWith('video/') && file.size > PHOTO_MAX_BYTES) throw new APIError('Photos can be up to 15 MB.', 413, null, true)
+      },
+    ],
+  },
   labels: { singular: 'Photo', plural: 'Photo library' },
   admin: {
     group: 'Gallery & Festivals',

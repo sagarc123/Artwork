@@ -6,8 +6,11 @@ import type { QuoteLine } from '@/lib/cart'
 import { reservedFixes, type CancelPlan } from '@/lib/orders'
 import { enrolFromOrder } from './enrol'
 import { issueInvoice } from './invoices'
+import { pruneRateLimits } from './rate-limit'
 
 export const HOLD_MINUTES = 15
+/** A cash-on-delivery order holds its stock this long while staff check it with the customer; then it is cancelled like an unpaid checkout. */
+export const COD_HOLD_HOURS = 48
 
 const payloadDb = async () => {
   const payload = await getPayload({ config })
@@ -86,17 +89,22 @@ export const confirmCod = (orderId: number, items: HeldItem[]) => transition(ord
 export const cancelOrder = (orderId: number, from: string, plan: CancelPlan, items: HeldItem[]) =>
   transition(orderId, [from], plan.status, items, plan.stock === 'release' ? release : restock)
 
-/** Cancels checkouts not paid in time (and, optionally, earlier open checkouts from the same phone). Returns how many. */
-export async function expireHolds(phone?: string, refresh = true) {
+/**
+ * Cancels checkouts not paid in time and COD orders nobody confirmed in time (their `reservedUntil` passed), and optionally
+ * this customer's earlier open online checkouts (same signed-in account or same visitor, never just the same phone number,
+ * so nobody can cancel someone else's checkout by typing their number). Returns how many.
+ */
+export async function expireHolds(own?: { account?: number | null; visitor?: string | null }, refresh = true) {
   const { payload } = await payloadDb()
   const now = new Date().toISOString()
   const or: Where[] = [{ reservedUntil: { less_than: now } }]
-  if (phone) or.push({ 'customer.phone': { equals: phone } })
+  if (own?.account) or.push({ and: [{ status: { equals: 'pending_payment' } }, { account: { equals: own.account } }] })
+  if (own?.visitor) or.push({ and: [{ status: { equals: 'pending_payment' } }, { visitorId: { equals: own.visitor } }] })
   let n = 0
   for (;;) {
-    const { docs } = await payload.find({ collection: 'orders', where: { and: [{ status: { equals: 'pending_payment' } }, { or }] }, limit: 50, depth: 0 })
+    const { docs } = await payload.find({ collection: 'orders', where: { and: [{ status: { in: ['pending_payment', 'cod_pending_confirmation'] } }, { or }] }, limit: 50, depth: 0 })
     // One cache refresh for the whole batch, not one per order.
-    for (const order of docs) if (await transition(order.id, ['pending_payment'], 'cancelled', order.items ?? [], release, false)) n++
+    for (const order of docs) if (await transition(order.id, [order.status], 'cancelled', order.items ?? [], release, false)) n++
     if (docs.length < 50) break
   }
   if (n && refresh) await refreshProducts()
@@ -203,6 +211,7 @@ async function reconcileReserved() {
 /** Every few minutes (see /api/cron/maintenance): free expired holds, issue missed invoices, check held stock. Safe to run twice. */
 export async function runMaintenance() {
   const expired = await expireHolds(undefined, false)
+  await pruneRateLimits().catch((error) => console.error('Rate-limit cleanup failed', error))
   const invoices = await retryInvoices()
   const reserved = await reconcileReserved().catch((error) => (console.warn('Held stock check skipped (busy), next run retries', error), 0))
   // One cache refresh for the whole run.

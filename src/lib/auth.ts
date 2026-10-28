@@ -2,7 +2,12 @@
 import { createHmac, randomInt, timingSafeEqual } from 'node:crypto'
 
 export const OTP_MINUTES = 10
+/** Wrong guesses allowed per phone AND visitor address: an attacker locks only their own address, never the real owner's. */
 export const OTP_MAX_TRIES = 5
+/** Wrong guesses allowed on one code from all addresses together (the brute-force bound); then the code is burned and a new one can be sent. */
+export const OTP_MAX_TOTAL = 25
+/** SMS a single phone number may be sent in a day, against SMS pumping. */
+export const OTP_MAX_PER_DAY = 10
 /** A new code can be asked for this often (per phone). */
 export const OTP_RESEND_SECONDS = 30
 export const SESSION_DAYS = 30
@@ -21,21 +26,24 @@ export type OtpRow = { codeHash: string; expiresAt: number; attempts: number; se
 
 /**
  * Checks a typed code. `ok` also means the row must now be deleted (a code works once).
- * Every wrong guess counts; after OTP_MAX_TRIES the row is locked until it expires or is replaced.
+ * `mine` is the wrong guesses already made by this visitor address for this phone: OTP_MAX_TRIES locks that address out.
+ * The row's own count (every address) is the overall bound: OTP_MAX_TOTAL burns the code.
  */
-export function checkCode(row: OtpRow | null | undefined, phone: string, code: string, secret: string, now: number): 'ok' | 'wrong' | 'expired' | 'locked' | 'none' {
+export function checkCode(row: OtpRow | null | undefined, phone: string, code: string, secret: string, now: number, mine = 0): 'ok' | 'wrong' | 'expired' | 'locked' | 'none' {
   if (!row) return 'none'
   if (row.expiresAt <= now) return 'expired'
-  if (row.attempts >= OTP_MAX_TRIES) return 'locked'
+  if (mine >= OTP_MAX_TRIES || row.attempts >= OTP_MAX_TOTAL) return 'locked'
   return same(row.codeHash, hashCode(phone, code, secret)) ? 'ok' : 'wrong'
 }
 
-/** May a new code be sent now? A locked phone waits for its code to expire; otherwise a short pause between codes. */
-export function canSend(row: OtpRow | null | undefined, now: number): 'ok' | 'wait' | 'locked' {
+/** May a new code be sent now? Only a short pause between codes: a burned code never blocks the real owner. */
+export function canSend(row: OtpRow | null | undefined, now: number): 'ok' | 'wait' {
   if (!row) return 'ok'
-  if (row.attempts >= OTP_MAX_TRIES && row.expiresAt > now) return 'locked'
   return now - row.sentAt < OTP_RESEND_SECONDS * 1000 ? 'wait' : 'ok'
 }
+
+/** Test mode (codes and emails written to the log) never exists in production. */
+export const mayLogSecrets = (nodeEnv: string | undefined) => nodeEnv !== 'production'
 
 /** The code may be shown on screen only while developing, and only when no SMS provider is set up. Never in production. */
 export const showTestCode = (nodeEnv: string | undefined, hasProvider: boolean) => nodeEnv === 'development' && !hasProvider

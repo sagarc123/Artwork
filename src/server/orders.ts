@@ -10,9 +10,10 @@ import { isValidGstin } from '@/lib/gst'
 import { normalisePhone } from '@/lib/enquiry'
 import { createRazorpayOrder, razorpayConfig, verifyPaymentSignature } from '@/lib/razorpay'
 import { cancelPlan } from '@/lib/orders'
-import { cancelOrder, expireHolds, holdStock, HOLD_MINUTES, markPaid, refreshProducts } from './order-service'
+import { cancelOrder, COD_HOLD_HOURS, expireHolds, holdStock, HOLD_MINUTES, markPaid, refreshProducts } from './order-service'
 import { getCustomer } from './customer'
 import { allow } from './rate-limit'
+import { visitorId } from './visitor'
 
 /** Accepts only well-formed cart lines from the browser. */
 function cleanLines(input: unknown): CartLine[] {
@@ -143,8 +144,9 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const rzp = razorpayConfig()
   if (!cod && !rzp) return { status: 'not_ready' }
 
-  // Also cancels this phone's earlier open checkouts, so retries don't pile up held stock.
-  await expireHolds(c.phone!)
+  // Also cancels this account's (or this browser's) earlier open checkouts, so retries don't pile up held stock. Never by phone alone.
+  const visitor = await visitorId()
+  await expireHolds({ account: me?.id, visitor })
   const { quote, rules, payload } = await quoteWithRules(input.lines, input.locale)
   if (!quote.ok || !rules || (courseOnly && quote.total === 0)) return { status: 'unavailable' }
   const seats = quote.lines.filter((l) => l.courseId)
@@ -168,6 +170,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     paymentMode: cod ? ('cod' as const) : ('prepaid' as const),
     publicId,
     account: me?.id,
+    visitorId: visitor,
     items: quote.lines.map((l) => ({
       product: l.productId,
       course: l.courseId,
@@ -191,7 +194,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     customer: { name: c.name, phone: c.phone!, email: c.email || undefined, gstin: gst?.gstin, businessName: gst?.businessName },
     address: a,
     note: clip(input.note, 500) || undefined,
-    reservedUntil: cod ? null : new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString(),
+    // COD stock is held until staff confirm; if nobody does within COD_HOLD_HOURS the maintenance job releases it.
+    reservedUntil: new Date(Date.now() + (cod ? COD_HOLD_HOURS * 3600_000 : HOLD_MINUTES * 60_000)).toISOString(),
     locale: isLocale(input.locale) ? input.locale : 'en',
   }
 

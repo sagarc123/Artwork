@@ -972,7 +972,8 @@
         {
           "h": "How long I keep it",
           "p": [
-            "Order and invoice records are kept for as long as tax law requires (currently up to 8 years). Enquiries are deleted 2 years after our last conversation. Permission for offers ends the moment you withdraw it."
+            "Order and invoice records are kept for as long as tax law requires (currently up to 8 years). Enquiries are deleted 2 years after our last conversation. Permission for offers ends the moment you withdraw it.",
+            "Invoices keep the buyer’s name and address for the period the law requires, even if you delete your account."
           ]
         },
         {

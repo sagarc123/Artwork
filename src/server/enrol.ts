@@ -64,3 +64,17 @@ export async function enrolFromOrder(orderId: number) {
     await payload.db.drizzle.execute(sql`UPDATE payload.orders SET status = 'delivered' WHERE id = ${orderId} AND status = 'paid'`)
   }
 }
+
+/**
+ * A course order was refunded or cancelled: its seats go, so /learn stops working. Progress goes with the seat; a certificate
+ * already issued stays on record but is withdrawn (the verify page then says so). One transaction.
+ */
+export async function revokeSeats(orderId: number) {
+  const d = (await getPayload({ config })).db.drizzle
+  await d.transaction(async (tx) => {
+    const seats = sql`SELECT id FROM payload.enrolments WHERE order_id = ${orderId}`
+    await tx.execute(sql`UPDATE payload.certificates SET status = 'revoked' WHERE enrolment_id IN (${seats})`)
+    await tx.execute(sql`DELETE FROM payload.lesson_progress WHERE enrolment_id IN (${seats})`)
+    await tx.execute(sql`DELETE FROM payload.enrolments WHERE order_id = ${orderId}`)
+  })
+}

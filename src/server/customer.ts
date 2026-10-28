@@ -8,7 +8,7 @@ import { readSession, SESSION_COOKIE, SESSION_DAYS, signSession } from '@/lib/au
 
 const secret = () => process.env.PAYLOAD_SECRET!
 
-export type Customer = { id: number; phone: string; name: string; savedSlugs: string[] }
+export type Customer = { id: number; phone: string; name: string; savedSlugs: string[]; createdAt: string }
 
 /** Is there a valid session cookie? (Signature and expiry only, no database: cheap enough for the header.) */
 export async function hasSession() {
@@ -27,7 +27,7 @@ export const getCustomer = cache(async (): Promise<Customer | null> => {
   const doc = await payload.findByID({ collection: 'customers', id, depth: 0 }).catch(() => null)
   if (!doc || doc.deletedAt) return null
   const saved = Array.isArray(doc.savedSlugs) ? doc.savedSlugs.filter((s): s is string => typeof s === 'string') : []
-  return { id: doc.id, phone: doc.phone, name: doc.name ?? '', savedSlugs: saved }
+  return { id: doc.id, phone: doc.phone, name: doc.name ?? '', savedSlugs: saved, createdAt: doc.createdAt }
 })
 
 /** httpOnly (scripts cannot read it), Secure in production, SameSite=Lax (not sent with cross-site form posts). */

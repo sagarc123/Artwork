@@ -75,6 +75,7 @@ export interface Config {
     festivals: Festival;
     testimonials: Testimonial;
     reviews: Review;
+    'review-photos': ReviewPhoto;
     media: Media;
     courses: Course;
     lessons: Lesson;
@@ -105,6 +106,7 @@ export interface Config {
     festivals: FestivalsSelect<false> | FestivalsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     reviews: ReviewsSelect<false> | ReviewsSelect<true>;
+    'review-photos': ReviewPhotosSelect<false> | ReviewPhotosSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
@@ -246,6 +248,7 @@ export interface Order {
   paidAt?: string | null;
   reservedUntil?: string | null;
   account?: (number | null) | Customer;
+  visitorId?: string | null;
   locale?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -744,10 +747,40 @@ export interface Review {
   product?: (number | null) | Product;
   course?: (number | null) | Course;
   text: string;
-  photo?: (number | null) | Media;
+  photo?: (number | null) | ReviewPhoto;
   customer: number | Customer;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "review-photos".
+ */
+export interface ReviewPhoto {
+  id: number;
+  alt?: string | null;
+  review?: (number | null) | Review;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumb?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -810,7 +843,7 @@ export interface Certificate {
   nameOnCert: string;
   course: number | Course;
   issuedAt: string;
-  enrolment: number | Enrolment;
+  enrolment?: (number | null) | Enrolment;
   customer: number | Customer;
   status: 'valid' | 'revoked';
   updatedAt: string;
@@ -982,6 +1015,10 @@ export interface PayloadLockedDocument {
         value: number | Review;
       } | null)
     | ({
+        relationTo: 'review-photos';
+        value: number | ReviewPhoto;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -1141,6 +1178,7 @@ export interface OrdersSelect<T extends boolean = true> {
   paidAt?: T;
   reservedUntil?: T;
   account?: T;
+  visitorId?: T;
   locale?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1352,6 +1390,39 @@ export interface ReviewsSelect<T extends boolean = true> {
   customer?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "review-photos_select".
+ */
+export interface ReviewPhotosSelect<T extends boolean = true> {
+  alt?: T;
+  review?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumb?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

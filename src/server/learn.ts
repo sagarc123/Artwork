@@ -111,6 +111,8 @@ export async function issueCertificate(enrolmentId: number) {
 export async function reissueCertificate(id: number) {
   const payload = await getPayload({ config })
   const c = await payload.findByID({ collection: 'certificates', id, depth: 0 })
+  // A refund removes the seat: such a certificate cannot be made genuine again from here.
+  if (!c.enrolment) throw new Error('This certificate belongs to a course seat that was refunded.')
   const e = await payload.findByID({ collection: 'enrolments', id: c.enrolment as number, depth: 1 })
   const customer = typeof e.customer === 'object' ? e.customer : null
   const course = typeof e.course === 'object' ? e.course : null

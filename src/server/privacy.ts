@@ -1,7 +1,7 @@
 import 'server-only'
 import config from '@payload-config'
 import { getPayload, type Where } from 'payload'
-import { dueAt, orderEmails, scopeExport } from '@/lib/privacy'
+import { dueAt, myOrdersWhere, orderEmails, scopeExport } from '@/lib/privacy'
 
 /** One line in "Privacy requests". Both the export and the erase do their work at once, so they are written as done. */
 export async function logRequest(type: 'export' | 'erase', customer: number, source: 'account' | 'admin') {
@@ -14,12 +14,12 @@ export async function logRequest(type: 'export' | 'erase', customer: number, sou
 }
 
 /** Everything held about one customer, as plain data for the download. Only this customer's rows (see scopeExport). */
-export async function exportData(me: { id: number; phone: string; name: string }, visitorId: string | null) {
+export async function exportData(me: { id: number; phone: string; name: string; createdAt: string }, visitorId: string | null) {
   const payload = await getPayload({ config })
   const find = <C extends 'orders' | 'enrolments' | 'lesson-progress' | 'certificates' | 'reviews' | 'consents' | 'subscribers'>(collection: C, where: Where) =>
     payload.find({ collection, where, limit: 5000, depth: 0, pagination: false, overrideAccess: true }).then((r) => r.docs)
   const customer = await payload.findByID({ collection: 'customers', id: me.id, depth: 0 })
-  const orders = await find('orders', { or: [{ account: { equals: me.id } }, { 'customer.phone': { equals: me.phone } }] })
+  const orders = await find('orders', myOrdersWhere({ ...me, since: me.createdAt }))
   const emails = orderEmails(orders, me)
   const enrolments = await find('enrolments', { customer: { equals: me.id } })
   const [progress, certificates, reviews, consents, subscribers] = await Promise.all([
@@ -29,7 +29,7 @@ export async function exportData(me: { id: number; phone: string; name: string }
     find('consents', { or: [{ customer: { equals: me.id } }, ...(visitorId ? [{ subject: { equals: visitorId } }] : []), ...(emails.length ? [{ email: { in: emails } }] : [])] }),
     emails.length ? find('subscribers', { email: { in: emails } }) : [],
   ])
-  const own = scopeExport({ id: me.id, phone: me.phone, emails, visitorId }, { orders, enrolments, progress, certificates, reviews, consents, subscribers })
+  const own = scopeExport({ id: me.id, phone: me.phone, since: me.createdAt, emails, visitorId }, { orders, enrolments, progress, certificates, reviews, consents, subscribers })
   const day = (v?: string | null) => v ?? null
   return {
     exportedAt: new Date().toISOString(),

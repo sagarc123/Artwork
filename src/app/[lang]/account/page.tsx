@@ -16,6 +16,7 @@ import { formatPrice } from '@/lib/site'
 import type { Media } from '@/payload-types'
 import { getCustomer } from '@/server/customer'
 import { progressFor } from '@/server/learn'
+import { myOrdersWhere } from '@/lib/privacy'
 import { showCertId } from '@/lib/learn'
 import { MIN_PROGRESS, productBought } from '@/lib/reviews'
 import { reviewedBy } from '@/server/reviews'
@@ -119,10 +120,10 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
       <EmptyState title={a.certsEmpty} />
     )
   } else if (tab === 'orders') {
-    // Orders placed from this account, plus earlier ones placed with the phone number it just proved it owns.
+    // Orders placed from this account, plus guest orders with its phone placed after the account was made.
     const { docs } = await payload.find({
       collection: 'orders',
-      where: { or: [{ account: { equals: me.id } }, { 'customer.phone': { equals: me.phone } }] },
+      where: myOrdersWhere({ ...me, since: me.createdAt }),
       sort: '-createdAt',
       limit: 50,
       depth: 0,

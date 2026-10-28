@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { canSend, checkCode, hashCode, newCode, OTP_MAX_TRIES, OTP_MINUTES, readSession, safeNext, showTestCode, signSession, type OtpRow } from './auth.ts'
+import { canSend, checkCode, hashCode, mayLogSecrets, newCode, OTP_MAX_TOTAL, OTP_MAX_TRIES, OTP_MINUTES, readSession, safeNext, showTestCode, signSession, type OtpRow } from './auth.ts'
 
 const secret = 'test-secret-test-secret-test-secret'
 const T0 = Date.UTC(2026, 9, 28, 10, 0, 0)
@@ -26,18 +26,29 @@ test('a code checks out once, until it expires', () => {
   assert.equal(checkCode(null, '9876543210', '123456', secret, T0), 'none')
 })
 
-test('after 5 wrong tries even the right code is refused', () => {
-  const locked = row('123456', { attempts: OTP_MAX_TRIES })
-  assert.equal(checkCode(locked, '9876543210', '123456', secret, T0 + 1000), 'locked')
-  assert.equal(checkCode(row('123456', { attempts: OTP_MAX_TRIES - 1 }), '9876543210', '123456', secret, T0 + 1000), 'ok')
+test('5 wrong tries lock that visitor address only; the right owner on another address still gets in', () => {
+  const r = row('123456', { attempts: OTP_MAX_TRIES })
+  assert.equal(checkCode(r, '9876543210', '123456', secret, T0 + 1000, OTP_MAX_TRIES), 'locked') // the attacker's address
+  assert.equal(checkCode(r, '9876543210', '123456', secret, T0 + 1000, 0), 'ok') // the owner's address
+  assert.equal(checkCode(r, '9876543210', '123456', secret, T0 + 1000, OTP_MAX_TRIES - 1), 'ok')
 })
 
-test('a new code: 30 second pause, and none while locked', () => {
+test('the overall bound: many addresses together burn the code', () => {
+  assert.equal(checkCode(row('123456', { attempts: OTP_MAX_TOTAL }), '9876543210', '123456', secret, T0 + 1000, 0), 'locked')
+  assert.equal(checkCode(row('123456', { attempts: OTP_MAX_TOTAL - 1 }), '9876543210', '123456', secret, T0 + 1000, 0), 'ok')
+})
+
+test('a new code: a 30 second pause, and a burned code does not block the owner', () => {
   assert.equal(canSend(null, T0), 'ok')
   assert.equal(canSend(row('1'), T0 + 10_000), 'wait')
   assert.equal(canSend(row('1'), T0 + 30_000), 'ok')
-  assert.equal(canSend(row('1', { attempts: OTP_MAX_TRIES }), T0 + 60_000), 'locked')
-  assert.equal(canSend(row('1', { attempts: OTP_MAX_TRIES }), T0 + OTP_MINUTES * 60_000), 'ok') // lock ends with the code
+  assert.equal(canSend(row('1', { attempts: OTP_MAX_TOTAL }), T0 + 60_000), 'ok')
+})
+
+test('test mode (codes in the log) is never on in production', () => {
+  assert.equal(mayLogSecrets('production'), false)
+  assert.equal(mayLogSecrets('development'), true)
+  assert.equal(mayLogSecrets(undefined), true)
 })
 
 test('the code is shown on screen only in development without an SMS provider', () => {
