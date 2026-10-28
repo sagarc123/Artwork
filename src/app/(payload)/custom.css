@@ -1199,9 +1199,24 @@ body:has(.payload-settings) #force-unlock {
   background: var(--theme-elevation-100);
   text-decoration: none;
 }
-.nav__link:has(.nav__link-indicator) {
+.nav__link:has(.nav__link-indicator),
+.nav__link[aria-current='page'] {
   background: var(--theme-elevation-100);
   font-weight: 700;
+}
+/* Today, Customers, Festival planner: the same accent bar Payload draws for its own current link. */
+.nav__link[aria-current='page'] {
+  position: relative;
+}
+.nav__link[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 20%;
+  width: 4px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--action);
 }
 .nav__link-indicator {
   inset-inline-start: 0;

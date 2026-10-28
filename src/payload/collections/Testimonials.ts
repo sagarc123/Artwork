@@ -5,7 +5,8 @@ import { anyone, canEditContent, hideFromHelpers, isOwner } from '../access'
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   hooks: refreshOnChange('testimonials'),
-  labels: { singular: 'Customer review', plural: 'Customer reviews' },
+  // Not "reviews": those come from verified buyers (Reviews). These are quotes the artist types in himself.
+  labels: { singular: 'Quote you added', plural: 'Quotes you add' },
   admin: {
     useAsTitle: 'name',
     group: 'Gallery & Festivals',

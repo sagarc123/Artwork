@@ -3,6 +3,7 @@ import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageC
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { hasRole } from '../access'
+import { NavLink } from './NavLink'
 import { ago, listUrl } from '../../lib/admin'
 import { changeLabel, festivalPlan, percentChange, sparkBars } from '../../lib/admin-tools'
 import { indiaToday } from '../../lib/dates'
@@ -185,7 +186,7 @@ export async function Today({ payload, user }: ServerProps) {
         )}
         {content && (
           <Link href="/admin/collections/testimonials/create" className="today__add-btn">
-            <Plus size={22} aria-hidden="true" /> Add a customer review
+            <Plus size={22} aria-hidden="true" /> Add a quote from a customer
           </Link>
         )}
       </nav>
@@ -280,19 +281,9 @@ function SalesCard({ sales: s }: { sales: Awaited<ReturnType<typeof salesSummary
 export function TodayNavLink({ user }: ServerProps) {
   return (
     <>
-      <Link href="/admin" className="nav__link today-nav">
-        Today
-      </Link>
-      {hasRole(user, 'owner', 'staff') && (
-        <Link href="/admin/customers" className="nav__link today-nav">
-          Customers
-        </Link>
-      )}
-      {hasRole(user, 'owner') && (
-        <Link href="/admin/festival-planner" className="nav__link today-nav">
-          Festival planner
-        </Link>
-      )}
+      <NavLink href="/admin">Today</NavLink>
+      {hasRole(user, 'owner', 'staff') && <NavLink href="/admin/customers">Customers</NavLink>}
+      {hasRole(user, 'owner') && <NavLink href="/admin/festival-planner">Festival planner</NavLink>}
     </>
   )
 }
