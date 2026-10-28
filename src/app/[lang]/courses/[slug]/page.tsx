@@ -5,12 +5,13 @@ import { notFound } from 'next/navigation'
 import { CourseCard } from '@/components/CourseCard'
 import { EnrolButton, EnrolCard } from '@/components/CourseEnrol'
 import { CourseVideo } from '@/components/CourseVideo'
+import { ReviewList } from '@/components/ReviewList'
 import { alternates, localeNames, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { coursePrice, formatDuration, groupSections, videoReady } from '@/lib/courses'
+import { coursePrice, formatDuration, forUnder18, groupSections, videoReady } from '@/lib/courses'
 import { formatPrice, site } from '@/lib/site'
 import type { Media } from '@/payload-types'
-import { getCourse, getCourses, getSlugs } from '@/server/content'
+import { getCourse, getCourses, getReviews, getSlugs } from '@/server/content'
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
@@ -59,6 +60,7 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
     .filter((x) => x.id !== course.id)
     .sort((a, b) => Number(catId(b) === catId(course)) - Number(catId(a) === catId(course)))
     .slice(0, 3)
+  const reviews = await getReviews('course', course.id)
   const enrol = { slug: course.slug, title: course.title, price: course.price, salePrice: course.salePrice, audience: course.audience, certificateEnabled: course.certificateEnabled }
 
   // Structured data so Google can show the course with its price.
@@ -73,10 +75,14 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
     provider: { '@type': 'Person', name: site.artistName, url: site.url },
     hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: `PT${Math.max(1, Math.round(seconds / 60))}M` },
     offers: { '@type': 'Offer', category: price.free ? 'Free' : 'Paid', price: price.now, priceCurrency: 'INR', url: new URL(localePath(locale, `/courses/${course.slug}`), site.url).toString() },
+    // Only from real, approved reviews, and only once there is one.
+    aggregateRating: reviews.count ? { '@type': 'AggregateRating', ratingValue: reviews.average, reviewCount: reviews.count, bestRating: 5, worstRating: 1 } : undefined,
   }
 
   return (
     <article className="bg-paper grain pb-40 lg:pb-28">
+      {/* Under-18 courses: no newsletter box in the footer here. */}
+      {forUnder18(course.audience) && <span hidden data-no-signup />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <div className="wrap grid gap-6 pt-4 lg:grid-cols-12 lg:gap-12 lg:pt-10">
         <nav aria-label={c.breadcrumb} className="flex flex-wrap items-center gap-x-2 lg:col-span-12">
@@ -209,6 +215,8 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
               {c.readStory}
             </Link>
           </section>
+
+          <ReviewList data={reviews} kind="course" locale={locale} t={t.reviews} />
 
           <section className="grid gap-2">
             <h2 className="font-heading text-h2">{c.faqTitle}</h2>

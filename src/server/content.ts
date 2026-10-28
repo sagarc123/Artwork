@@ -8,6 +8,7 @@ import { localePath } from '@/i18n/config'
 import { pickMedium } from '@/lib/art'
 import { galleryDocs, type GalleryDoc } from '@/lib/gallery'
 import { hashString } from '@/lib/seed'
+import { summarise } from '@/lib/reviews'
 import { pickTestimonials } from '@/lib/testimonials'
 import { videoReady } from '@/lib/courses'
 import { applySale, FREE_SHIPPING_FROM, nextSaleChange, parsePincodes, SHIPPING_FEE } from '@/lib/cart'
@@ -278,6 +279,27 @@ export async function getTestimonials(locale: Locale, topic?: 'event' | 'portrai
   // ponytail: reads every shared review (a handful) and picks in code; query by language and topic if there are hundreds.
   const { docs } = await (await db()).find({ collection: 'testimonials', locale, where: { permission: { equals: true } }, sort: '-createdAt', limit: 200, depth: 1 })
   return pickTestimonials(docs, locale, topic)
+}
+
+export type ShownReview = { id: number; name: string; rating: number; text: string; createdAt: string; photo: Media | null }
+
+/**
+ * Approved reviews of one product or course: the count, the average and the newest few. Reads only the fields that are shown
+ * (never the reviewer's account), and only approved ones: this read skips the API's own access rules.
+ */
+export async function getReviews(kind: 'product' | 'course', id: number) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('reviews', 'media')
+  const payload = await db()
+  const where = { and: [{ status: { equals: 'approved' } }, { [kind]: { equals: id } }] }
+  const [{ docs: all }, { docs }] = await Promise.all([
+    payload.find({ collection: 'reviews', where, limit: 5000, depth: 0, pagination: false, select: { rating: true } }),
+    payload.find({ collection: 'reviews', where, sort: '-createdAt', limit: 10, depth: 1, select: { name: true, rating: true, text: true, photo: true, createdAt: true } }),
+  ])
+  const { count, average } = summarise(all.map((r) => r.rating))
+  const items: ShownReview[] = docs.map((r) => ({ id: r.id, name: r.name, rating: r.rating, text: r.text, createdAt: r.createdAt, photo: typeof r.photo === 'object' ? r.photo : null }))
+  return { count, average, items }
 }
 
 /** Announcement strip, festive look, the Instagram strip and the making-of video (Site settings), in one language. */

@@ -17,6 +17,8 @@ import type { Media } from '@/payload-types'
 import { getCustomer } from '@/server/customer'
 import { progressFor } from '@/server/learn'
 import { showCertId } from '@/lib/learn'
+import { MIN_PROGRESS, productBought } from '@/lib/reviews'
+import { reviewedBy } from '@/server/reviews'
 
 // Private and per person: always rendered on the server for the signed-in customer.
 export const instant = false
@@ -41,6 +43,8 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
   const p = (path: string) => localePath(locale, path)
   const payload = await getPayload({ config })
   const date = (iso: string) => new Intl.DateTimeFormat(`${locale}-IN`, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso))
+  const reviewed = await reviewedBy(me.id)
+  const reviewLink = 'ink-link inline-flex min-h-12 items-center font-semibold text-peacock'
   const link = 'press inline-flex h-13 items-center justify-center rounded-ui bg-kumkum px-6 font-semibold text-white'
 
   let body
@@ -65,6 +69,15 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
                   <Check aria-hidden="true" className="size-5" />
                   {progress.get(e.id)?.done ? t.courses.goToCourse : a.start}
                 </Link>
+                {/* Reviews open at 30% of the lessons (checked again on the server). */}
+                {(progress.get(e.id)?.percent ?? 0) >= MIN_PROGRESS &&
+                  (reviewed.courses.has(e.course.id) ? (
+                    <p className="font-semibold text-leaf">{t.reviews.reviewed}</p>
+                  ) : (
+                    <Link href={p(`/review/course/${e.course.id}`)} className={reviewLink}>
+                      {t.reviews.write}
+                    </Link>
+                  ))}
               </div>
             </li>
           ))}
@@ -124,6 +137,18 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
                 {date(o.createdAt)} · {t.order.status[o.status]}
               </p>
               <p className="text-muted">{(o.items ?? []).map((i) => i.title).join(', ')}</p>
+              {/* One link per piece once the order is delivered (or a digital one is paid). */}
+              {(o.items ?? []).flatMap((i) => (typeof i.product === 'number' && productBought([{ status: o.status, items: [{ product: i.product, type: i.type }] }], i.product) ? [{ id: i.product, title: i.title }] : [])).map((i) =>
+                reviewed.products.has(i.id) ? (
+                  <p key={i.id} className="font-semibold text-leaf">
+                    {i.title}: {t.reviews.reviewed}
+                  </p>
+                ) : (
+                  <Link key={i.id} href={p(`/review/product/${i.id}`)} className={reviewLink}>
+                    {t.reviews.write}: {i.title}
+                  </Link>
+                ),
+              )}
             </div>
             {o.publicId && (
               <Link href={p(`/order/${o.publicId}`)} className="press inline-flex h-12 items-center justify-center rounded-ui border border-border px-5 font-semibold hover:bg-charcoal/5">
@@ -151,7 +176,7 @@ export default async function AccountPage({ searchParams }: PageProps<'/[lang]/a
       </div>
     )
   } else {
-    body = <AccountProfile locale={locale} t={a} name={me.name} phone={me.phone} />
+    body = <AccountProfile locale={locale} t={a} n={t.newsletter} name={me.name} phone={me.phone} />
   }
 
   return (

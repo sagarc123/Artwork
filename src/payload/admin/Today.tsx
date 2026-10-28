@@ -1,5 +1,5 @@
 import type { ServerProps } from 'payload'
-import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Percent, Plus, Truck, type LucideIcon } from 'lucide-react'
+import { CalendarClock, CheckCircle2, ExternalLink, Inbox, IndianRupee, MessageCircle, Package, PackageCheck, Percent, Plus, Star, Truck, type LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { hasRole } from '../access'
@@ -72,7 +72,7 @@ export async function Today({ payload, user }: ServerProps) {
   const findOrders = (status: string[]) =>
     payload.find({ collection: 'orders', where: { status: { in: status } }, sort: 'createdAt', limit: 5, depth: 0, select: { orderNumber: true, customer: true, total: true, createdAt: true } })
 
-  const [site, enquiries, cod, toPack, shipped, sales, prints, festivals, preset, upcoming] = await Promise.all([
+  const [site, enquiries, cod, toPack, shipped, sales, prints, festivals, preset, upcoming, reviews] = await Promise.all([
     payload.findGlobal({ slug: 'site-settings', depth: 0 }),
     orders ? payload.find({ collection: 'enquiries', where: { status: { equals: 'new' } }, sort: 'createdAt', limit: 5, depth: 0, select: { name: true, type: true, createdAt: true } }) : null,
     orders ? findOrders(['cod_pending_confirmation']) : null,
@@ -85,6 +85,8 @@ export async function Today({ payload, user }: ServerProps) {
     owner ? salePresetData(payload) : null,
     // The next festival names the sale ("Start Diwali sale").
     owner ? payload.find({ collection: 'festivals', where: { nextDate: { greater_than_equal: indiaToday(new Date(now)) } }, sort: 'nextDate', limit: 1, depth: 0, select: { name: true, nextDate: true } }) : null,
+    // New reviews wait for one tap (Approve or Hide) on their page.
+    content ? payload.find({ collection: 'reviews', where: { status: { equals: 'pending' } }, sort: 'createdAt', limit: 5, depth: 1, select: { name: true, rating: true, product: true, course: true, createdAt: true } }) : null,
   ])
   const nextFestival = upcoming && preset ? festivalPlan(upcoming.docs, preset.today, new Map())[0] : undefined
   const replyHours = site.contact?.replyHours ?? 4
@@ -116,6 +118,19 @@ export async function Today({ payload, user }: ServerProps) {
     },
     cod && { key: 'cod', title: 'COD orders to confirm', icon: MessageCircle, count: cod.totalDocs, href: listUrl('orders', 'status', ['cod_pending_confirmation']), tone: 'urgent' as const, empty: 'no COD orders to confirm', items: cod.docs.map(orderItem) },
     toPack && { key: 'pack', title: 'Orders to pack', icon: Package, count: toPack.totalDocs, href: listUrl('orders', 'status', ['paid', 'cod_confirmed']), tone: 'urgent' as const, empty: 'nothing to pack', items: toPack.docs.map(orderItem) },
+    reviews && {
+      key: 'reviews',
+      title: 'Reviews waiting',
+      icon: Star,
+      count: reviews.totalDocs,
+      href: listUrl('reviews', 'status', ['pending']),
+      tone: 'urgent' as const,
+      empty: 'no reviews waiting',
+      items: reviews.docs.map((r) => {
+        const about = typeof r.product === 'object' ? r.product?.title : typeof r.course === 'object' ? r.course?.title : ''
+        return { id: r.id, label: `${r.rating}★ ${r.name}${about ? ` · ${about}` : ''}`, note: since(r.createdAt), href: edit('reviews', r.id) }
+      }),
+    },
     prints && { key: 'prints', title: 'Prints running out', icon: PackageCheck, count: lowPrints.length, href: listUrl('products', 'type', ['print']), tone: 'urgent' as const, empty: 'all prints in stock', items: lowPrints.slice(0, 5) },
     festivals && {
       key: 'festivals',

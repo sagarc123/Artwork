@@ -74,6 +74,7 @@ export interface Config {
     artworks: Artwork;
     festivals: Festival;
     testimonials: Testimonial;
+    reviews: Review;
     media: Media;
     courses: Course;
     lessons: Lesson;
@@ -82,6 +83,8 @@ export interface Config {
     'lesson-progress': LessonProgress;
     customers: Customer;
     'otp-codes': OtpCode;
+    subscribers: Subscriber;
+    consents: Consent;
     categories: Category;
     mediums: Medium;
     'tax-classes': TaxClass;
@@ -100,6 +103,7 @@ export interface Config {
     artworks: ArtworksSelect<false> | ArtworksSelect<true>;
     festivals: FestivalsSelect<false> | FestivalsSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    reviews: ReviewsSelect<false> | ReviewsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
@@ -108,6 +112,8 @@ export interface Config {
     'lesson-progress': LessonProgressSelect<false> | LessonProgressSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
+    consents: ConsentsSelect<false> | ConsentsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     mediums: MediumsSelect<false> | MediumsSelect<true>;
     'tax-classes': TaxClassesSelect<false> | TaxClassesSelect<true>;
@@ -722,6 +728,26 @@ export interface Testimonial {
   createdAt: string;
 }
 /**
+ * Reviews written by people who really bought a piece or finished part of a course. Open a waiting one and tap Approve to show it on the website, or Hide to keep it off. Your own quoted testimonials are separate (see "Testimonials").
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews".
+ */
+export interface Review {
+  id: number;
+  status: 'pending' | 'approved' | 'rejected';
+  name: string;
+  rating: number;
+  kind: 'product' | 'course';
+  product?: (number | null) | Product;
+  course?: (number | null) | Course;
+  text: string;
+  photo?: (number | null) | Media;
+  customer: number | Customer;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lessons".
  */
@@ -815,6 +841,40 @@ export interface OtpCode {
   createdAt: string;
 }
 /**
+ * Everyone who signed up for the newsletter on the website. Only "Confirmed" people clicked the link in their email and may be written to. There is no sending screen here: download the list and send with Resend or another email tool.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: number;
+  email: string;
+  status: 'confirmed' | 'pending' | 'unsubscribed';
+  confirmedAt?: string | null;
+  unsubscribedAt?: string | null;
+  confirmSentAt?: string | null;
+  locale?: ('en' | 'mr' | 'hi') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Who agreed to what, and when. For your records; nothing to do here.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "consents".
+ */
+export interface Consent {
+  id: number;
+  email: string;
+  purpose: 'newsletter';
+  noticeVersion: string;
+  source: string;
+  grantedAt: string;
+  withdrawnAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * People who can sign in here: you and your helper.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -897,6 +957,10 @@ export interface PayloadLockedDocument {
         value: number | Testimonial;
       } | null)
     | ({
+        relationTo: 'reviews';
+        value: number | Review;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -927,6 +991,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'otp-codes';
         value: number | OtpCode;
+      } | null)
+    | ({
+        relationTo: 'subscribers';
+        value: number | Subscriber;
+      } | null)
+    | ({
+        relationTo: 'consents';
+        value: number | Consent;
       } | null)
     | ({
         relationTo: 'categories';
@@ -1241,6 +1313,23 @@ export interface TestimonialsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reviews_select".
+ */
+export interface ReviewsSelect<T extends boolean = true> {
+  status?: T;
+  name?: T;
+  rating?: T;
+  kind?: T;
+  product?: T;
+  course?: T;
+  text?: T;
+  photo?: T;
+  customer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1401,6 +1490,34 @@ export interface OtpCodesSelect<T extends boolean = true> {
   expiresAt?: T;
   sentAt?: T;
   attempts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
+  status?: T;
+  confirmedAt?: T;
+  unsubscribedAt?: T;
+  confirmSentAt?: T;
+  locale?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "consents_select".
+ */
+export interface ConsentsSelect<T extends boolean = true> {
+  email?: T;
+  purpose?: T;
+  noticeVersion?: T;
+  source?: T;
+  grantedAt?: T;
+  withdrawnAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -9,8 +9,10 @@ import { localePath, type Locale } from '@/i18n/config'
 import { getDictionary, getLocale, type Dictionary } from '@/i18n/dictionaries'
 import { formatDuration, groupSections } from '@/lib/courses'
 import { neighbours, nextToDo, progressCount } from '@/lib/learn'
+import { MIN_PROGRESS } from '@/lib/reviews'
 import { getCustomer } from '@/server/customer'
 import { playerData } from '@/server/learn'
+import { hasReviewed } from '@/server/reviews'
 
 // Per person, per request: nothing here is cached or shared, and a paid lesson's video id is only read after the enrolment check.
 export const instant = false
@@ -84,9 +86,13 @@ export default async function LessonPage({ params }: PageProps<'/[lang]/learn/[c
   const index = lessons.findIndex((x) => x.id === lesson.id) + 1
   const list = <LessonList lessons={lessons} doneIds={doneIds} currentId={lesson.id} href={href} t={l} units={c.units} />
   const name = me.name || ''
+  // "Write a review" appears once 30% of the lessons are done (the form page checks again on the server).
+  const canReview = progress.percent >= MIN_PROGRESS && !(await hasReviewed(me.id, 'course', course.id))
 
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
+      {/* Learners may be under 18: no newsletter box in the footer here. */}
+      <span hidden data-no-signup />
       <div className="wrap grid gap-8 pt-4 lg:grid-cols-[minmax(0,1fr)_21rem] lg:gap-10 lg:pt-8">
         <div className="grid min-w-0 content-start gap-6">
           <div className="grid gap-3">
@@ -126,6 +132,12 @@ export default async function LessonPage({ params }: PageProps<'/[lang]/learn/[c
                 </p>
               )}
             </section>
+          )}
+
+          {canReview && (
+            <Link href={localePath(locale, `/review/course/${course.id}`)} className="press inline-flex h-13 items-center justify-center rounded-ui border-[1.5px] border-charcoal px-6 font-semibold sm:justify-self-start">
+              {t.reviews.write}
+            </Link>
           )}
 
           {lesson.transcript?.trim() && (

@@ -4,6 +4,7 @@ import type { Dictionary } from '@/i18n/dictionaries'
 import { site, whatsappLink } from '@/lib/site'
 import { LanguageSwitcher } from './LanguagePicker'
 import { MotionToggle } from './MotionSettings'
+import { NewsletterSignup } from './NewsletterSignup'
 import { Signature } from './Signature'
 import { getBusiness, getCategories } from '@/server/content'
 
@@ -93,6 +94,17 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
             </ul>
           </div>
         ))}
+      </div>
+
+      {/* Hidden on the lesson player and the kids' course pages (they carry data-no-signup): no marketing for under-18 learners. */}
+      <div className="newsletter-signup border-t border-paper/15">
+        <div className="wrap grid gap-6 py-8 lg:grid-cols-2 lg:gap-10 lg:py-10">
+          <div className="grid content-start gap-2">
+            <h2 className="font-heading text-h3-sm">{t.newsletter.title}</h2>
+            <p className="max-w-[48ch] text-paper/85">{t.newsletter.body}</p>
+          </div>
+          <NewsletterSignup locale={locale} t={t.newsletter} />
+        </div>
       </div>
 
       <div className="border-t border-paper/15">

@@ -6,7 +6,7 @@ import { EnrolButton } from '@/components/CourseEnrol'
 import { CourseVideo } from '@/components/CourseVideo'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
-import { formatDuration, videoReady } from '@/lib/courses'
+import { formatDuration, forUnder18, videoReady } from '@/lib/courses'
 import { getCourse, getCourses } from '@/server/content'
 
 // Unknown or locked lessons must wait for the full render so notFound() can still send a real 404.
@@ -44,6 +44,7 @@ export default async function SampleLessonPage({ params }: PageProps<'/[lang]/co
   const courseHref = localePath(locale, `/courses/${course.slug}`)
   return (
     <article className="bg-paper grain pb-20 lg:pb-28">
+      {forUnder18(course.audience) && <span hidden data-no-signup />}
       <div className="wrap grid max-w-4xl gap-6 pt-4 lg:pt-10">
         <Link href={courseHref} className="ink-link inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold text-peacock">
           <ArrowLeft aria-hidden="true" className="size-5" />

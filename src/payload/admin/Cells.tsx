@@ -28,6 +28,12 @@ export const TONE: Record<string, 'urgent' | 'busy' | 'done' | 'off'> = {
   advance_paid: 'busy',
   done: 'done',
   lost: 'off',
+  // reviews and newsletter
+  pending: 'busy',
+  approved: 'done',
+  rejected: 'off',
+  confirmed: 'done',
+  unsubscribed: 'off',
 }
 
 const optionLabel = (field: DefaultServerCellComponentProps['field'], value: unknown) => {

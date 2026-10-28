@@ -5,15 +5,17 @@ import { useState, type FormEvent } from 'react'
 import { localePath, type Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { deleteAccount, saveName, signOut } from '@/server/auth-actions'
+import { stopNewsletter } from '@/server/newsletter-actions'
 
 const input = 'h-13 w-full rounded-ui border border-border bg-surface px-4'
 
 /** Profile tab: name, the verified phone, sign out, and "delete my account". */
-export function AccountProfile({ locale, t, name, phone }: { locale: Locale; t: Dictionary['account']; name: string; phone: string }) {
+export function AccountProfile({ locale, t, n, name, phone }: { locale: Locale; t: Dictionary['account']; n: Dictionary['newsletter']; name: string; phone: string }) {
   const router = useRouter()
   const [note, setNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [stopNote, setStopNote] = useState<string | null>(null)
 
   async function rename(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -22,6 +24,14 @@ export function AccountProfile({ locale, t, name, phone }: { locale: Locale; t: 
     setBusy(false)
     setNote(r?.status === 'ok' ? t.nameSaved : t.failed)
     if (r?.status === 'ok') router.refresh()
+  }
+
+  async function stop(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setBusy(true)
+    const r = await stopNewsletter(String(new FormData(e.currentTarget).get('email') ?? ''), locale).catch(() => null)
+    setBusy(false)
+    setStopNote(r === 'ok' ? n.profileDone : r === 'invalid' ? n.errors.email : r === 'rate' ? n.errors.rate : n.errors.failed)
   }
 
   async function out() {
@@ -61,6 +71,27 @@ export function AccountProfile({ locale, t, name, phone }: { locale: Locale; t: 
           {note && (
             <p role="status" className="font-semibold">
               {note}
+            </p>
+          )}
+        </div>
+      </form>
+
+      <form onSubmit={stop} noValidate className="grid gap-3">
+        <h2 className="font-heading text-h3">{n.profileTitle}</h2>
+        <p className="text-muted">{n.profileBody}</p>
+        <div className="grid gap-2">
+          <label htmlFor="nl-stop-email" className="font-semibold">
+            {n.emailLabel}
+          </label>
+          <input id="nl-stop-email" name="email" type="email" autoComplete="email" maxLength={254} className={input} />
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <button type="submit" disabled={busy} className="press h-13 rounded-ui border border-border px-6 font-semibold hover:bg-charcoal/5 disabled:opacity-60">
+            {n.profileStop}
+          </button>
+          {stopNote && (
+            <p role="status" className="font-semibold">
+              {stopNote}
             </p>
           )}
         </div>

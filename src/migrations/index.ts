@@ -12,6 +12,7 @@ import * as migration_20261027_074127_motion_pass_2 from './20261027_074127_moti
 import * as migration_20261028_074026_website_look_tabs from './20261028_074026_website_look_tabs';
 import * as migration_20261028_080827_courses_part2a from './20261028_080827_courses_part2a';
 import * as migration_20261028_082925_courses_part2b from './20261028_082925_courses_part2b';
+import * as migration_20261028_091233_reviews_newsletter from './20261028_091233_reviews_newsletter';
 
 export const migrations = [
   {
@@ -82,6 +83,11 @@ export const migrations = [
   {
     up: migration_20261028_082925_courses_part2b.up,
     down: migration_20261028_082925_courses_part2b.down,
-    name: '20261028_082925_courses_part2b'
+    name: '20261028_082925_courses_part2b',
+  },
+  {
+    up: migration_20261028_091233_reviews_newsletter.up,
+    down: migration_20261028_091233_reviews_newsletter.down,
+    name: '20261028_091233_reviews_newsletter'
   },
 ];

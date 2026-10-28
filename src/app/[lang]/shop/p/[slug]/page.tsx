@@ -6,6 +6,7 @@ import { ViewTransition } from 'react'
 import { DeliveryCheck } from '@/components/DeliveryCheck'
 import { DeliveryPromise } from '@/components/DeliveryPromise'
 import { MediaImage } from '@/components/MediaImage'
+import { ReviewList } from '@/components/ReviewList'
 import { ProductBuy } from '@/components/ProductBuy'
 import { SaveButton } from '@/components/SaveButton'
 import { ShareButton } from '@/components/ShareButton'
@@ -14,7 +15,7 @@ import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { site } from '@/lib/site'
-import { getBusiness, getDeliveryRules, getProduct, getProducts, getSlugs, toShopItem } from '@/server/content'
+import { getBusiness, getDeliveryRules, getProduct, getProducts, getReviews, getSlugs, toShopItem } from '@/server/content'
 
 // Unknown slugs must wait for the full render so notFound() can still send a real 404 (not the streamed App Shell).
 export const ensureStatic = 'navigation'
@@ -63,7 +64,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
   const available = product.variants.some((v) => v.stock - (v.reserved ?? 0) > 0)
   const physical = product.type !== 'digital'
   // Same rule as checkout (src/lib/cart.ts codBlock): prints and originals, within the COD limit.
-  const [{ cod }, { rules }] = await Promise.all([getBusiness(), getDeliveryRules()])
+  const [{ cod }, { rules }, reviews] = await Promise.all([getBusiness(), getDeliveryRules(), getReviews('product', product.id)])
   const codOk = physical && cod.enabled && Math.min(...product.variants.map((v) => v.price)) + cod.fee <= cod.maxTotal
 
   // Structured data so Google can show price and availability.
@@ -81,6 +82,8 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
       highPrice: Math.max(...product.variants.map((v) => v.price)),
       availability: available ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
     },
+    // Only from real, approved reviews, and only once there is one.
+    aggregateRating: reviews.count ? { '@type': 'AggregateRating', ratingValue: reviews.average, reviewCount: reviews.count, bestRating: 5, worstRating: 1 } : undefined,
   }
 
   return (
@@ -176,6 +179,8 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
             </details>
           ))}
         </div>
+
+        <ReviewList data={reviews} kind="product" locale={locale} t={t.reviews} className="md:col-span-12" />
 
         {product.story && (
           <section className="grid max-w-[65ch] gap-4 md:col-span-12 lg:col-span-7">

@@ -19,6 +19,7 @@ import { ProductBulk as ProductBulk_e3585f670ff671b3f00ee98df5be6f62 } from '../
 import { YesNoCell as YesNoCell_6ad2bf8381d5a2730091b1470fced514 } from '../../../payload/admin/Cells'
 import { CertificateActions as CertificateActions_ba57610217154adacac748d16cba9a37 } from '../../../payload/admin/CertificateActions'
 import { EraseStudent as EraseStudent_e86ad549832eceef5b3eb6e591bf48e6 } from '../../../payload/admin/EraseStudent'
+import { CsvLink as CsvLink_e5a9a35432ce6337e84c78ec4e1129d8 } from '../../../payload/admin/CsvLink'
 import { SalePresetField as SalePresetField_e016573c205c9f1f38310c40ed9a431d } from '../../../payload/admin/FestivalPlanner'
 import { Icon as Icon_fe32eb75d2e86cd142684d3b5ba68760 } from '../../../payload/admin/Brand'
 import { Logo as Logo_fe32eb75d2e86cd142684d3b5ba68760 } from '../../../payload/admin/Brand'
@@ -53,6 +54,7 @@ export const importMap = {
   "/payload/admin/Cells#YesNoCell": YesNoCell_6ad2bf8381d5a2730091b1470fced514,
   "/payload/admin/CertificateActions#CertificateActions": CertificateActions_ba57610217154adacac748d16cba9a37,
   "/payload/admin/EraseStudent#EraseStudent": EraseStudent_e86ad549832eceef5b3eb6e591bf48e6,
+  "/payload/admin/CsvLink#CsvLink": CsvLink_e5a9a35432ce6337e84c78ec4e1129d8,
   "/payload/admin/FestivalPlanner#SalePresetField": SalePresetField_e016573c205c9f1f38310c40ed9a431d,
   "/payload/admin/Brand#Icon": Icon_fe32eb75d2e86cd142684d3b5ba68760,
   "/payload/admin/Brand#Logo": Logo_fe32eb75d2e86cd142684d3b5ba68760,

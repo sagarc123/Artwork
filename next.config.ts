@@ -14,6 +14,8 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Review photos (up to 4 MB, checked again on the server) travel in a server action; the default limit is 1 MB.
+  experimental: { serverActions: { bodySizeLimit: "5mb" } },
   images: { formats: ["image/avif", "image/webp"] },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

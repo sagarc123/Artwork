@@ -13,6 +13,8 @@ import { Products } from './payload/collections/Products'
 import { Categories, Festivals, Mediums } from './payload/collections/Taxonomies'
 import { TaxClasses } from './payload/collections/TaxClasses'
 import { Certificates, Customers, Enrolments, LessonProgress, OtpCodes } from './payload/collections/Students'
+import { Consents, Subscribers } from './payload/collections/Newsletter'
+import { Reviews } from './payload/collections/Reviews'
 import { Testimonials } from './payload/collections/Testimonials'
 import { Users } from './payload/collections/Users'
 import { CommerceSettings } from './payload/globals/CommerceSettings'
@@ -106,7 +108,7 @@ export default buildConfig({
     },
   },
   // Menu groups follow this order: Orders & enquiries (orders, invoices, enquiries; the Customers page sits above them), Shop, Gallery & Festivals, (Courses, hidden), Lists (categories, mediums, GST classes), Settings.
-  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Media, Courses, Lessons, Enrolments, Certificates, LessonProgress, Customers, OtpCodes, Categories, Mediums, TaxClasses, Users].map(noApiTab),
+  collections: [Orders, Invoices, Enquiries, Products, Artworks, Festivals, Testimonials, Reviews, Media, Courses, Lessons, Enrolments, Certificates, LessonProgress, Customers, OtpCodes, Subscribers, Consents, Categories, Mediums, TaxClasses, Users].map(noApiTab),
   globals: [SiteSettings, CommerceSettings, ServicePrices].map(noApiTab),
   localization: {
     locales: [
