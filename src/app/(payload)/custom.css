@@ -1167,10 +1167,77 @@ body:has(.payload-settings) #force-unlock {
     color: var(--theme-elevation-650);
   }
 }
-/* The open menu wins over the bottom save bar (they sit in different stacking layers, so the bar steps aside). */
-.template-default--nav-open .doc-controls__controls-wrapper,
-body:has(.nav--nav-open) .doc-controls__controls-wrapper {
-  visibility: hidden;
+/* Phones only: the open menu is a full-screen drawer over the page, so the fixed save bar steps aside while it is open.
+   On a laptop the menu is a column beside the page and must never hide Save. */
+@media (max-width: 768px) {
+  .template-default--nav-open .doc-controls__controls-wrapper,
+  body:has(.nav--nav-open) .doc-controls__controls-wrapper {
+    visibility: hidden;
+  }
+}
+
+/* Side menu: group headings, 44 px rows, a clear current page. */
+.nav {
+  background: var(--theme-bg);
+}
+.nav__wrap {
+  gap: 2px;
+}
+.nav__link {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--style-radius-s);
+  font-size: 1.05rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--theme-text);
+  overflow-wrap: anywhere;
+}
+.nav a.nav__link:hover,
+.nav a.nav__link:focus-visible {
+  background: var(--theme-elevation-100);
+  text-decoration: none;
+}
+.nav__link:has(.nav__link-indicator) {
+  background: var(--theme-elevation-100);
+  font-weight: 700;
+}
+.nav__link-indicator {
+  inset-inline-start: 0;
+  width: 4px;
+  height: 60%;
+  top: 20%;
+  border-radius: 0 3px 3px 0;
+  background: var(--action);
+}
+.nav__link-label {
+  min-width: 0;
+}
+.nav-group {
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--theme-elevation-150);
+}
+.nav-group__toggle {
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 0.75rem;
+  color: var(--theme-elevation-650);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.nav-group__toggle svg {
+  margin-top: 0;
+}
+.nav-group__label {
+  min-width: 0;
+}
+.nav__controls {
+  padding-top: 1rem;
 }
 
 /* Empty lists: our own line about what the list is for replaces Payload's "Nothing found" (its Add button stays). */
