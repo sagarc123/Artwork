@@ -47,7 +47,7 @@
 
 @theme inline {
   --font-heading: var(--heading-face);
-  --font-body: var(--font-mukta), system-ui, sans-serif;
+  --font-body: var(--body-face);
   --font-display: var(--font-rozha), var(--font-tiro), serif;
   /* Season tokens (see "Two looks" below): text on the current floor, and the accent colour. */
   --color-on: var(--on);
@@ -61,7 +61,8 @@
      Festive: colour floors, paithani thresholds, marigold brush and tape, the toran. Components don't fork: they use
      these tokens and the .floor-* / .threshold classes. */
   :root {
-    --heading-face: var(--font-hanken), var(--font-mukta), system-ui, sans-serif;
+    --heading-face: var(--font-lexend), var(--font-hind), system-ui, sans-serif;
+    --body-face: var(--font-hind), var(--font-mukta), system-ui, sans-serif;
     --on: var(--color-charcoal);
     --accent: var(--color-peacock);
     --deco: var(--color-peacock);
@@ -78,6 +79,7 @@
   }
   :root[data-season='festive'] {
     --heading-face: var(--font-tiro), "Martel", serif;
+    --body-face: var(--font-mukta), system-ui, sans-serif;
     --accent: var(--color-kumkum);
     --deco: var(--color-marigold);
     --brush: var(--color-marigold);
@@ -534,20 +536,6 @@ dialog.drawer[open] {
     box-shadow: 0 0 26px 10px rgb(242 183 5 / 0.7);
   }
 }
-@keyframes wa-nudge {
-  0%, 60%, 100% {
-    transform: none;
-  }
-  15% {
-    transform: rotate(-6deg);
-  }
-  30% {
-    transform: rotate(5deg);
-  }
-  45% {
-    transform: rotate(-3deg);
-  }
-}
 
 @media (prefers-reduced-motion: no-preference) {
   /* Hero: the headline is visible from the first frame (only moves, never fades), the rest rises in. */
@@ -603,8 +591,53 @@ dialog.drawer[open] {
   .tab-bloom {
     animation: bloom 320ms var(--ease-settle);
   }
-  .wa-nudge {
-    animation: wa-nudge 1.2s var(--ease-settle) 8s 2;
+}
+
+/* Brand mark (src/components/Art.tsx BrandMark): on load the stroke/ring trickles round from the dot; on hover/focus the dot and line circle once.
+   The dot itself never animates on load, so a slow first frame still shows the mark. Calm modes stop it through the rules at the end of the motion section. */
+.bm .bm-reveal {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.bm .bm-orbit,
+.bm .bm-chase {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.bm-thali .bm-dot {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+@keyframes bm-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes bm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bm-pop {
+  50% {
+    transform: scale(1.3);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bm:not(.bm--still) .bm-reveal {
+    animation: bm-draw 0.9s var(--ease-draw);
+  }
+  :is(a, button):is(:hover, :focus-visible) .bm .bm-orbit,
+  .bm:hover .bm-orbit {
+    animation: bm-spin 1s var(--ease-draw);
+  }
+  :is(a, button):is(:hover, :focus-visible) .bm .bm-chase,
+  .bm:hover .bm-chase {
+    animation: bm-spin 1s var(--ease-draw) 0.12s;
+  }
+  :is(a, button):is(:hover, :focus-visible) .bm-thali .bm-dot,
+  .bm-thali:hover .bm-dot {
+    animation: bm-pop 1s var(--ease-draw);
   }
 }
 
@@ -673,6 +706,14 @@ dialog.drawer[open] {
 ::view-transition-group(tab-ink) {
   animation-duration: 320ms;
   animation-timing-function: var(--ease-pour);
+}
+/* The root cross-fade would run on top of the .page one (a double fade): the old page is dropped, the new one just shows. */
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 ::view-transition-old(.page) {
   animation: 160ms var(--ease-lift) both vt-out;
@@ -1309,57 +1350,153 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
   }
 }
 
-/* ─────────────── Everyday: "white wall" studio ───────────────
-   A quiet gallery wall: near-white paper, grotesque headings, charcoal buttons, frames without props. The artwork is the only colour.
-   Everything below is scoped to everyday (the default with no data-season), so the festive look is untouched. */
+/* ─────────────── Everyday: "Warm Studio" ───────────────
+   Warm cream paper, deep-teal ink, peacock actions, marigold pops (prices, the current page, the header button).
+   Lexend headings, Hind body and Devanagari. Everything below is scoped to everyday (the default with no data-season),
+   so the festive look is untouched. Tokens: --ws-* are everyday-only; the colour tokens are the site's own, re-pointed. */
 :root:not([data-season='festive']) {
-  --color-paper: #fcfcfa;
-  --color-placeholder: #f1f1ee;
-  --color-charcoal: #1b1b1a;
-  --color-muted: #5c5c58;
-  --color-border: #7a7a75;
-  --wash: #f4f3f0;
-  --shadow-frame: 0 0 0 1px rgb(27 27 26 / 0.09);
+  --color-paper: #fffcf7;
+  --color-placeholder: #fff4dc;
+  --color-charcoal: #0e3f4c; /* ink: text, headings, outlines */
+  --color-muted: #4a6269;
+  --color-marigold: #f2a20c; /* fill only (ink text on it is 5.3:1) */
+  --wash: #fff4dc;
+  --shadow-frame: 0 8px 22px -14px rgb(14 63 76 / 0.3);
+  --radius-ui: 16px;
+  --radius-sheet: 20px;
   --tape: #0000;
   --grain-light: none;
   --grain-dark: none;
+  --ws-body: #34565f;
+  --ws-line: #eadfcb;
+  --ws-card: #f1e6d0;
+  --ws-cream: #fff4dc;
+  --ws-disc: #fdebc0;
+  --ws-rim: #f2c46b;
+  --ws-peacock-d: #094b5c;
+  --ws-link: #ffe7a8;
+  /* Headings are ink; on dark bands they follow the band's text colour (see below). */
+  --head: var(--color-charcoal);
+  /* H1 64px on desktop, 38px on phones; section headings (text-h1) 40px. Body stays 18px. */
+  --text-display: clamp(2.4rem, 1.5rem + 3.2vw, 4rem);
+  --text-display--line-height: 1.12;
+  --text-h1: clamp(1.9rem, 3.2vw, 2.5rem);
+  --text-h1--line-height: 1.2;
 }
-/* Headings: a clean grotesque (Mukta takes over for Devanagari). */
-:root:not([data-season='festive']) :is(h1, h2, h3, .font-heading) {
-  font-weight: 500;
-  letter-spacing: -0.015em;
+:root:not([data-season='festive']) body {
+  color: var(--ws-body);
+}
+:root:not([data-season='festive']) :is(.text-paper, .floor-keep, .site-footer) {
+  --head: currentColor;
+}
+/* Headings: Lexend (Hind takes over for Devanagari), ink. In @layer base so a text-* class on the heading still wins. */
+@layer base {
+  :root:not([data-season='festive']) :is(h1, h2, h3, .font-heading) {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--head);
+  }
 }
 :root:not([data-season='festive']) .font-display {
   font-family: var(--heading-face);
 }
-/* Colour floors and the dark gallery floor become one light sheet; no stain. */
+/* Section headings carry a short marigold underline. */
+:root:not([data-season='festive']) h2.text-h1 {
+  position: relative;
+  padding-bottom: 0.9rem;
+}
+:root:not([data-season='festive']) h2.text-h1::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 56px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--color-marigold);
+}
+:root:not([data-season='festive']) h2.text-h1.text-center::after {
+  left: 50%;
+  margin-left: -28px;
+}
+/* The Marathi tagline under the home headline. */
+.tagline {
+  font-family: var(--body-face);
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-peacock);
+}
+/* Colour floors and the dark gallery floor become one cream sheet; no stain. */
 :root:not([data-season='festive']) .floor:not(.floor-keep) {
   background-image: none;
 }
 :root:not([data-season='festive']) .floor-charcoal:not(.floor-keep) {
   --floor: var(--wash);
   --on: var(--color-charcoal);
-  --btn-bg: var(--color-charcoal);
-  --btn-fg: var(--color-paper);
+  --btn-bg: var(--color-peacock);
+  --btn-fg: #fff;
 }
-/* Primary buttons: charcoal (kumkum stays for errors and destructive actions). */
+:root:not([data-season='festive']) :is(.floor-kumkum, .floor-peacock, .floor-leaf):not(.floor-keep) {
+  --btn-bg: var(--color-peacock);
+}
+/* Buttons: primary peacock (kumkum stays for errors and destructive actions), secondary an outline. */
 :root:not([data-season='festive']) :is(a, button).bg-kumkum {
-  background-color: var(--color-charcoal);
+  background-color: var(--color-peacock);
 }
-:root:not([data-season='festive']) :is(a, button).bg-kumkum:hover {
-  background-color: #3a3a38;
+:root:not([data-season='festive']) :is(a, button).bg-kumkum:is(:hover, :active) {
+  background-color: var(--ws-peacock-d);
 }
-/* Navigation: peacock for the current page, never red. */
-:root:not([data-season='festive']) .site-header nav a:is(:hover, [aria-current='page']) {
+:root:not([data-season='festive']) a[data-variant='secondary'] {
+  border-color: var(--color-peacock);
   color: var(--color-peacock);
 }
-/* Language switch: quieter (no black pill), still a 44px target with the current language underlined. */
-:root:not([data-season='festive']) :is(.site-header, .site-footer) [role='group'] button[aria-pressed='true'] {
-  background: none;
+:root:not([data-season='festive']) a[data-variant='secondary']:is(:hover, :active) {
+  background-color: var(--ws-cream);
+  color: var(--ws-peacock-d);
+}
+/* Header: cream bar with a warm hairline; nav links are 44px pills, the current page has a marigold underline. */
+:root:not([data-season='festive']) .site-header {
+  border-bottom-color: var(--ws-line);
+}
+:root:not([data-season='festive']) .site-header [class*='border-border'] {
+  border-color: var(--ws-line);
+}
+:root:not([data-season='festive']) .site-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 0.85rem;
+  border-radius: 12px;
+  color: var(--color-charcoal);
+  text-decoration: none;
+}
+:root:not([data-season='festive']) .site-header nav a:hover {
+  background: var(--ws-cream);
+}
+:root:not([data-season='festive']) .site-header nav a[aria-current='page'] {
+  border-radius: 0;
+  box-shadow: inset 0 -3px 0 var(--color-marigold);
+}
+:root:not([data-season='festive']) .site-header :is(a, button):not(.bg-marigold):hover {
+  color: var(--color-peacock);
+}
+/* Language pills: the current language sits on a cream pill (still a 44px target). */
+:root:not([data-season='festive']) .site-header [role='group'] button {
+  border-radius: 12px;
+}
+:root:not([data-season='festive']) .site-header [role='group'] button[aria-pressed='true'] {
+  background: var(--ws-cream);
   color: var(--color-charcoal);
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--color-charcoal);
-  border-radius: 0;
+}
+:root:not([data-season='festive']) .site-header [role='group'] button[aria-current='true'] {
+  background: var(--ws-cream);
+  border-radius: 12px;
+  text-decoration: none;
+}
+:root:not([data-season='festive']) .site-header [role='group'] button[aria-pressed='false']:hover {
+  background: var(--ws-cream);
 }
 /* Frames: a thin mat on the wall. No nail and string, no tape, no tilt. */
 :root:not([data-season='festive']) :is(.hang, .tape)::before,
@@ -1375,9 +1512,9 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
 }
 :root:not([data-season='festive']) .lined-paper {
   background: var(--color-surface);
-  border: 1px solid rgb(27 27 26 / 0.12);
+  border: 1px solid var(--ws-card);
 }
-/* Stand-ins: light tiles with pencil-grey rangoli; the real photos bring the colour. */
+/* Stand-ins: cream tiles with pencil-grey rangoli; the real photos bring the colour. */
 :root:not([data-season='festive']) :is(.ph-colour, .doorstep, [data-photo-slot].bg-charcoal) {
   background-color: var(--color-placeholder);
 }
@@ -1389,7 +1526,7 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
 :root:not([data-season='festive']) a.fest-tile {
   background-color: var(--color-surface);
   color: var(--color-charcoal);
-  box-shadow: inset 0 0 0 1px rgb(27 27 26 / 0.15);
+  box-shadow: inset 0 0 0 1px var(--ws-card);
 }
 :root:not([data-season='festive']) .fest-tile > span[aria-hidden='true'] {
   display: none;
@@ -1405,29 +1542,107 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
   background: none;
   box-shadow: inset 0 0 0 1px var(--color-charcoal);
 }
-:root:not([data-season='festive']) .site-footer [role='group'] button[aria-pressed='true'] {
-  color: var(--color-paper);
-  box-shadow: inset 0 -2px 0 var(--color-paper);
-}
 /* No newsletter box, cookie banner or cookie link next to under-18 learners: pages mark themselves with data-under18. */
 body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-settings-link) {
   display: none;
 }
-/* Error outlines in the footer box: marigold on the dark festive wall, kumkum on the light everyday one (both clear 3:1). */
+/* Error outlines in the footer box: marigold (clears 3:1 on both the festive charcoal and the everyday deep peacock). */
 .newsletter-signup {
   --nl-flag: var(--color-marigold);
 }
-:root:not([data-season='festive']) .newsletter-signup {
-  --nl-flag: #a6261d;
-}
-/* Footer: the same near-white wall, swapping the two ink tokens so every utility inside follows. */
+/* Footer: deep peacock with a dotted top edge, the WhatsApp bar, links in pale marigold, a faint half-plate in the corner. */
 :root:not([data-season='festive']) .site-footer {
-  --color-charcoal: var(--wash);
-  --color-paper: #1b1b1a;
-  border-top: 1px solid rgb(27 27 26 / 0.12);
+  --color-paper: var(--ws-cream);
+  position: relative;
+  overflow: hidden;
+  background-color: var(--ws-peacock-d);
+  color: var(--ws-cream);
+}
+:root:not([data-season='festive']) .site-footer > :not(.footer-plate) {
+  position: relative;
+  z-index: 1;
+}
+:root:not([data-season='festive']) .site-footer .paithani {
+  display: block;
+  height: 10px;
+  margin-top: 6px;
+  background: radial-gradient(circle, var(--ws-rim) 3px, #0000 3.5px) 0 50% / 18px 10px repeat-x;
+}
+.footer-plate {
+  position: absolute;
+  right: -90px;
+  bottom: -120px;
+  width: 340px;
+  fill: var(--ws-cream);
+  opacity: 0.1;
+  pointer-events: none;
+  @media (width >= 64rem) {
+    right: -120px;
+    bottom: -190px;
+    width: 520px;
+  }
+}
+.footer-ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1.3rem;
+  border-radius: 24px;
+  background: rgb(255 244 220 / 0.08);
+  @media (width >= 64rem) {
+    padding: 1.6rem 2rem;
+  }
+}
+.footer-ask p {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--ws-cream);
+  @media (width >= 64rem) {
+    font-size: 1.5rem;
+  }
+}
+.footer-ask-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 64px;
+  width: 100%;
+  padding: 0.5rem 1.25rem;
+  border-radius: 16px;
+  background: var(--color-marigold);
+  text-align: center;
+  line-height: 1.25;
+  color: var(--color-charcoal);
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 140ms;
+  &:hover {
+    filter: brightness(0.95);
+  }
+  @media (width >= 40rem) {
+    width: auto;
+    padding-inline: 2.2rem;
+  }
+}
+:root:not([data-season='festive']) .site-footer :is(a, button):focus-visible {
+  outline: 3px dotted var(--color-marigold);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 :root:not([data-season='festive']) .site-footer .footer-link {
-  color: var(--color-peacock);
+  color: var(--ws-link);
+  text-decoration: none;
+  &:hover {
+    color: #fff;
+  }
+}
+:root:not([data-season='festive']) .site-footer :is(.border-paper\/15, .border-t) {
+  border-color: rgb(255 244 220 / 0.25);
 }
 /* Motion: reveal-only fades. data-motion="off" (the footer switch) still stops everything. */
 @keyframes fade-rise {
@@ -1436,9 +1651,9 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     translate: 0 8px;
   }
 }
-:root:not([data-season='festive'], [data-motion='off']) *:not(.reveal, [class*='animate-']),
-:root:not([data-season='festive'], [data-motion='off']) *::before,
-:root:not([data-season='festive'], [data-motion='off']) *::after {
+/* The festive-style drawings stay finished on everyday days (the logo, text rises and UI motion play). */
+:root:not([data-season='festive']) :is(.grangoli--draw, .sketch-draw, .ink-kolam, .wash-in, .pin-in, .fm-load, .fm-scroll, .scroll-draw),
+:root:not([data-season='festive']) :is(.grangoli--draw, .sketch-draw, .ink-kolam, .wash-in, .pin-in, .fm-load, .fm-scroll, .scroll-draw) * {
   animation: none !important;
 }
 :root:not([data-season='festive'], [data-motion='off']) .pinch {
@@ -1453,8 +1668,9 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     }
   }
 }
-:root:not([data-season='festive'], [data-motion='off'])::view-transition-group(*),
-:root:not([data-season='festive'], [data-motion='off'])::view-transition-old(*),
-:root:not([data-season='festive'], [data-motion='off'])::view-transition-new(*) {
+/* Page changes: only the .page transition runs on everyday days (a touch quicker than festive). */
+:root:not([data-season='festive'], [data-motion='off'])::view-transition-group(.page),
+:root:not([data-season='festive'], [data-motion='off'])::view-transition-old(.page),
+:root:not([data-season='festive'], [data-motion='off'])::view-transition-new(.page) {
   animation-duration: 0.2s;
 }

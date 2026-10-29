@@ -110,7 +110,7 @@ export function LanguageChooser({ current, labels }: { current: Locale; labels: 
       <div className="grain flex min-h-full flex-col">
         <div aria-hidden="true" className="paithani" />
         <div className="mx-auto grid w-full max-w-md flex-1 content-center gap-8 px-5 py-10">
-          <BrandMark animate={false} className="size-14 justify-self-center" />
+          <BrandMark thali animate={false} className="size-14 justify-self-center" />
           <h2 id="lang-title" className="text-center font-heading text-h2">
             {/* The label is the same line in Marathi, Hindi and English. */}
             {labels.label.split(' · ').map((part, i) => (

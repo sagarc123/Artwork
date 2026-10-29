@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Hanken_Grotesk, Mukta, Rozha_One, Tiro_Devanagari_Marathi } from 'next/font/google'
+import { Hind, Lexend, Mukta, Rozha_One, Tiro_Devanagari_Marathi } from 'next/font/google'
 import { ViewTransition } from 'react'
 import '../globals.css'
 import { BottomTabBar } from '@/components/BottomTabBar'
@@ -21,8 +21,9 @@ import { getFestivals, getSiteExtras } from '@/server/content'
 const tiro = Tiro_Devanagari_Marathi({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-tiro', display: 'swap' })
 // Festival-poster display face, used only for one giant word per section and step numerals.
 const rozha = Rozha_One({ weight: '400', subsets: ['devanagari', 'latin'], variable: '--font-rozha', display: 'swap', preload: false })
-// Everyday headings (globals.css --heading-face); Devanagari falls through to Mukta.
-const hanken = Hanken_Grotesk({ subsets: ['latin'], variable: '--font-hanken', display: 'swap' })
+// Everyday look (globals.css --heading-face / --body-face): Lexend headings, Hind body and Devanagari. Mukta stays for festive body text.
+const lexend = Lexend({ subsets: ['latin'], variable: '--font-lexend', display: 'swap' })
+const hind = Hind({ weight: ['400', '500', '600', '700'], subsets: ['devanagari', 'latin'], variable: '--font-hind', display: 'swap' })
 const mukta = Mukta({ weight: ['400', '500', '600', '700'], subsets: ['devanagari', 'latin'], variable: '--font-mukta', display: 'swap' })
 
 export function generateStaticParams() {
@@ -59,11 +60,11 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
       : ''
 
   return (
-    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable} ${hanken.variable}`} data-festive={fixedLook} data-season={season ?? undefined} suppressHydrationWarning>
+    <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable} ${lexend.variable} ${hind.variable}`} data-festive={fixedLook} data-season={season ?? undefined} suppressHydrationWarning>
       <head>
-        {/* Before first paint: a saved "Stop animations" (so the hero doesn't start drawing and then jump), an announcement closed earlier this visit, and the automatic look. */}
+        {/* Before first paint: a saved "Stop animations" and the slow-phone test (so effects don't start and then jump), an announcement closed earlier this visit, and the automatic look. */}
         <InlineScript
-          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
+          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
         />
       </head>
       <body className="flex min-h-dvh flex-col">

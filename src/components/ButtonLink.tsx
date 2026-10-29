@@ -19,6 +19,7 @@ export function ButtonLink({ variant = 'primary', className = '', ...props }: Pr
   return (
     <Link
       {...props}
+      data-variant={variant}
       className={`press inline-flex items-center justify-center text-center font-semibold transition-[color,background-color,transform] ${box} ${variants[variant]} ${className}`}
     />
   )

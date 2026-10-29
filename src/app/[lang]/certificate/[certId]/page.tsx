@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const PRINT_CSS = `
 @page { size: A4 landscape; margin: 0 }
 @media print {
-  header.site-header, footer, body > nav, .skip-link, .no-print, .wa-nudge, [data-print-hide] { display: none !important }
+  header.site-header, footer, body > nav, .skip-link, .no-print, [data-print-hide] { display: none !important }
   html, body { background: #fff !important }
   .cert-wrap { padding: 0 !important }
   .cert-sheet { box-shadow: none !important; width: 297mm !important; height: 209mm !important; max-width: none !important; border-radius: 0 !important; break-inside: avoid }

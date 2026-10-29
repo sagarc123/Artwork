@@ -55,6 +55,7 @@
       "ctaLearn": "Learn with me"
     },
     "studio": {
+      "tagline": "प्रत्येक सणाला रंग देणारी कला",
       "title": "Portraits, Paintings and Rangoli, Drawn by Hand",
       "sub": "Hi, I'm Siddesh. In my studio in Maharashtra I draw charcoal portraits, paint watercolours and design rangoli for your doorstep.",
       "labels": {
@@ -153,6 +154,8 @@
     "follow": "Follow my work",
     "motionStop": "Stop animations",
     "motionStart": "Start animations",
+    "questions": "Questions?",
+    "messageMe": "Message me on WhatsApp",
     "track": "Track my order"
   },
   "whatsapp": {

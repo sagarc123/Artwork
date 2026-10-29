@@ -20,7 +20,7 @@ export function WhatsAppButton({ label, aria, message }: { label: string; aria: 
       target="_blank"
       rel="noopener noreferrer"
       aria-label={aria}
-      className={`wa-nudge fixed right-4 z-45 inline-flex size-13 items-center justify-center rounded-full bg-leaf font-semibold text-white shadow-md hover:bg-leaf/90 lg:right-6 lg:bottom-6 lg:w-auto lg:gap-2 lg:px-5 ${STACKED.test(path) ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))]' : 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))]'}`}
+      className={`no-print fixed right-4 transition-[bottom] duration-200 z-45 inline-flex size-13 items-center justify-center rounded-full bg-leaf font-semibold text-white shadow-md hover:bg-leaf/90 lg:right-6 lg:bottom-6 lg:w-auto lg:gap-2 lg:px-5 ${STACKED.test(path) ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))]' : 'bottom-[calc(4.75rem+env(safe-area-inset-bottom))]'}`}
     >
       <MessageCircle aria-hidden="true" className="size-6" />
       <span className="sr-only lg:not-sr-only">{label}</span>

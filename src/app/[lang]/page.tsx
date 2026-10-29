@@ -92,6 +92,9 @@ export default async function HomePage() {
               <div>
                 <h1 className="hero-title font-heading text-display">{h.studio.title}</h1>
                 <BrushUnderline className="brush--draw mt-3 w-2/3 max-w-xs" />
+                <p lang="mr" className="tagline mt-3">
+                  {h.studio.tagline}
+                </p>
               </div>
               <p className="hero-in max-w-[42ch] text-muted" style={n(1)}>
                 {h.studio.sub}

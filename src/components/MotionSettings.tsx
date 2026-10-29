@@ -5,20 +5,6 @@ import { useEffect, useSyncExternalStore } from 'react'
 
 const KEY = 'motion'
 
-type Connection = { saveData?: boolean; effectiveType?: string }
-
-/** Turns effects down on slow phones/connections. CSS reads <html data-fx="lite"> and data-motion="off". */
-function isLowEnd() {
-  const nav = navigator as Navigator & { connection?: Connection; deviceMemory?: number }
-  const c = nav.connection
-  return Boolean(
-    c?.saveData ||
-      (c?.effectiveType && /(^|-)(2g|3g)$/.test(c.effectiveType)) ||
-      (nav.deviceMemory !== undefined && nav.deviceMemory < 4) ||
-      (nav.hardwareConcurrency !== undefined && nav.hardwareConcurrency < 4),
-  )
-}
-
 function readPref(): 'on' | 'off' {
   try {
     return localStorage.getItem(KEY) === 'off' ? 'off' : 'on'
@@ -36,15 +22,13 @@ const subscribe = (onChange: () => void) => {
   }
 }
 
-/** Footer switch: "Stop animations" (WCAG 2.2.2 / 2.3.3). Also applies the low-end check once per visit. */
+/** Footer switch: "Stop animations" (WCAG 2.2.2 / 2.3.3). CSS reads <html data-motion="off">; the slow-phone data-fx="lite" is set by the head script in layout.tsx. */
 export function MotionToggle({ stopLabel, startLabel }: { stopLabel: string; startLabel: string }) {
   const motion = useSyncExternalStore(subscribe, readPref, () => 'on' as const)
 
   useEffect(() => {
-    if (isLowEnd()) document.documentElement.dataset.fx = 'lite'
-  }, [])
-  useEffect(() => {
-    document.documentElement.dataset.motion = motion
+    const root = document.documentElement
+    if (root.dataset.motion !== motion) root.dataset.motion = motion
   }, [motion])
 
   const toggle = () => {

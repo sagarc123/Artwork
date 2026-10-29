@@ -19,7 +19,7 @@ const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center le
 function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
-      <BrandMark className="size-8 shrink-0 min-[360px]:size-9" />
+      <BrandMark thali className="size-8 shrink-0 min-[360px]:size-9" />
       <span className="font-heading text-[1.125rem] leading-[1.1] lg:whitespace-nowrap min-[375px]:text-[1.375rem] xl:text-[1.625rem]">{brand}</span>
     </Link>
   )
@@ -101,7 +101,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
         <nav aria-label={t.nav.mainNav}>
           <ul className="flex items-center gap-4 xl:gap-6">
             {commissions.map((item) => (
-              <li key={item.href}>
+              <li key={item.href} className={item.href === p('/events') ? 'look-festive' : undefined}>
                 <NavLink href={item.href} className={navClass}>
                   {item.label}
                 </NavLink>
@@ -119,6 +119,10 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           </ul>
         </nav>
         <div className="flex items-center">
+          {/* Everyday: "Book an Event" is the marigold button (festive keeps it as a nav link). */}
+          <Link href={p('/events')} className="look-everyday mr-2 inline-flex min-h-12 items-center rounded-ui bg-marigold px-5 font-semibold whitespace-nowrap text-charcoal hover:brightness-95">
+            {t.nav.events}
+          </Link>
           <Link href={p('/search')} className={iconLink}>
             <Search aria-hidden="true" className="size-6" />
             {t.nav.search}
