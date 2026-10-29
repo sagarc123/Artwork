@@ -144,13 +144,10 @@ h1,
 /* Nothing changed yet: still the kumkum button, faded, so it reads "not yet" rather than "broken" (beige on beige did).
    Unlayered rules beat Payload's at any specificity, so its disabled look is restated here. */
 .btn--style-primary.btn--disabled {
-  --bg-color: var(--action);
-  --hover-bg: var(--action);
-  --color: #fff;
-  --hover-color: #fff;
-}
-.btn.btn--style-primary.btn--disabled {
-  opacity: 0.45;
+  --bg-color: var(--theme-elevation-150);
+  --hover-bg: var(--theme-elevation-150);
+  --color: var(--theme-elevation-700);
+  --hover-color: var(--theme-elevation-700);
 }
 .btn--style-secondary {
   --bg-color: var(--theme-input-bg, transparent);
@@ -384,12 +381,12 @@ h1,
 }
 .today__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
   gap: 1rem;
 }
 /* What's waiting on you comes first, bigger, before the news. */
 .today__grid--urgent {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
   margin-bottom: 1rem;
 }
 .today__grid--urgent .today-card {
@@ -1156,14 +1153,14 @@ body:has(.payload-settings) #force-unlock {
     border: 0;
     background: none;
   }
-  :is(.collection-list--products, .collection-list--artworks) .table td.cell-images {
+  :is(.collection-list--products, .collection-list--artworks) .table td.cell-title {
     flex: 1 1 100%;
   }
   /* Paintings & prints: the tick box (for the bulk buttons) sits beside the photo and name. */
-  .collection-list--products .table td.cell-images {
+  .collection-list--products .table td.cell-title {
     flex-basis: calc(100% - 3.5rem);
   }
-  :is(.collection-list--products, .collection-list--artworks) .table td:not(.cell-images) {
+  :is(.collection-list--products, .collection-list--artworks) .table td:not(.cell-title) {
     color: var(--theme-elevation-650);
   }
 }
@@ -1417,12 +1414,20 @@ html[data-theme='dark'] .sales__spark svg {
 .sale-preset__form {
   display: grid;
   gap: 0.6rem;
-  justify-items: start;
+  justify-items: stretch;
 }
+/* Percent and days sit side by side; the long button below wraps its words inside its pill. */
 .sale-preset__fields {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
+}
+.sale-preset__form .one-tap__btn.is-primary {
+  height: auto;
+  padding-block: 0.6rem;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
 }
 .sale-preset label,
 .call-form > label,
@@ -1448,7 +1453,7 @@ html[data-theme='dark'] .sales__spark svg {
   font-weight: 400;
 }
 .sale-preset input[type='number'] {
-  width: 7.5rem;
+  width: 100%;
 }
 .sale-preset__hint {
   margin: 0;
@@ -1882,4 +1887,332 @@ html[data-theme='dark'] .bulk-bar {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+
+/* ─────────────── Admin round 4 (QA 3): fixes below win over the earlier rules by coming last. ─────────────── */
+
+/* Brand mark: the public site's .bm rules live in globals.css, which the admin doesn't load. */
+.bm .bm-reveal {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.bm .bm-orbit,
+.bm .bm-chase {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.bm .bm-dot {
+  fill: var(--color-kumkum, #a6261d);
+}
+.brand-icon,
+.brand-logo__mark {
+  overflow: visible;
+}
+
+/* One label for the language button at every width ("English"), placed by the avatar's real position. */
+.localizer-button__label {
+  display: none;
+}
+.app-header__localizer.localizer {
+  right: calc(var(--gutter-h) + 52px);
+}
+.app-header__account {
+  border-radius: 50%;
+  overflow: hidden;
+}
+/* The language list shows names only, not "(en)". */
+.localizer__locale-code {
+  display: none;
+}
+
+/* Disabled buttons: neutral grey that reads "nothing to save yet", not broken pink. */
+.btn.btn--style-primary.btn--disabled {
+  --bg-color: var(--theme-elevation-150);
+  --hover-bg: var(--theme-elevation-150);
+  --color: var(--theme-elevation-700);
+  --hover-color: var(--theme-elevation-700);
+  opacity: 1;
+  cursor: not-allowed;
+}
+.btn.btn--disabled {
+  cursor: not-allowed;
+}
+
+/* Settings pages: no tall empty band above Save. */
+.doc-controls:not(:has(.doc-controls__value-wrap:not(:empty), .doc-controls__status)) .doc-controls__wrapper {
+  height: auto;
+  min-height: 0;
+  padding-block: 0.6rem;
+}
+.doc-controls:not(:has(.doc-controls__value-wrap:not(:empty), .doc-controls__status)) .doc-controls__content {
+  display: none;
+}
+.doc-controls:not(:has(.doc-controls__value-wrap:not(:empty), .doc-controls__status)) .doc-controls__controls-wrapper {
+  margin-inline-start: auto;
+}
+
+/* Tab strips line up with the fields below (the first tab's text starts where the content does). */
+.tabs-field__tabs {
+  --tab-pad: 1rem;
+  gap: 0;
+}
+.tabs-field__tabs::before {
+  width: calc(var(--gutter-h) - var(--tab-pad));
+}
+.tabs-field__tab-button {
+  padding-inline: var(--tab-pad);
+}
+
+/* Upload: a side panel, not the full width; a big clear button; "or" centred under it. */
+.drawer__content {
+  width: min(100%, 46rem) !important;
+}
+.file-field__dropzoneContent {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+.file-field__dropzoneButtons {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.file-field__dragAndDropText {
+  text-align: center;
+}
+.dropzone .btn:first-of-type {
+  --bg-color: var(--action);
+  --hover-bg: var(--action-hover);
+  --color: #fff;
+  --hover-color: #fff;
+  min-height: 56px;
+  padding-inline: 2rem;
+  font-size: 1.15rem;
+}
+.bulk-upload--add-files__dropArea {
+  height: auto;
+}
+.bulk-upload--add-files .dropzone {
+  min-height: 14rem;
+  height: auto;
+}
+
+/* Selects: one line, value cut with an ellipsis, x and chevron stay beside it. */
+.rs__control {
+  flex-wrap: nowrap;
+}
+.rs__value-container {
+  min-width: 0;
+  flex: 1 1 0;
+  flex-wrap: nowrap;
+}
+.rs__single-value,
+.relationship--single-value,
+.relationship--single-value__label,
+.relationship--single-value__text {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rs__indicators {
+  flex-shrink: 0;
+}
+
+/* "+ New" beside a select: a pill, with a gap. */
+.relationship-add-new {
+  margin-inline-start: 0.6rem;
+}
+.relationship-add-new__add-button {
+  border-radius: 999px;
+}
+
+/* Tick boxes: room between rows, and between the box and its words. */
+.checkbox {
+  margin-bottom: 1.25rem;
+}
+.checkbox-input {
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 44px;
+}
+.checkbox-input label.field-label {
+  padding-left: 0.5rem;
+}
+
+/* Date picker: admin font. */
+.react-datepicker-popper,
+.react-datepicker-popper * {
+  font-family: var(--admin-font), system-ui, sans-serif;
+}
+
+/* "All sections" tiles line up with the headings above and below, and every tile is the same height. */
+.collections {
+  margin-inline: -6px;
+  width: calc(100% + 12px);
+}
+.collections__card-list .card {
+  align-items: center;
+  min-height: 64px;
+}
+.collections__card-list .card__title {
+  margin: 0;
+}
+
+/* Lists on a phone or small tablet: columns may shrink, and what still doesn't fit scrolls with a shadow at the edge. */
+@media (max-width: 900px) {
+  .table th,
+  .table td {
+    min-width: 4.5rem;
+  }
+}
+@media (max-width: 768px) {
+  .table {
+    background:
+      linear-gradient(to right, var(--theme-bg) 30%, transparent) left center / 2rem 100% no-repeat local,
+      linear-gradient(to left, var(--theme-bg) 30%, transparent) right center / 2rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, rgb(0 0 0 / 0.28), transparent) left center / 0.9rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, rgb(0 0 0 / 0.28), transparent) right center / 0.9rem 100% no-repeat scroll;
+  }
+  .table tbody tr:nth-child(odd) {
+    background: color-mix(in srgb, var(--theme-elevation-50) 60%, transparent);
+  }
+  .table :is(th, td):first-child {
+    padding-inline-start: 0.75rem;
+  }
+  /* Tap targets: tick boxes, links in rows, selects, menus, small icon buttons (padding, not a bigger look). */
+  .checkbox-input__input input[type='checkbox'] {
+    top: 0;
+    left: 0;
+    width: 44px;
+    height: 44px;
+    margin-left: calc(50% - 22px);
+    margin-top: calc(50% - 22px);
+  }
+  .table td a:not(.thumb-cell) {
+    display: inline-block;
+    padding-block: 0.7rem;
+  }
+  .dropdown-indicator,
+  .clear-indicator,
+  .clickable-arrow,
+  .paginator__page {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .popup-button,
+  .per-page__base-button,
+  .array-field__header-action,
+  .rs__multi-value__remove,
+  .file-field__remove,
+  .card__actions .btn,
+  .today-card__more,
+  a[href$='/forgot'] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .relationship--single-value__drawer-toggler,
+  .multi-value-label__drawer-toggler {
+    padding: 15px;
+    margin: -15px;
+  }
+  .today .btn__icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  input:not([type='checkbox'], [type='radio'], [type='hidden'], .rs__input) {
+    min-height: 44px;
+  }
+
+
+  /* Date picker: a centred card over a dim page, instead of covering the label and fields. */
+  .react-datepicker-popper {
+    position: fixed !important;
+    inset: 50% auto auto 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: calc(100vw - 1rem);
+    z-index: 100;
+  }
+  .react-datepicker-popper .react-datepicker {
+    max-width: 100%;
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35);
+  }
+
+  /* Breadcrumb: only the last crumb, with the back arrow. */
+  .step-nav > a:not(:last-of-type) {
+    display: none;
+  }
+  .step-nav > a {
+    max-width: 60vw;
+  }
+
+  /* Tabs: tighter padding on phones (the first tab still lines up with the content). */
+  .tabs-field__tabs {
+    --tab-pad: 0.55rem;
+  }
+
+  /* Save bar: "Save for later" and "Put on website" each on one line; the icon buttons keep 44 px targets. */
+  .doc-controls__controls-wrapper {
+    gap: 0.4rem;
+    padding: 0.5rem 0.6rem;
+  }
+  .doc-controls__controls {
+    gap: 0.4rem;
+  }
+  .doc-controls .btn {
+    white-space: nowrap;
+    font-size: 0.92rem;
+    padding-inline: 0.35rem;
+  }
+  .doc-controls__controls > .form-submit {
+    flex: 1 1 auto;
+  }
+  .doc-controls__controls-wrapper .preview-btn,
+  .doc-controls__controls-wrapper .doc-controls__dots,
+  .doc-controls__controls-wrapper .popup-button {
+    flex: 0 0 44px;
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  .doc-controls__controls > .form-submit > .btn--withPopup > .popup {
+    min-width: 44px;
+  }
+  body:has(.doc-controls__controls-wrapper) {
+    padding-bottom: 8rem;
+  }
+
+  /* Tick-box rows: the "show in gallery" and "show on home page" sidebar fields belong to the first tab only. */
+}
+/* Sidebar fields (below the form on phones and tablets) show once, under the first tab, not under every tab. */
+@media (max-width: 1024px) {
+  .document-fields:has(.tabs-field__tab-button:first-child:not(.tabs-field__tab-button--active)) .document-fields__sidebar-wrap {
+    display: none;
+  }
+}
+
+/* The breadcrumb's home link is squeezed to 18 px by its row and clipped the mark's red dot: keep the full 24 px. */
+.step-nav__home,
+.step-nav__home > span {
+  width: 24px;
+  min-width: 24px;
+  overflow: visible;
+}
+.card__actions {
+  align-self: center;
+}
+@media (max-width: 768px) {
+  .multi-value-remove__icon {
+    width: 20px;
+    height: 20px;
+  }
 }

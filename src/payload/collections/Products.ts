@@ -21,7 +21,7 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: 'adminTitle',
     group: 'Shop',
-    defaultColumns: ['images', 'sold', '_status', 'type'],
+    defaultColumns: ['title', 'sold', '_status', 'type'],
     description: 'Paintings, drawings, prints and downloads for sale. Each one also shows in the gallery unless you untick "Show in gallery".',
     hidden: hideFromHelpers,
     components: { beforeListTable: ['/payload/admin/Bulk#ProductBulk', { path: '/payload/admin/Cells#EmptyNote', clientProps: { text: 'No paintings or prints yet. Tap “Add new” to put your first piece in the shop.' } }] },
@@ -37,8 +37,8 @@ export const Products: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
-            { name: 'viewOnSite', type: 'ui', admin: { components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
-            { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
+            { name: 'viewOnSite', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
+            { name: 'language', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             {
               name: 'title',
               label: 'Name of the piece',
@@ -46,7 +46,7 @@ export const Products: CollectionConfig = {
               required: true,
               localized: true,
               validate: englishRequired,
-              admin: { description: 'Needed in English. Marathi and Hindi are optional: when empty, the English name shows.' },
+              admin: { description: 'Needed in English. Marathi and Hindi are optional: when empty, the English name shows.', components: { Cell: '/payload/admin/Cells#ThumbCell' } },
             },
             {
               name: 'type',
@@ -70,10 +70,9 @@ export const Products: CollectionConfig = {
               required: true,
               admin: {
                 description: 'First photo is the main one. Add a close-up and a photo on a wall if you can.',
-                components: { Cell: '/payload/admin/Cells#ThumbCell' },
               },
             },
-            { name: 'photoTaker', type: 'ui', admin: { components: { Field: '/payload/admin/PhotoTaker#PhotoTaker' } } },
+            { name: 'photoTaker', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/PhotoTaker#PhotoTaker' } } },
             // An original is just a price and a Sold switch; they are stored as its one size row (see originalFromSimpleFields).
             {
               type: 'row',
@@ -118,7 +117,7 @@ export const Products: CollectionConfig = {
                   type: 'checkbox',
                   virtual: true,
                   access: { read: staffOnlyField },
-                  admin: { hidden: true },
+                  admin: { hidden: true, disableListColumn: true },
                   hooks: { afterRead: [({ siblingData }) => (siblingData?.variants?.[0]?.stock ?? 1) <= 0] },
                 },
               ],
@@ -157,7 +156,7 @@ export const Products: CollectionConfig = {
                       ],
                     },
                     // Never stored: the festival sale fills in the crossed-out "was" price as the shop reads it (applySale).
-                    { name: 'compareAtPrice', type: 'number', virtual: true, admin: { hidden: true } },
+                    { name: 'compareAtPrice', type: 'number', virtual: true, admin: { hidden: true, disableListColumn: true } },
                     // Held for 15 minutes while someone pays; only checkout changes it.
                     {
                       name: 'reserved',
@@ -165,7 +164,7 @@ export const Products: CollectionConfig = {
                       defaultValue: 0,
                       min: 0,
                       access: { read: staffOnlyField, update: () => false },
-                      admin: { hidden: true },
+                      admin: { hidden: true, disableListColumn: true },
                       hooks: { beforeDuplicate: [() => 0] },
                     },
                   ],
@@ -208,7 +207,7 @@ export const Products: CollectionConfig = {
           label: 'Advanced',
           description: 'Optional. You can leave all of this as it is.',
           fields: [
-            slugField('title', 'Web address. Made from the English title; change it only if you need to.', undefined),
+            slugField('title', 'Made from the English title; change it only if you need to.', undefined),
             {
               name: 'taxClass',
               label: 'GST rate',

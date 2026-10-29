@@ -43,7 +43,7 @@ export const Media: CollectionConfig = {
   fields: [
     {
       name: 'alt',
-      label: 'What the photo shows',
+      label: 'Photo description',
       type: 'text',
       // Optional: left empty, it becomes the painting's title when the photo is used on a product or gallery piece.
       admin: { description: 'Optional. Describe the photo as you would to a friend on the phone, e.g. "Peacock rangoli in blue and orange, dot style".' },

@@ -31,7 +31,7 @@ export const CommerceSettings: GlobalConfig = {
           label: 'No COD to these PIN codes',
           type: 'textarea',
           access: { read: staffOnlyField },
-          admin: { description: 'Pincodes where COD is not offered, separated by commas or new lines.' },
+          admin: { description: 'PIN codes where COD is not offered, separated by commas or new lines.' },
         },
       ],
     },
@@ -119,7 +119,7 @@ export const CommerceSettings: GlobalConfig = {
       type: 'group',
       admin: { description: 'Takes a percentage off shop prices for a few days. The old price shows crossed out. Products are not changed.' },
       fields: [
-        { name: 'preset', type: 'ui', admin: { components: { Field: '/payload/admin/FestivalPlanner#SalePresetField' } } },
+        { name: 'preset', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/FestivalPlanner#SalePresetField' } } },
         { name: 'enabled', label: 'Sale is on', type: 'checkbox' },
         {
           type: 'row',

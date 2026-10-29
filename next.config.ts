@@ -54,6 +54,11 @@ const nextConfig: NextConfig = {
   // Review photos (up to 4 MB, checked again on the server) travel in a server action; the default limit is 1 MB.
   experimental: { serverActions: { bodySizeLimit: "5mb" } },
   images: { formats: ["image/avif", "image/webp"] },
+  // Internal collections are hidden from the admin's client config for everyone, so opening their address by hand crashed
+  // the page (React #419). Send those addresses to Today instead.
+  async redirects() {
+    return [{ source: "/admin/collections/:slug(review-photos|lesson-progress|otp-codes)/:path*", destination: "/admin", permanent: false }];
+  },
   async headers() {
     // Later rules win for the same header, so /admin gets its own policy.
     return [

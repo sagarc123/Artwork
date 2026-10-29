@@ -326,7 +326,7 @@ export interface Product {
       }[]
     | null;
   /**
-   * Web address. Made from the English title; change it only if you need to.
+   * Made from the English title; change it only if you need to.
    */
   slug: string;
   /**
@@ -394,7 +394,7 @@ export interface Category {
   id: number;
   name: string;
   /**
-   * Web address. Filled from the English title if left empty.
+   * Filled from the English title if left empty.
    */
   slug: string;
   /**
@@ -418,7 +418,7 @@ export interface Medium {
   id: number;
   name: string;
   /**
-   * Web address. Filled from the English title if left empty.
+   * Filled from the English title if left empty.
    */
   slug: string;
   updatedAt: string;
@@ -434,7 +434,7 @@ export interface Festival {
   id: number;
   name: string;
   /**
-   * Web address. Filled from the English title if left empty.
+   * Filled from the English title if left empty.
    */
   slug: string;
   /**
@@ -488,7 +488,7 @@ export interface Course {
   salePrice?: number | null;
   thumbnail: number | Media;
   /**
-   * The free preview. Paste its video ID from Bunny Stream.
+   * Optional free preview. Paste the video’s code from Bunny.
    */
   introVideoId?: string | null;
   outcomes?:
@@ -515,7 +515,7 @@ export interface Course {
       }[]
     | null;
   /**
-   * Web address. Made from the English title; change it only if you need to.
+   * Made from the English title; change it only if you need to.
    */
   slug: string;
   /**
@@ -523,7 +523,7 @@ export interface Course {
    */
   audience?: ('all' | 'teens' | 'kids') | null;
   /**
-   * Students can ask questions under each lesson.
+   * A question box appears under each lesson.
    */
   qaEnabled?: boolean | null;
   certificateEnabled?: boolean | null;
@@ -680,7 +680,7 @@ export interface Artwork {
   festival?: (number | null) | Festival;
   year?: number | null;
   /**
-   * Web address. Made from the English title; change it only if you need to.
+   * Made from the English title; change it only if you need to.
    */
   slug: string;
   /**
@@ -1877,7 +1877,7 @@ export interface CommerceSetting {
     maxTotal: number;
     fee: number;
     /**
-     * Pincodes where COD is not offered, separated by commas or new lines.
+     * PIN codes where COD is not offered, separated by commas or new lines.
      */
     blockedPincodes?: string | null;
   };

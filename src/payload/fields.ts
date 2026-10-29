@@ -9,7 +9,7 @@ export const slugify = (text: string) =>
     .trim()
     .replace(/[\s-]+/g, '-')
 
-export const slugField = (from = 'title', description = 'Web address. Filled from the English title if left empty.', position: 'sidebar' | undefined = 'sidebar'): Field => ({
+export const slugField = (from = 'title', description = 'Filled from the English title if left empty.', position: 'sidebar' | undefined = 'sidebar'): Field => ({
   name: 'slug',
   label: 'Web address',
   type: 'text',
@@ -44,7 +44,7 @@ export const rupeesField = (name: string, required = true, description = 'In ₹
   type: 'number',
   required,
   min: 0,
-  admin: { step: 1, description },
+  admin: { step: 1, description, components: { Cell: '/payload/admin/Cells#MoneyCell' } },
   validate: (value: unknown) =>
     value == null ? (required ? 'Please enter a price.' : true) : Number.isInteger(value) ? true : 'Use whole rupees, e.g. 4500.',
 })
@@ -85,7 +85,7 @@ export const adminTitleField = (from: string): Field => ({
   name: 'adminTitle',
   label: 'Name',
   type: 'text',
-  admin: { hidden: true },
+  admin: { hidden: true, disableListColumn: true },
   hooks: {
     beforeChange: [
       async ({ value, data, originalDoc, req, collection }) => {

@@ -54,7 +54,7 @@ export const Enquiries: CollectionConfig = {
   disableDuplicate: true,
   defaultSort: '-createdAt',
   fields: [
-    { name: 'reply', type: 'ui', admin: { components: { Field: '/payload/admin/EnquiryActions#EnquiryActions' } } },
+    { name: 'reply', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/EnquiryActions#EnquiryActions' } } },
     {
       name: 'status',
       type: 'select',

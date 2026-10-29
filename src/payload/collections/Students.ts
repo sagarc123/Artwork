@@ -38,9 +38,9 @@ export const Customers: CollectionConfig = {
       validate: (v: string | null | undefined) => (typeof v === 'string' && (/^[6-9]\d{9}$/.test(v) || v.startsWith('deleted-')) ? true : 'Please enter a 10-digit mobile number.'),
     },
     { name: 'name', type: 'text' },
-    { name: 'erase', type: 'ui', admin: { components: { Field: '/payload/admin/EraseStudent#EraseStudent' }, condition: (d) => !!d?.id && !d?.deletedAt } },
+    { name: 'erase', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/EraseStudent#EraseStudent' }, condition: (d) => !!d?.id && !d?.deletedAt } },
     // The saved ("wishlist") pieces, merged from the device when the customer signs in.
-    { name: 'savedSlugs', type: 'json', access: { update: ownerOnlyField }, admin: { hidden: true } },
+    { name: 'savedSlugs', type: 'json', access: { update: ownerOnlyField }, admin: { hidden: true, disableListColumn: true } },
     { name: 'deletedAt', label: 'Deleted their account on', type: 'date', access: { update: ownerOnlyField }, admin: { readOnly: true, condition: (d) => !!d?.deletedAt } },
   ],
 }
@@ -144,7 +144,7 @@ export const Certificates: CollectionConfig = {
   access: { read: isOrderStaff, create: () => false, update: isOwner, delete: isOwner },
   indexes: [{ fields: ['enrolment'], unique: true }],
   fields: [
-    { name: 'actions', type: 'ui', admin: { components: { Field: '/payload/admin/CertificateActions#CertificateActions' } } },
+    { name: 'actions', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/CertificateActions#CertificateActions' } } },
     { name: 'publicId', label: 'Certificate number', type: 'text', required: true, unique: true, index: true, admin: { readOnly: true } },
     { name: 'nameOnCert', label: 'Name on the certificate', type: 'text', required: true },
     { type: 'row', fields: [{ name: 'course', type: 'relationship', relationTo: 'courses', required: true, admin: { readOnly: true } }, { name: 'issuedAt', label: 'Issued on', type: 'date', required: true, admin: { readOnly: true } }] },

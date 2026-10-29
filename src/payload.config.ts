@@ -85,7 +85,22 @@ export default buildConfig({
           createdAt: 'Added',
           updatedAt: 'Last changed',
           lastModified: 'Last changed',
+          selectValue: 'Choose…',
+          or: 'or',
         },
+        // The ⋮ menu's "copy to another language" (Payload calls languages locales).
+        localization: {
+          copyToLocale: 'Copy to another language',
+          copyTo: 'Copy to',
+          copyFrom: 'Copy from',
+          copyFromTo: 'Copying from {{from}} to {{to}}',
+          cannotCopySameLocale: 'Pick a different language to copy to',
+          selectedLocales: 'in chosen languages',
+          selectLocaleToCopy: 'Choose a language to copy',
+          selectLocaleToDuplicate: 'Choose the languages to copy into',
+          localeToPublish: 'Language to put on website',
+        },
+        upload: { selectFile: 'Choose a file', fileName: 'File name' },
         authentication: { forceUnlock: 'Unlock (after too many wrong passwords)', login: 'Sign in' },
         // Drafts stay (a half-done piece can wait off the website), in plain words: "Save for later" keeps it off the
         // website, "Put on website" makes it live, "History" lists earlier saves.
@@ -103,6 +118,12 @@ export default buildConfig({
           aboutToUnpublish: 'This takes it off the website. You can put it back any time.',
           unpublishedSuccessfully: 'Taken off the website.',
           versions: 'History',
+          versionID: 'Version number',
+          currentlyPublished: 'On website now',
+          previouslyPublished: 'Was on website',
+          previouslyDraft: 'Was not on website',
+          currentDraft: 'Latest, not on website',
+          currentPublishedVersion: 'Version on website now',
           preview: 'See it on the website',
         },
       },
@@ -114,8 +135,8 @@ export default buildConfig({
   localization: {
     locales: [
       { code: 'en', label: 'English' },
-      { code: 'mr', label: 'मराठी (Marathi)' },
-      { code: 'hi', label: 'हिंदी (Hindi)' },
+      { code: 'mr', label: 'मराठी' },
+      { code: 'hi', label: 'हिंदी' },
     ],
     defaultLocale: 'en',
     fallback: true,

@@ -40,7 +40,7 @@ export const Invoices: CollectionConfig = {
       ],
     },
     { name: 'order', type: 'relationship', relationTo: 'orders', unique: true, index: true },
-    { name: 'orderPublicId', type: 'text', index: true, admin: { hidden: true } },
+    { name: 'orderPublicId', type: 'text', index: true, admin: { hidden: true, disableListColumn: true } },
     {
       name: 'seller',
       type: 'group',

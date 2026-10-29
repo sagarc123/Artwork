@@ -21,8 +21,8 @@ export const Courses: CollectionConfig = {
         {
           label: 'Basics',
           fields: [
-            { name: 'viewOnSite', type: 'ui', admin: { components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
-            { name: 'language', type: 'ui', admin: { components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
+            { name: 'viewOnSite', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/ViewOnSite#ViewOnSite' } } },
+            { name: 'language', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/LocaleNote#LocaleSwitch' } } },
             // Needed in English only: saving in Marathi or Hindi with an empty title used to fail (and left the form "unsaved").
             { name: 'title', type: 'text', required: true, localized: true, validate: englishRequired },
             { name: 'subtitle', type: 'text', localized: true },
@@ -63,13 +63,14 @@ export const Courses: CollectionConfig = {
           label: 'Story',
           description: 'What people read on the course page. All optional.',
           fields: [
-            { name: 'introVideoId', label: 'Intro video (from Bunny)', type: 'text', admin: { description: 'The free preview. Paste its video ID from Bunny Stream.' } },
-            { name: 'outcomes', label: "What you'll learn", type: 'array', labels: { singular: 'point', plural: 'points' }, fields: [{ name: 'text', type: 'text', required: true, localized: true }] },
+            { name: 'introVideoId', label: 'Intro video', type: 'text', admin: { description: 'Optional free preview. Paste the video’s code from Bunny.' } },
+            { name: 'outcomes', label: "What you'll learn", type: 'array', labels: { singular: 'point', plural: 'points' }, admin: { components: { RowLabel: '/payload/admin/PriceRowLabel#PriceRowLabel' } }, fields: [{ name: 'text', type: 'text', required: true, localized: true }] },
             {
               name: 'materials',
               label: 'Materials needed',
               type: 'array',
               labels: { singular: 'material', plural: 'materials' },
+              admin: { components: { RowLabel: '/payload/admin/PriceRowLabel#PriceRowLabel' } },
               fields: [
                 { name: 'text', type: 'text', required: true, localized: true },
                 { name: 'product', label: 'Shop item', type: 'relationship', relationTo: 'products', admin: { description: 'Optional: link to buy it in the shop' } },
@@ -80,6 +81,7 @@ export const Courses: CollectionConfig = {
               label: 'Common questions',
               type: 'array',
               labels: { singular: 'question', plural: 'questions' },
+              admin: { components: { RowLabel: '/payload/admin/PriceRowLabel#PriceRowLabel' } },
               fields: [
                 { name: 'question', type: 'text', required: true, localized: true },
                 { name: 'answer', type: 'textarea', required: true, localized: true },
@@ -91,7 +93,7 @@ export const Courses: CollectionConfig = {
           label: 'Advanced',
           description: 'Optional. You can leave all of this as it is.',
           fields: [
-            slugField('title', 'Web address. Made from the English title; change it only if you need to.', undefined),
+            slugField('title', 'Made from the English title; change it only if you need to.', undefined),
             {
               name: 'audience',
               label: "Who it's for",
@@ -104,7 +106,7 @@ export const Courses: CollectionConfig = {
                 { label: 'Kids', value: 'kids' },
               ],
             },
-            { name: 'qaEnabled', label: 'Lesson questions on/off', type: 'checkbox', defaultValue: true, admin: { description: 'Students can ask questions under each lesson.' } },
+            { name: 'qaEnabled', label: 'Let students ask questions', type: 'checkbox', defaultValue: true, admin: { description: 'A question box appears under each lesson.' } },
             { name: 'certificateEnabled', label: 'Certificate when finished', type: 'checkbox', defaultValue: true },
             { name: 'featured', label: 'Show on home page', type: 'checkbox' },
             seoFields,

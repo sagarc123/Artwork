@@ -132,7 +132,7 @@ export const Orders: CollectionConfig = {
     ],
   },
   fields: [
-    { name: 'actions', type: 'ui', admin: { components: { Field: '/payload/admin/OrderActions#OrderActions' } } },
+    { name: 'actions', type: 'ui', admin: { disableListColumn: true, components: { Field: '/payload/admin/OrderActions#OrderActions' } } },
     {
       name: 'status',
       type: 'select',
@@ -179,7 +179,7 @@ export const Orders: CollectionConfig = {
       admin: { initCollapsed: true, description: 'Saved by the website at checkout. Nothing here can be changed.' },
       fields: lock([
         { name: 'orderNumber', label: 'Order number', type: 'text', index: true, admin: { readOnly: true, components: { Cell: '/payload/admin/Cells#OrderCell' } } },
-        { name: 'publicId', type: 'text', unique: true, index: true, admin: { hidden: true } },
+        { name: 'publicId', type: 'text', unique: true, index: true, admin: { hidden: true, disableListColumn: true } },
         {
           name: 'items',
           type: 'array',
@@ -190,9 +190,9 @@ export const Orders: CollectionConfig = {
             { name: 'course', type: 'relationship', relationTo: 'courses' },
             { name: 'childFirstName', label: "Child's first name", type: 'text' },
             { name: 'guardianConsent', label: 'Parent agreed', type: 'checkbox' },
-            { name: 'variantId', type: 'text', admin: { hidden: true } },
+            { name: 'variantId', type: 'text', admin: { hidden: true, disableListColumn: true } },
             { type: 'row', fields: [{ name: 'variantLabel', label: 'Size', type: 'text' }, { name: 'frameLabel', label: 'Frame', type: 'text' }] },
-            { name: 'type', type: 'text', admin: { hidden: true } },
+            { name: 'type', type: 'text', admin: { hidden: true, disableListColumn: true } },
             { type: 'row', fields: [{ name: 'unitPrice', label: 'Price (₹)', type: 'number' }, { name: 'qty', label: 'Qty', type: 'number' }, { name: 'lineTotal', label: 'Line total (₹)', type: 'number' }] },
           ],
         },
@@ -254,8 +254,8 @@ export const Orders: CollectionConfig = {
         // The signed-in customer who placed it (always set for course orders).
         { name: 'account', label: 'Student account', type: 'relationship', relationTo: 'customers', index: true },
         // The browser that placed it (signed visitor cookie): lets a retry cancel its own earlier checkout, even when not signed in.
-        { name: 'visitorId', type: 'text', index: true, admin: { hidden: true } },
-        { name: 'locale', type: 'text', admin: { hidden: true } },
+        { name: 'visitorId', type: 'text', index: true, admin: { hidden: true, disableListColumn: true } },
+        { name: 'locale', type: 'text', admin: { hidden: true, disableListColumn: true } },
       ]),
     },
   ],
