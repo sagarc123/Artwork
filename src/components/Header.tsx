@@ -118,7 +118,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center">
+        <div className="hdr-icons flex items-center">
           {/* Everyday: "Book an Event" is the marigold button (festive keeps it as a nav link). */}
           <Link href={p('/events')} className="look-everyday mr-2 inline-flex min-h-12 items-center rounded-ui bg-marigold px-5 font-semibold whitespace-nowrap text-charcoal hover:brightness-95">
             {t.nav.events}

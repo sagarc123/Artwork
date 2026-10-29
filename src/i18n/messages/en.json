@@ -518,7 +518,8 @@
     "emptyBody": "Pick a print or an original from the shop. It will wait here until you are ready to pay.",
     "courseLine": "Online course · lifetime access",
     "forChild": "For {name}",
-    "signInNote": "You will sign in with your mobile number at checkout."
+    "signInNote": "You will sign in with your mobile number at checkout.",
+    "addedShort": "Added"
   },
   "checkout": {
     "title": "Almost there",

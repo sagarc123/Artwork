@@ -18,7 +18,7 @@ export function CourseCard({ course, locale, t }: { course: Course; locale: Loca
   const thumb = typeof course.thumbnail === 'object' ? course.thumbnail : null
   const medium = pickMedium([cat?.slug, cat?.name, course.title, course.slug], course.slug)
   return (
-    <li>
+    <li className="rv">
       <Link href={localePath(locale, `/courses/${course.slug}`)} className="card art-card grid h-full content-start gap-3">
         <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
           {/* Festive: the matted thumbnail. Everyday: the same photo on a plate. */}

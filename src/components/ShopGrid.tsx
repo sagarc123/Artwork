@@ -91,7 +91,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
       ) : (
         <ul className="pin-in grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
           {shown.map((item, i) => (
-            <li key={item.href} className="relative">
+            <li key={item.href} className="rv relative">
               <Link href={item.href} className="card art-card grid gap-3">
                 <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
                   {/* The artwork morphs into the product page's main image (same name there). */}

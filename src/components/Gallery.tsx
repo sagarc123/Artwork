@@ -77,7 +77,7 @@ export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryIte
 
       <ul className="mt-6 columns-2 gap-4 lg:columns-4 lg:gap-6">
         {shown.map((item, i) => (
-          <li key={item.id} className="mb-4 break-inside-avoid lg:mb-6">
+          <li key={item.id} className="rv mb-4 break-inside-avoid lg:mb-6">
             <button type="button" onClick={() => setOpen(i)} className="card art-card peek grid w-full gap-2 text-left">
               <span className="relative block overflow-hidden bg-surface p-2 shadow-frame">
                 <span className="peek-art block">

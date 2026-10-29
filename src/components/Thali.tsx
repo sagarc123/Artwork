@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { seededRandom } from '@/lib/seed'
 
 // The "thali": a round plate with a rim of jittered dots, the art inside, and the Bindu (open ring + kumkum dot) as its centre construction.
@@ -21,10 +21,15 @@ const f1 = (n: number) => n.toFixed(1)
 
 function Rim({ n, seed, colours, r, base, jit, sjit }: { n: number; seed: string; colours: [string, string]; r: number; base: number; jit: number; sjit: number }) {
   const rand = seededRandom(seed)
-  return Array.from({ length: n }, (_, i) => {
-    const [x, y] = pt(r + (rand() * 2 - 1) * jit, (i * 360) / n + (rand() * 2 - 1) * 1.6)
-    return <circle key={i} cx={f1(x)} cy={f1(y)} r={(base + (rand() * 2 - 1) * sjit).toFixed(2)} fill={colours[i % 2]} />
-  })
+  // .rim: the dots pop in one by one on load (--i) and the badge's rim turns on hover (globals.css).
+  return (
+    <g className="rim">
+      {Array.from({ length: n }, (_, i) => {
+        const [x, y] = pt(r + (rand() * 2 - 1) * jit, (i * 360) / n + (rand() * 2 - 1) * 1.6)
+        return <circle key={i} cx={f1(x)} cy={f1(y)} r={(base + (rand() * 2 - 1) * sjit).toFixed(2)} fill={colours[i % 2]} style={{ '--i': i } as CSSProperties} />
+      })}
+    </g>
+  )
 }
 
 /** The open ring (320° of it) and, in the gap, the kumkum dot. */

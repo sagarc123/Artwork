@@ -84,7 +84,7 @@ export function HowItWorks({ t }: { t: Home['how'] }) {
         </h2>
         <ol className="grid gap-4 md:grid-cols-3 md:gap-6">
           {t.steps.map((s, i) => (
-            <li key={s.t} className="ws-step">
+            <li key={s.t} className="ws-step rv">
               <span aria-hidden="true" className="ws-n">
                 {i + 1}
               </span>
@@ -104,6 +104,7 @@ export function HowItWorks({ t }: { t: Home['how'] }) {
 export function EventTiles({ t, price }: { t: Home['events']; price: string | null }) {
   return (
     <section className="ws-section">
+      <div className="dotline dl" aria-hidden="true" />
       <div className="wrap grid gap-8">
         <div className="grid max-w-3xl gap-3">
           <h2 className="font-heading text-h1">{t.title}</h2>
@@ -111,7 +112,7 @@ export function EventTiles({ t, price }: { t: Home['events']; price: string | nu
         </div>
         <ul className="ws-tiles grid gap-4 md:grid-cols-3 md:gap-6">
           {t.scenes.map((name, i) => (
-            <li key={name}>
+            <li key={name} className="rv">
               <div className="art-card grid">
                 <span className="relative block">
                   <PhotoPlaceholder ratio="16/11" seed={`doorstep-${i}`} style={(['phool', 'kolam', 'poster'] as const)[i]} floor="paper" alt="" slot={`Event photo: ${name}`} />
@@ -153,7 +154,7 @@ export function PortraitBand({ t, price, locale }: { t: Home['portraits']; price
             </Link>
           </div>
         </div>
-        <div className="ws-ba max-lg:hidden">
+        <div className="ws-ba rv max-lg:hidden">
           <figure>
             <div aria-hidden="true" className="ws-mat">
               <PhotoStandIn seed="portrait-pair" />
@@ -183,10 +184,10 @@ export function CourseBand({ course, t, c, locale }: { course: Course; t: Home['
   return (
     <section className="ws-course text-paper">
       <div className="wrap grid gap-8 lg:grid-cols-[18rem_1fr] lg:items-center lg:gap-14">
-        <Thali category="course" seed={course.slug} width="min(18rem, 62%)" className="mx-auto">
+        <Thali category="course" seed={course.slug} width="min(18rem, 62%)" className="rv mx-auto">
           <MediaImage media={thumb} alt={course.title} ratio="1/1" seed={course.slug} medium={pickMedium([cat?.slug, cat?.name, course.title, course.slug], course.slug)} floor="charcoal" sizes="300px" />
         </Thali>
-        <div className="grid content-start gap-4 max-lg:text-center max-lg:justify-items-center">
+        <div className="rv grid content-start gap-4 max-lg:text-center max-lg:justify-items-center">
           <p className="font-semibold">{t.kicker}</p>
           <h2 className="font-heading text-h1">{course.title}</h2>
           {course.subtitle && <p className="max-w-[46ch] text-paper/90">{course.subtitle}</p>}

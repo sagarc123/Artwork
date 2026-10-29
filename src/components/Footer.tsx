@@ -55,7 +55,7 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
 
   return (
     <footer className="site-footer bg-charcoal pb-40 text-paper grain-dark lg:pb-20">
-      <div aria-hidden="true" className="paithani" />
+      <div aria-hidden="true" className="paithani dl" />
       <svg aria-hidden="true" viewBox="0 0 240 120" className="footer-plate look-everyday">
         {HALF_PLATE.map(([x, y, r]) => (
           <circle key={`${x}-${y}`} cx={x} cy={y} r={r} />

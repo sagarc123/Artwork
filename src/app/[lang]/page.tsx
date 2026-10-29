@@ -233,7 +233,7 @@ export default async function HomePage() {
           ) : (
             <ul className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4 lg:gap-y-10 lg:gap-x-8">
               {featured.map((f, i) => (
-                <li key={f.slug} className={[i === 0 && 'lg:col-span-2 lg:row-span-2', i === 4 && 'max-lg:hidden'].filter(Boolean).join(' ')}>
+                <li key={f.slug} className={['rv', i === 0 && 'lg:col-span-2 lg:row-span-2', i === 4 && 'max-lg:hidden'].filter(Boolean).join(' ')}>
                   <Link href={f.href} className="card art-card grid gap-3">
                     <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
                       <ViewTransition name={`art-${f.slug}`} share="morph" default="none">

@@ -1230,13 +1230,21 @@ dialog.drawer[open] {
   stroke-dasharray: 1;
 }
 .ty .ty-loop {
-  stroke: var(--color-charcoal);
+  stroke: var(--color-peacock);
   stroke-width: 1.8;
   stroke-dasharray: 1;
 }
 .ty .ty-dots {
-  stroke: var(--color-charcoal);
+  stroke: var(--color-marigold);
   stroke-width: 4;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+@keyframes ty-dots-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
 }
 @keyframes ty-open {
   from {
@@ -1259,8 +1267,16 @@ dialog.drawer[open] {
     .ty-loop {
       animation: draw 800ms var(--ease-draw) 60ms both;
     }
+    /* Everyday: dots press in (0.26s), the ring draws round them (to 0.9s), then the tick (to 1.15s). */
+    .ty-dots {
+      animation: ty-dots-in 260ms var(--ease-pour) both;
+    }
+    .ty-loop {
+      animation-duration: 700ms;
+      animation-delay: 200ms;
+    }
     .ty-check--ink {
-      animation-delay: 800ms;
+      animation-delay: 850ms;
     }
   }
 }
@@ -1703,9 +1719,7 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   border-radius: 20px;
   background: #fff;
   box-shadow: 0 8px 22px -14px rgb(14 63 76 / 0.3);
-  transition:
-    transform 280ms var(--ease-pour),
-    box-shadow 280ms;
+  transition: transform 280ms var(--ease-pour);
 }
 :root:not([data-season='festive']) .art-card::after {
   display: none;
@@ -1731,16 +1745,51 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   font-weight: 600;
 }
 /* Only the card surface lifts; the list item (the hit area) stays put. */
+:root:not([data-season='festive']) .art-card {
+  position: relative;
+}
+:root:not([data-season='festive']) .art-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 18px 30px -16px rgb(14 63 76 / 0.38);
+  opacity: 0;
+  transition: opacity 280ms;
+  pointer-events: none;
+}
+:root:not([data-season='festive']) :is(.rim-badge, .thali) .rim {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform 0.9s var(--ease-pour);
+}
 @media (hover: hover) {
   :root:not([data-season='festive']) li:hover > .art-card {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 30px -16px rgb(14 63 76 / 0.38);
+    transform: translateY(-6px) scale(1.02);
+  }
+  :root:not([data-season='festive']) li:hover > .art-card::before {
+    opacity: 1;
+  }
+  :root:not([data-season='festive']) li:hover > .art-card :is(.rim-badge, .thali) .rim {
+    transform: rotate(15deg);
   }
 }
 :root:not([data-season='festive']) .art-card:focus-visible {
   outline: 3px dotted var(--color-marigold);
   outline-offset: 4px;
   box-shadow: 0 0 0 2px var(--color-peacock);
+  transform: translateY(-6px) scale(1.02);
+}
+:root:not([data-season='festive']) .art-card:focus-visible::before {
+  opacity: 1;
+}
+:root:not([data-season='festive']) .art-card:focus-visible :is(.rim-badge, .thali) .rim {
+  transform: rotate(15deg);
+}
+/* Touch (and mouse) press: the surface dips for 140ms. */
+:root:not([data-season='festive']) li > .art-card:active {
+  transform: scale(0.97);
+  transition-duration: 140ms;
 }
 /* The price in a marigold pill (ink on marigold is 5.4:1). */
 :root:not([data-season='festive']) .price-pill {
@@ -2030,5 +2079,228 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   .ws-course h2.text-h1::after {
     left: 50%;
     margin-left: -28px;
+  }
+}
+
+/* ─────────────── Everyday motion: dot → line → colour (tokens: quick 140ms, base 280ms, slow 560ms; out, inout, pop) ─────────────── */
+:root:not([data-season='festive']) {
+  --ease-pop: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+@keyframes ws-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes ws-plate {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+@keyframes ws-dot {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+@keyframes ws-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.55) rotate(-24deg);
+  }
+}
+@keyframes ws-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes badge-pop {
+  from {
+    transform: scale(0.5);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+@keyframes rv-safe {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero, once (≈1.3s): text rises with a 60ms stagger; then the plate: rim dots pop one by one, the disc, the ring, and the colour blooms. */
+  :root:not([data-season='festive']) .ws-hero-text > * {
+    animation: ws-rise 560ms var(--ease-pour) both;
+  }
+  :root:not([data-season='festive']) .ws-hero-text > :nth-child(2) {
+    animation-delay: 60ms;
+  }
+  :root:not([data-season='festive']) .ws-hero-text > :nth-child(3) {
+    animation-delay: 120ms;
+  }
+  :root:not([data-season='festive']) .ws-hero-text > :nth-child(4) {
+    animation-delay: 180ms;
+  }
+  :root:not([data-season='festive']) .ws-hero-text > :nth-child(5) {
+    animation-delay: 240ms;
+  }
+  :root:not([data-season='festive']) .ws-halo {
+    animation: ws-plate 700ms var(--ease-pour) both;
+  }
+  .ws-stage .ws-big {
+    --d: 100ms;
+  }
+  .ws-stage .ws-small {
+    --d: 340ms;
+  }
+  :root:not([data-season='festive']) .ws-stage .thali > svg:first-child > circle:first-child {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ws-plate 420ms var(--ease-pour) var(--d) both;
+  }
+  :root:not([data-season='festive']) .ws-stage .rim circle {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ws-dot 340ms var(--ease-pop) calc(var(--d) + 80ms + var(--i) * 11ms) both;
+  }
+  :root:not([data-season='festive']) .ws-stage .thali > svg:first-child > circle:last-child {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ws-plate 420ms var(--ease-pour) calc(var(--d) + 440ms) both;
+  }
+  :root:not([data-season='festive']) .ws-stage .thali > svg:last-child {
+    animation: ws-plate 420ms var(--ease-pour) calc(var(--d) + 440ms) both;
+  }
+  :root:not([data-season='festive']) .ws-stage .thali > div {
+    animation: ws-bloom 640ms var(--ease-pour) calc(var(--d) + 520ms) both;
+  }
+  /* Slow phones: the hero is simple fades (and nothing per dot). */
+  :root[data-fx='lite']:not([data-motion='off']) :is(.ws-hero-text > *, .ws-halo, .ws-stage .thali) {
+    animation: ws-fade 200ms ease-out 0s both !important;
+  }
+  /* The cart badge pops. */
+  :root:not([data-season='festive']) .tab-bloom {
+    animation: badge-pop 420ms var(--ease-pop);
+  }
+}
+/* Scroll reveals (once; <html data-rv> is only set when script and motion are available): opacity and a 14px rise. */
+:root[data-rv]:not([data-season='festive']) .rv {
+  transition:
+    opacity 560ms var(--ease-pour),
+    transform 560ms var(--ease-pour);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+:root[data-rv]:not([data-season='festive']) .rv:not(.in) {
+  opacity: 0;
+  transform: translateY(14px);
+  /* If script never reveals it, it shows after 3s anyway. */
+  animation: rv-safe 1ms 3s forwards;
+}
+.rv:nth-child(4n + 2) {
+  --i: 1;
+}
+.rv:nth-child(4n + 3) {
+  --i: 2;
+}
+.rv:nth-child(4n) {
+  --i: 3;
+}
+:root[data-fx='lite'] .rv:not(.in) {
+  transform: none;
+}
+:root[data-fx='lite'] .rv {
+  transition: opacity 160ms linear !important;
+  transition-delay: 0s !important;
+}
+/* Dotted dividers draw left to right once: a cover slides away (transform only). */
+:root:not([data-season='festive']) .dotline {
+  height: 10px;
+  width: min(72rem, 100% - 2.5rem);
+  margin-inline: auto;
+  margin-bottom: 3rem;
+  background: radial-gradient(circle, var(--ws-rim) 3px, #0000 3.5px) 0 50% / 18px 10px repeat-x;
+}
+:root:not([data-season='festive']) .dl {
+  position: relative;
+  overflow: hidden;
+  --dl-bg: var(--color-paper);
+}
+:root:not([data-season='festive']) .site-footer .dl {
+  --dl-bg: var(--ws-peacock-d);
+}
+:root[data-rv]:not([data-season='festive']) .dl::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--dl-bg);
+  transition: transform 900ms var(--ease-draw);
+}
+:root[data-rv]:not([data-season='festive']) .dl.in::after {
+  transform: translateX(101%);
+}
+/* Buttons: colour fades on hover, press dips to .98. */
+:root:not([data-season='festive']) :is(.ws-wa, .ws-pop, .card-btn, .footer-ask-btn, a.bg-kumkum, button.bg-kumkum) {
+  transition:
+    background-color 280ms,
+    filter 140ms,
+    transform 140ms var(--ease-pour);
+}
+:root:not([data-season='festive']) :is(.ws-wa, .ws-pop, .card-btn, .footer-ask-btn, .press):active {
+  transform: scale(0.98);
+}
+:root:not([data-season='festive']) button[data-done] {
+  background: var(--color-marigold);
+  color: var(--color-charcoal);
+}
+/* Header: a soft shadow fades in once the page has scrolled a few pixels (opacity only; no shrink, no hide). */
+:root:not([data-season='festive']) .site-header::before {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 14px;
+  background: linear-gradient(rgb(14 63 76 / 0.12), #0000);
+  opacity: 0;
+  transition: opacity 280ms;
+  pointer-events: none;
+}
+:root[data-stuck]:not([data-season='festive']) .site-header::before {
+  opacity: 1;
+}
+/* Form errors: no shake, just the border changing colour over 200ms. */
+:root:not([data-season='festive']) :is(input, select, textarea) {
+  transition: border-color 200ms;
+}
+/* Card to product page: the picture morphs over 520ms. */
+:root:not([data-season='festive'], [data-motion='off'])::view-transition-group(.morph) {
+  animation-duration: 520ms;
+}
+/* Header spacing (Marathi and Hindi labels are wider) and room above the phone language pill. */
+:root:not([data-season='festive']) .hdr-icons > a {
+  min-width: 3.25rem;
+  padding-inline: 0.4rem;
+  white-space: nowrap;
+}
+:root:not([data-season='festive']) .site-header > .lg\:hidden.border-b {
+  padding-block: 4px;
+}
+/* Calm modes: everything is in its final state. */
+:root[data-motion='off'] .rv,
+:root[data-motion='off'] .rv:not(.in) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+:root:is([data-motion='off'], [data-fx='lite']) .dl::after {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv,
+  .rv:not(.in) {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .dl::after {
+    display: none !important;
   }
 }

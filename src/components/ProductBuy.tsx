@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode, type RefObject } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import { formatPrice, whatsappLink } from '@/lib/site'
+import { flyToCart } from './cart-fly'
 import { cartActions } from './cart-store'
 import { pinch } from './pinch'
 import { SoldBadge } from './SoldBadge'
@@ -56,10 +57,20 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
   const soldOut = variants.every((x) => x.stock <= 0)
   const message = `${t.waOrder}: ${title} — ${variant.label}${frame ? `, ${frame.label}` : ''} (${formatPrice(total)})`
   const similarHref = whatsappLink(`${t.similarMessage}\n${title}`)
+  const [flash, setFlash] = useState(false)
   const add = (e: MouseEvent<HTMLButtonElement>) => {
-    cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
-    pinch(e.currentTarget, 'cart')
-    setAdded(true)
+    const button = e.currentTarget
+    // Everyday: the picture flies to the cart first and the cart updates as it lands (at once when motion is off).
+    const main = document.querySelector('.art-main > div')
+    const box = main?.getBoundingClientRect()
+    const onScreen = box && box.bottom > 0 && box.top < innerHeight
+    flyToCart(onScreen ? main : button).then(() => {
+      cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
+      pinch(button, 'cart')
+      setAdded(true)
+      setFlash(document.documentElement.dataset.season !== 'festive')
+      setTimeout(() => setFlash(false), 1800)
+    })
   }
 
   const option = 'flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-ui border-[1.5px] border-border px-4 has-checked:border-charcoal has-checked:bg-charcoal/5 has-disabled:opacity-50'
@@ -122,9 +133,9 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
           {promise}
           {/* One primary per view: Add to cart is filled; WhatsApp is the outline alternative. */}
           <div className={`grid gap-3 ${physical ? 'sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2' : ''}`}>
-            <button type="button" onClick={add} className={`${primary} h-13 bg-kumkum px-6 hover:bg-kumkum/90`}>
+            <button type="button" onClick={add} data-done={flash || undefined} className={`${primary} h-13 bg-kumkum px-6 hover:bg-kumkum/90`}>
               <ShoppingCart aria-hidden="true" className="size-6" />
-              {cart.add}
+              {flash ? cart.addedShort : cart.add}
             </button>
             {physical && (
               <a href={whatsappLink(message)} target="_blank" rel="noopener noreferrer" className={`${outline} h-13 px-6`}>

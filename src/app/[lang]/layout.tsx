@@ -5,6 +5,7 @@ import '../globals.css'
 import { BottomTabBar } from '@/components/BottomTabBar'
 import { ConsentTrackers } from '@/components/ConsentTrackers'
 import { CookieBanner } from '@/components/CookieBanner'
+import { EverydayMotion } from '@/components/EverydayMotion'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LanguageChooser } from '@/components/LanguagePicker'
@@ -64,7 +65,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
       <head>
         {/* Before first paint: a saved "Stop animations" and the slow-phone test (so effects don't start and then jump), an announcement closed earlier this visit, and the automatic look. */}
         <InlineScript
-          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
+          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";if(window.IntersectionObserver&&d.dataset.motion!=="off"&&!matchMedia("(prefers-reduced-motion:reduce)").matches)d.dataset.rv="";var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
         />
       </head>
       <body className="flex min-h-dvh flex-col">
@@ -81,6 +82,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         </main>
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />
+        <EverydayMotion />
         <LanguageChooser current={locale} labels={t.langStrip} />
         <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
       </body>
