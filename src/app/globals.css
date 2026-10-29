@@ -1514,13 +1514,13 @@ html:is([data-motion='off'], [data-fx='lite'])::view-transition-new(*) {
   background: var(--color-surface);
   border: 1px solid var(--ws-card);
 }
-/* Stand-ins: cream tiles with pencil-grey rangoli; the real photos bring the colour. */
+/* Stand-ins: cream tiles; the real photos bring the colour. */
 :root:not([data-season='festive']) :is(.ph-colour, .doorstep, [data-photo-slot].bg-charcoal) {
   background-color: var(--color-placeholder);
 }
-:root:not([data-season='festive']) .grangoli {
+/* Stand-ins: rangoli keep their powder colours (ink lines where the sheet is cream). */
+:root:not([data-season='festive']) [data-photo-slot] .grangoli--dark {
   color: var(--color-charcoal);
-  filter: grayscale(1);
 }
 /* Festival tiles: outlined, not colour blocks. */
 :root:not([data-season='festive']) a.fest-tile {
@@ -1673,4 +1673,111 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
 :root:not([data-season='festive'], [data-motion='off'])::view-transition-old(.page),
 :root:not([data-season='festive'], [data-motion='off'])::view-transition-new(.page) {
   animation-duration: 0.2s;
+}
+
+/* ─────────────── Everyday cards and plates (Thali.tsx; the extra bits carry .look-everyday) ─────────────── */
+.kind {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ws-body);
+}
+.rim-badge {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+  @media (width >= 40rem) {
+    width: 30px;
+    height: 30px;
+  }
+}
+/* A white card: 1px warm border, soft shadow; the picture sits uncropped on a cream mat. */
+:root:not([data-season='festive']) .art-card {
+  height: 100%;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 12px 12px 18px;
+  border: 1px solid var(--ws-card);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 22px -14px rgb(14 63 76 / 0.3);
+  transition:
+    transform 280ms var(--ease-pour),
+    box-shadow 280ms;
+}
+:root:not([data-season='festive']) .art-card::after {
+  display: none;
+}
+:root:not([data-season='festive']) .art-card > :first-child {
+  position: relative;
+  margin-bottom: 0.5rem;
+  padding: 6%;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--ws-cream);
+  box-shadow: none;
+}
+:root:not([data-season='festive']) :is(.art-card, .art-main) img {
+  object-fit: contain;
+}
+:root:not([data-season='festive']) .art-card [data-photo-slot] {
+  background: none;
+}
+:root:not([data-season='festive']) .art-card :is(.text-h3-sm, .text-h3) {
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+/* Only the card surface lifts; the list item (the hit area) stays put. */
+@media (hover: hover) {
+  :root:not([data-season='festive']) li:hover > .art-card {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 30px -16px rgb(14 63 76 / 0.38);
+  }
+}
+:root:not([data-season='festive']) .art-card:focus-visible {
+  outline: 3px dotted var(--color-marigold);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 2px var(--color-peacock);
+}
+/* The price in a marigold pill (ink on marigold is 5.4:1). */
+:root:not([data-season='festive']) .price-pill {
+  display: inline-block;
+  justify-self: start;
+  width: fit-content;
+  padding: 0.1rem 0.8rem;
+  border-radius: 999px;
+  background: var(--color-marigold);
+  color: var(--color-charcoal);
+}
+:root:not([data-season='festive']) .price-pill * {
+  color: inherit;
+}
+/* The card's one action. */
+:root:not([data-season='festive']) .card-btn {
+  border-color: var(--color-peacock);
+  background: var(--color-peacock);
+  color: #fff;
+}
+:root:not([data-season='festive']) :is(li:hover > .art-card .card-btn, .card-btn:hover) {
+  background: var(--ws-peacock-d);
+  border-color: var(--ws-peacock-d);
+}
+/* Product page: the main picture in the same white card and cream mat. */
+:root:not([data-season='festive']) .art-main {
+  border: 1px solid var(--ws-card);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 22px -14px rgb(14 63 76 / 0.3);
+}
+:root:not([data-season='festive']) .art-main > div {
+  border-radius: 14px;
+  background: var(--ws-cream);
+}
+:root:not([data-season='festive']) .title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }

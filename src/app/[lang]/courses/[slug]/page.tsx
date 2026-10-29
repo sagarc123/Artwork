@@ -6,6 +6,8 @@ import { CourseCard } from '@/components/CourseCard'
 import { Breadcrumbs } from '@/components/JsonLd'
 import { EnrolButton, EnrolCard } from '@/components/CourseEnrol'
 import { CourseVideo } from '@/components/CourseVideo'
+import { MediaImage } from '@/components/MediaImage'
+import { Thali } from '@/components/Thali'
 import { ReviewList } from '@/components/ReviewList'
 import { alternates, localeNames, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -105,7 +107,13 @@ export default async function CoursePage({ params }: PageProps<'/[lang]/courses/
         <div className="grid content-start gap-10 lg:col-span-7">
           <div className="grid gap-5">
             <CourseVideo videoId={course.introVideoId} title={`${c.introVideo}: ${course.title}`} soon={c.videoSoon} soonNote={c.videoSoonNote} seed={course.slug} />
-            <h1 className="font-heading text-h1">{course.title}</h1>
+            <div className="title-row">
+              {/* Everyday: the course on a small plate beside its title. */}
+              <Thali category="course" seed={course.slug} width="5rem" className="look-everyday shrink-0">
+                <MediaImage media={thumb} alt="" ratio="1/1" seed={course.slug} floor="charcoal" sizes="80px" />
+              </Thali>
+              <h1 className="font-heading text-h1">{course.title}</h1>
+            </div>
             {course.subtitle && <p className="max-w-[55ch] text-h3-sm text-muted">{course.subtitle}</p>}
             <p className="flex flex-wrap gap-x-5 gap-y-1 text-muted">
               <span>{c.levels[course.level]}</span>

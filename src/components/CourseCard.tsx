@@ -7,6 +7,7 @@ import { coursePrice, formatDuration, forUnder18 } from '@/lib/courses'
 import { formatPrice } from '@/lib/site'
 import type { CourseCard as Course } from '@/server/content'
 import { MediaImage } from './MediaImage'
+import { RimBadge, Thali } from './Thali'
 
 export const lessonCount = (t: Dictionary['courses'], n: number) => (n === 1 ? t.lessonOne : t.lessons.replace('{n}', String(n)))
 
@@ -15,11 +16,21 @@ export function CourseCard({ course, locale, t }: { course: Course; locale: Loca
   const cat = typeof course.category === 'object' ? course.category : null
   const price = coursePrice(course)
   const thumb = typeof course.thumbnail === 'object' ? course.thumbnail : null
+  const medium = pickMedium([cat?.slug, cat?.name, course.title, course.slug], course.slug)
   return (
     <li>
-      <Link href={localePath(locale, `/courses/${course.slug}`)} className="card grid h-full content-start gap-3">
+      <Link href={localePath(locale, `/courses/${course.slug}`)} className="card art-card grid h-full content-start gap-3">
         <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
-          <MediaImage media={thumb} alt={course.title} ratio="16/10" seed={course.slug} medium={pickMedium([cat?.slug, cat?.name, course.title, course.slug], course.slug)} floor="charcoal" sizes="(min-width: 1024px) 33vw, 100vw" />
+          {/* Festive: the matted thumbnail. Everyday: the same photo on a plate. */}
+          <span className="look-festive block">
+            <MediaImage media={thumb} alt={course.title} ratio="16/10" seed={course.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 33vw, 100vw" />
+          </span>
+          <span className="look-everyday grid place-items-center py-3">
+            <Thali category="course" seed={course.slug} width="min(12rem, 70%)">
+              <MediaImage media={thumb} alt={course.title} ratio="1/1" seed={course.slug} medium={medium} floor="charcoal" sizes="200px" />
+            </Thali>
+          </span>
+          <RimBadge category="course" seed={`${course.slug}-b`} className="look-everyday" />
           {price.free && <span className="absolute top-4 left-4 rounded-ui bg-marigold px-3 py-1 font-semibold text-charcoal">{t.free}</span>}
         </span>
         {cat && <span className="font-semibold text-accent">{cat.name}</span>}
@@ -49,11 +60,11 @@ export function CourseCard({ course, locale, t }: { course: Course; locale: Loca
             {t.under18}
           </span>
         )}
-        <span className="font-semibold">
+        <span className="price-pill font-semibold">
           {price.free ? t.free : formatPrice(price.now)}
           {price.was && <s className="ml-2 font-normal text-muted">{formatPrice(price.was)}</s>}
         </span>
-        <span className="inline-flex h-12 items-center justify-center rounded-ui border-[1.5px] border-charcoal font-semibold">{t.view}</span>
+        <span className="card-btn inline-flex h-12 items-center justify-center rounded-ui border-[1.5px] border-charcoal font-semibold">{t.view}</span>
       </Link>
     </li>
   )

@@ -100,7 +100,7 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
 
         <div className="grid content-start gap-4 md:col-span-6 lg:col-span-7">
           {/* Phones: small, so title and price show on the first screen (the buy bar below carries Add to cart). */}
-          <div className="tape relative mx-auto w-full max-w-[calc(32svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
+          <div className="tape art-main relative mx-auto w-full max-w-[calc(32svh*0.8)] bg-surface p-3 shadow-frame md:max-w-none lg:p-5">
             {/* Shares its name with the card that opened it (shop, home, gallery), so the artwork morphs across. */}
             <ViewTransition name={`art-${product.slug}`} share="morph" default="none">
               <MediaImage media={images[0]} alt={product.title} ratio="4/5" seed={product.slug} medium={medium} floor="charcoal" sizes="(min-width: 1024px) 55vw, (min-width: 768px) 50vw, 100vw" priority />

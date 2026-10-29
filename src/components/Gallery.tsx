@@ -10,6 +10,7 @@ import { whatsappLink } from '@/lib/site'
 import { EmptyState } from './EmptyState'
 import { MediaImage, photoSrc } from './MediaImage'
 import { ShareButton } from './ShareButton'
+import { RimBadge, thaliFor } from './Thali'
 import type { Floor } from './PhotoPlaceholder'
 
 export type GalleryItem = {
@@ -77,7 +78,7 @@ export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryIte
       <ul className="mt-6 columns-2 gap-4 lg:columns-4 lg:gap-6">
         {shown.map((item, i) => (
           <li key={item.id} className="mb-4 break-inside-avoid lg:mb-6">
-            <button type="button" onClick={() => setOpen(i)} className="card peek grid w-full gap-2 text-left">
+            <button type="button" onClick={() => setOpen(i)} className="card art-card peek grid w-full gap-2 text-left">
               <span className="relative block overflow-hidden bg-surface p-2 shadow-frame">
                 <span className="peek-art block">
                   <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} medium={item.medium} style={styles[i]} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
@@ -85,7 +86,9 @@ export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryIte
                 <span aria-hidden="true" className="peek-info">
                   <span className="peek-view">{t.view}</span>
                 </span>
+                <RimBadge category={thaliFor(item.medium)} seed={item.seed} className="look-everyday" />
               </span>
+              {item.category && <span className="kind look-everyday">{item.category.name}</span>}
               <span className="font-heading text-h3-sm">{item.title}</span>
               <span className={item.productHref ? 'font-semibold text-leaf' : 'text-muted'}>{item.productHref ? t.forSale : t.private}</span>
             </button>

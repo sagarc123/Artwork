@@ -93,7 +93,7 @@
       "title": "Fresh from the studio",
       "seeAll": "See all art →",
       "itemTitle": "Artwork name",
-      "priceSoon": "Price coming soon",
+      "priceSoon": "Ask price on WhatsApp",
       "soon": "New pieces arriving soon",
       "ask": "Ask on WhatsApp",
       "empty": "New pieces are on their way. Ask me on WhatsApp what is ready."
@@ -398,6 +398,7 @@
     "title": "Take a piece of my studio home",
     "intro": "Originals are one of a kind. Prints and downloads are made from my favourite pieces.",
     "all": "All",
+    "askPrice": "Ask price on WhatsApp",
     "type": "Type",
     "types": {
       "original": "Original",

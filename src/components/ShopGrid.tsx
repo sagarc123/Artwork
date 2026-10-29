@@ -5,12 +5,13 @@ import { useState, ViewTransition } from 'react'
 import type { Dictionary } from '@/i18n/dictionaries'
 import type { Media } from '@/payload-types'
 import { noRepeat, styleFor, type Medium } from '@/lib/art'
-import { formatPrice } from '@/lib/site'
+import { formatPrice, whatsappLink } from '@/lib/site'
 import { EmptyState } from './EmptyState'
 import { MediaImage } from './MediaImage'
 import type { Floor } from './PhotoPlaceholder'
 import { SaveButton } from './SaveButton'
 import { SoldBadge } from './SoldBadge'
+import { RimBadge, thaliFor } from './Thali'
 
 export type ShopItem = {
   slug: string
@@ -91,7 +92,7 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
         <ul className="pin-in grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4">
           {shown.map((item, i) => (
             <li key={item.href} className="relative">
-              <Link href={item.href} className="card grid gap-3">
+              <Link href={item.href} className="card art-card grid gap-3">
                 <span className="tape relative block bg-surface p-2 shadow-frame lg:p-3">
                   {/* The artwork morphs into the product page's main image (same name there). */}
                   <ViewTransition name={`art-${item.slug}`} share="morph" default="none">
@@ -108,19 +109,27 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                   />
                   </ViewTransition>
                   {item.sold && <SoldBadge label={t.sold} className="absolute top-4 left-4" />}
+                  <RimBadge category={thaliFor(item.medium)} seed={item.seed} className="look-everyday" />
                 </span>
+                <span className="kind look-everyday">{t.types[item.type]}</span>
                 <span className="font-heading text-h3-sm">{item.title}</span>
                 <span className="text-muted">{item.meta}</span>
                 {item.sold ? (
                   <s className="text-muted">{formatPrice(item.price)}</s>
-                ) : (
-                  <span className="font-semibold">
+                ) : item.price <= 0 ? null : (
+                  <span className="price-pill font-semibold">
                     {item.hasMorePrices && <span className="font-normal text-muted">{t.from} </span>}
                     {formatPrice(item.price)}
                     {item.compareAt && item.compareAt > item.price && <s className="ml-2 font-normal text-muted">{formatPrice(item.compareAt)}</s>}
                   </span>
                 )}
               </Link>
+              {/* No price yet: ask on WhatsApp (a link can't sit inside the card's link). */}
+              {item.price <= 0 && !item.sold && (
+                <a href={whatsappLink(`${t.askPrice}: ${item.title}`)} target="_blank" rel="noopener noreferrer" className="card-btn mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-ui border-[1.5px] border-charcoal px-4 font-semibold">
+                  {t.askPrice}
+                </a>
+              )}
               {/* Outside the link (a button can't sit inside one); over the photo's top-right corner. */}
               <SaveButton slug={item.slug} title={item.title} labels={t} className="absolute top-3 right-3 lg:top-4 lg:right-4" />
             </li>

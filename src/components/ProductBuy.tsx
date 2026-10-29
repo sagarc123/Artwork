@@ -72,7 +72,7 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
           <SoldBadge label={t.sold} />
         </p>
       ) : (
-        <p className="text-h2 font-semibold">
+        <p className="price-pill text-h2 font-semibold">
           {formatPrice(total)}
           {was && <s className="ml-3 text-h3 font-normal text-muted">{formatPrice(was)}</s>}
         </p>

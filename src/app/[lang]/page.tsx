@@ -13,6 +13,7 @@ import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
 import { StudioWall, type WallPhoto } from '@/components/StudioWall'
 import { SoldBadge } from '@/components/SoldBadge'
+import { RimBadge, thaliFor } from '@/components/Thali'
 import { Testimonials } from '@/components/Testimonials'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
@@ -223,7 +224,7 @@ export default async function HomePage() {
             <ul className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4 lg:gap-y-10 lg:gap-x-8">
               {featured.map((f, i) => (
                 <li key={f.slug} className={[i === 0 && 'lg:col-span-2 lg:row-span-2', i === 4 && 'max-lg:hidden'].filter(Boolean).join(' ')}>
-                  <Link href={f.href} className="card grid gap-3">
+                  <Link href={f.href} className="card art-card grid gap-3">
                     <div className="tape relative bg-surface p-3 shadow-frame lg:p-4">
                       <ViewTransition name={`art-${f.slug}`} share="morph" default="none">
                       <MediaImage
@@ -238,12 +239,14 @@ export default async function HomePage() {
                       />
                       </ViewTransition>
                       {f.sold && <SoldBadge label={t.shop.sold} className="absolute top-5 left-5 lg:top-6 lg:left-6" />}
+                      <RimBadge category={thaliFor(f.medium)} seed={f.seed} className="look-everyday" />
                     </div>
+                    <span className="kind look-everyday">{t.shop.types[f.type]}</span>
                     <span className={`font-heading ${i === 0 ? 'text-h2' : 'text-h3'}`}>{f.title}</span>
                     {f.sold ? (
                       <s className="text-muted">{formatPrice(f.price)}</s>
                     ) : (
-                      <span className="font-semibold">
+                      <span className="price-pill font-semibold">
                         {f.hasMorePrices && <span className="font-normal text-muted">{t.shop.from} </span>}
                         {formatPrice(f.price)}
                       </span>
