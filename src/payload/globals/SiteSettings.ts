@@ -108,6 +108,23 @@ export const SiteSettings: GlobalConfig = {
           label: 'Home page',
           fields: [
             {
+              name: 'trust',
+              label: 'Numbers under the home page headline',
+              type: 'group',
+              admin: { description: 'Fill in only what is true. Each filled box shows as one short line, e.g. "8 years · 150+ events · Pune, Mumbai · ★ 4.9". Empty boxes are left out, and with all of them empty nothing shows.' },
+              fields: [
+                { type: 'row', fields: [
+                  { name: 'years', label: 'Years of experience', type: 'number', min: 1 },
+                  { name: 'events', label: 'Events done', type: 'number', min: 1, admin: { description: 'Shows as "150+ events".' } },
+                ] },
+                { name: 'cities', label: 'Cities you work in', type: 'text', localized: true, maxLength: 80, admin: { description: 'e.g. "Pune, Mumbai, Nashik".' } },
+                { type: 'row', fields: [
+                  { name: 'rating', label: 'Rating (1 to 5)', type: 'number', min: 1, max: 5, admin: { step: 0.1, description: 'Leave empty to use the average of the reviews customers have left on the website (only once there are some).' } },
+                  { name: 'ratingCount', label: 'How many ratings', type: 'number', min: 1, admin: { description: 'Shown next to the rating. Only used with the rating above.' } },
+                ] },
+              ],
+            },
+            {
               name: 'instagram',
               label: 'Instagram on the home page',
               type: 'group',

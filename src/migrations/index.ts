@@ -15,6 +15,7 @@ import * as migration_20261028_082925_courses_part2b from './20261028_082925_cou
 import * as migration_20261028_091233_reviews_newsletter from './20261028_091233_reviews_newsletter';
 import * as migration_20261028_093903_privacy from './20261028_093903_privacy';
 import * as migration_20261028_102728_security_fixes from './20261028_102728_security_fixes';
+import * as migration_20261029_051654_trust_line from './20261029_051654_trust_line';
 
 export const migrations = [
   {
@@ -100,6 +101,11 @@ export const migrations = [
   {
     up: migration_20261028_102728_security_fixes.up,
     down: migration_20261028_102728_security_fixes.down,
-    name: '20261028_102728_security_fixes'
+    name: '20261028_102728_security_fixes',
+  },
+  {
+    up: migration_20261029_051654_trust_line.up,
+    down: migration_20261029_051654_trust_line.down,
+    name: '20261029_051654_trust_line'
   },
 ];

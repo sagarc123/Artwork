@@ -320,6 +320,25 @@ export async function getSiteExtras(locale: Locale) {
   }
 }
 
+/**
+ * The line under the home headline: years, events, cities and a rating, each only when the owner filled it in.
+ * No rating filled in: the real average of the approved reviews (nothing is shown until there is one).
+ */
+export async function getTrust(locale: Locale) {
+  'use cache'
+  cacheLife('max')
+  cacheTag('site-settings', 'reviews')
+  const payload = await db()
+  const [s, { docs }] = await Promise.all([
+    payload.findGlobal({ slug: 'site-settings', locale, depth: 0 }),
+    payload.find({ collection: 'reviews', where: { status: { equals: 'approved' } }, limit: 5000, depth: 0, pagination: false, select: { rating: true } }),
+  ])
+  const t = s.trust
+  const real = summarise(docs.map((r) => r.rating))
+  const rating = t?.rating ? { average: Math.round(t.rating * 10) / 10, count: t.ratingCount || 0 } : real.count ? real : null
+  return { years: t?.years || 0, events: t?.events || 0, cities: t?.cities?.trim() || '', rating }
+}
+
 /** Delivery table plus the COD rules that depend on the PIN code. Server-only: blocked PIN codes stay private. */
 export async function getDeliveryRules() {
   'use cache'

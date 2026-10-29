@@ -1790,6 +1790,28 @@ export interface SiteSetting {
     link?: string | null;
   };
   /**
+   * Fill in only what is true. Each filled box shows as one short line, e.g. "8 years · 150+ events · Pune, Mumbai · ★ 4.9". Empty boxes are left out, and with all of them empty nothing shows.
+   */
+  trust?: {
+    years?: number | null;
+    /**
+     * Shows as "150+ events".
+     */
+    events?: number | null;
+    /**
+     * e.g. "Pune, Mumbai, Nashik".
+     */
+    cities?: string | null;
+    /**
+     * Leave empty to use the average of the reviews customers have left on the website (only once there are some).
+     */
+    rating?: number | null;
+    /**
+     * Shown next to the rating. Only used with the rating above.
+     */
+    ratingCount?: number | null;
+  };
+  /**
    * Pick 3 to 6 photos you have posted on Instagram. They show on the home page and open your Instagram.
    */
   instagram?: {
@@ -2061,6 +2083,15 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         enabled?: T;
         message?: T;
         link?: T;
+      };
+  trust?:
+    | T
+    | {
+        years?: T;
+        events?: T;
+        cities?: T;
+        rating?: T;
+        ratingCount?: T;
       };
   instagram?:
     | T

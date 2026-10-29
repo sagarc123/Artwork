@@ -52,7 +52,10 @@
       "sub": "Hi, I'm Siddesh. I draw rangoli at doorsteps across Maharashtra — and portraits and paintings for your walls.",
       "ctaEvent": "Book Event Rangoli",
       "ctaShop": "Shop Art",
-      "ctaLearn": "Learn with me"
+      "ctaLearn": "Learn with me",
+      "waCta": "WhatsApp: Book my event",
+      "waMsg": "Namaste! I would like to book rangoli for my event.",
+      "ctaPortrait": "Portrait from your photo"
     },
     "studio": {
       "tagline": "प्रत्येक सणाला रंग देणारी कला",
@@ -79,7 +82,9 @@
         "Festival",
         "Society"
       ],
-      "from": "Event rangoli from {price}"
+      "from": "Event rangoli from {price}",
+      "check": "Check my date",
+      "tileMsg": "Namaste! I would like to check your date for a {type} rangoli."
     },
     "portraits": {
       "title": "Your photo, drawn by hand",
@@ -87,7 +92,9 @@
       "cta": "Start my portrait",
       "photo": "Your photo",
       "drawing": "Drawn by hand",
-      "from": "Portraits from {price}"
+      "from": "Portraits from {price}",
+      "waCta": "Send your photo on WhatsApp",
+      "waMsg": "Namaste! I would like a portrait drawn from my photo."
     },
     "featured": {
       "title": "Fresh from the studio",
@@ -96,7 +103,8 @@
       "priceSoon": "Ask price on WhatsApp",
       "soon": "New pieces arriving soon",
       "ask": "Ask on WhatsApp",
-      "empty": "New pieces are on their way. Ask me on WhatsApp what is ready."
+      "empty": "New pieces are on their way. Ask me on WhatsApp what is ready.",
+      "askMore": "Looking for something else?"
     },
     "artist": {
       "title": "Hello, I'm Siddesh Mokashi",
@@ -134,6 +142,29 @@
       "follow": "See more on Instagram",
       "open": "Open on Instagram: {title}",
       "photo": "Instagram photo {n}"
+    },
+    "how": {
+      "title": "How it works",
+      "steps": [
+        {
+          "t": "Message me",
+          "b": "Send your date, place or photo on WhatsApp."
+        },
+        {
+          "t": "I confirm price and date",
+          "b": "I reply within {hours} hours."
+        },
+        {
+          "t": "Pay a small advance to start",
+          "b": "Nothing is paid until we agree on the price. Portraits: the rest after you approve the preview."
+        }
+      ]
+    },
+    "trust": {
+      "years": "{n} years",
+      "events": "{n}+ events",
+      "rating": "Rated {rating} out of 5",
+      "count": "({n} ratings)"
     }
   },
   "footer": {

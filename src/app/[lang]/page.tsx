@@ -11,17 +11,18 @@ import { MakingOf } from '@/components/MakingOf'
 import { MediaImage, photoSrc } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
-import { StudioWall, type WallPhoto } from '@/components/StudioWall'
+import { CourseBand, EventTiles, HeroStage, HowItWorks, PortraitBand, TrustLine, WaButton } from '@/components/HomeWarm'
 import { SoldBadge } from '@/components/SoldBadge'
 import { RimBadge, thaliFor } from '@/components/Thali'
 import { Testimonials } from '@/components/Testimonials'
+import type { Media } from '@/payload-types'
 import { alternates, localePath } from '@/i18n/config'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import type { Medium } from '@/lib/art'
 import { fixedSeason } from '@/lib/festive'
 import { eventFrom, fromText, portraitFrom } from '@/lib/prices'
 import { formatPrice, site, whatsappLink } from '@/lib/site'
-import { festivalLook, getFestivals, getProducts, getServicePrices, getSiteExtras, getTestimonials, toShopItem } from '@/server/content'
+import { festivalLook, getCourses, getFestivals, getProducts, getServicePrices, getSiteExtras, getTestimonials, getTrust, toShopItem } from '@/server/content'
 import { ViewTransition } from 'react'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -52,11 +53,13 @@ export default async function HomePage() {
   const t = await getDictionary()
   const h = t.home
   const p = (path: string) => localePath(locale, path)
-  const [products, festivalDocs, prices, testimonials, { instagram, siteLook, festiveLook, makingOf }] = await Promise.all([
+  const [products, festivalDocs, prices, testimonials, trust, courses, { instagram, siteLook, festiveLook, makingOf }] = await Promise.all([
     getProducts(locale),
     getFestivals(locale),
     getServicePrices(locale),
     getTestimonials(locale),
+    getTrust(locale),
+    site.coursesLive ? getCourses(locale) : Promise.resolve([]),
     getSiteExtras(locale),
   ])
 
@@ -64,7 +67,7 @@ export default async function HomePage() {
   const items = [...products].sort((a, b) => Number(!!b.featured) - Number(!!a.featured)).map((x) => toShopItem(x, locale))
   const featured = items.slice(0, 5)
   // Everyday hero: a real photo for each spot on the studio wall once one exists, else the drawn stand-in.
-  const wall = (...media: Medium[]): WallPhoto => {
+  const wall = (...media: Medium[]): { media: Media; alt: string } | null => {
     const x = items.find((i) => media.includes(i.medium) && photoSrc(i.image))
     return x?.image ? { media: x.image, alt: x.title } : null
   }
@@ -85,43 +88,43 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={{ '@graph': [org, { '@type': 'WebSite', name: site.brandName, url: new URL(localePath(locale, '/'), site.url).toString(), inLanguage: locale, potentialAction: { '@type': 'SearchAction', target: `${new URL(localePath(locale, '/search'), site.url)}?q={search_term_string}`, 'query-input': 'required name=search_term_string' } }] }} />
-      {/* 1 (everyday) · The studio wall: his range, a charcoal portrait, a watercolour and an ink rangoli, drawn in pencil and ink. */}
+      <div className="home-flow">
+      {/* 1 (everyday) · Warm Studio hero: headline and actions beside one big plate with a small portrait plate on a soft disc. Phones: the plate first. */}
       {season !== 'festive' && (
-        <section className="look-everyday relative overflow-hidden bg-paper grain">
-          <div className="wrap grid gap-8 pt-6 pb-14 lg:grid-cols-12 lg:items-center lg:gap-10 lg:pt-10 lg:pb-20">
-            <div className="relative z-10 grid gap-5 lg:col-span-5">
-              <div>
-                <h1 className="hero-title font-heading text-display">{h.studio.title}</h1>
-                <BrushUnderline className="brush--draw mt-3 w-2/3 max-w-xs" />
-                <p lang="mr" className="tagline mt-3">
-                  {h.studio.tagline}
-                </p>
-              </div>
-              <p className="hero-in max-w-[42ch] text-muted" style={n(1)}>
+        <section className="look-everyday ws-hero" style={{ order: 1 }}>
+          <div className="wrap">
+            <div className="ws-hero-text">
+              <h1 className="hero-title font-heading text-display">{h.studio.title}</h1>
+              <p lang="mr" className="tagline">
+                {h.studio.tagline}
+              </p>
+              <p className="hero-in max-w-[42ch] text-[1.1875rem]" style={n(1)}>
                 {h.studio.sub}
               </p>
-              <PhoneCtas shop={t.nav.shop} courses={site.coursesLive ? t.nav.courses : null} event={h.hero.ctaEvent} shopHref={p('/shop')} coursesHref={p('/courses')} eventHref={p('/events')} />
-              <div className="hero-in grid gap-3 max-sm:hidden sm:flex sm:flex-wrap sm:items-center sm:gap-x-7" style={n(2)}>
-                <ButtonLink href={p('/events')}>{h.hero.ctaEvent}</ButtonLink>
-                <Link href={p('/shop')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
+              <div className="hero-in ws-cta" style={n(2)}>
+                <div className="ws-cta-main">
+                  <WaButton href={whatsappLink(h.hero.waMsg)}>{h.hero.waCta}</WaButton>
+                </div>
+                <ButtonLink href={p('/custom-portraits')} variant="secondary">
+                  {h.hero.ctaPortrait}
+                </ButtonLink>
+                <ButtonLink href={p('/shop')} variant="secondary">
                   {h.hero.ctaShop}
-                </Link>
-                <Link href={p('/custom-portraits')} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
-                  {h.portraits.cta}
-                </Link>
+                </ButtonLink>
               </div>
+              <TrustLine trust={trust} t={h.trust} />
             </div>
-            {/* Phone: the wall comes first so the first screen has art (the headline stays the LCP: inline SVG, no request). */}
-            <div className="order-first mx-auto w-full max-w-[13rem] sm:max-w-md lg:order-none lg:col-span-7 lg:max-w-none lg:pl-6">
-              <StudioWall portrait={wall('portrait', 'drawing')} painting={wall('painting')} rangoli={wall('rangoli')} labels={h.studio.labels} />
-            </div>
+            <HeroStage
+              rangoli={<MediaImage media={wall('rangoli')?.media ?? null} alt={wall('rangoli')?.alt ?? ''} ratio="1/1" seed="siddesh-home" medium="rangoli" floor="paper" sizes="(min-width: 1024px) 400px, 232px" priority />}
+              portrait={<MediaImage media={wall('portrait', 'drawing')?.media ?? null} alt={wall('portrait', 'drawing')?.alt ?? ''} ratio="1/1" seed="siddesh-portrait" medium="portrait" floor="paper" sizes="200px" />}
+            />
           </div>
         </section>
       )}
 
       {/* 1 (festive) · The doorstep: headline on paper, a rangoli drawing itself on the charcoal floor. */}
       {season !== 'everyday' && (
-      <section className="look-festive relative overflow-hidden bg-paper grain">
+      <section className="look-festive relative overflow-hidden bg-paper grain" style={{ order: 1 }}>
         <div className="wrap grid gap-6 pt-6 lg:grid-cols-12 lg:items-center lg:gap-8 lg:pt-14">
           <div className="relative z-10 grid gap-5 pb-4 lg:col-span-5 lg:pb-24">
             {/* Phones get the rangoli tile instead of the big word. */}
@@ -164,7 +167,7 @@ export default async function HomePage() {
       <Threshold />
 
       {/* 2 · Event rangoli: three steps to your door. */}
-      <section className="relative overflow-hidden bg-paper py-10 lg:py-28">
+      <section className="look-festive relative overflow-hidden bg-paper py-10 lg:py-28">
         <DisplayWord className="absolute top-4 -right-4 text-charcoal/[0.05]">दारी</DisplayWord>
         <div className="wrap relative grid gap-12 lg:grid-cols-12">
           <div className="grid content-start gap-6 lg:col-span-5">
@@ -188,7 +191,7 @@ export default async function HomePage() {
       <Threshold />
 
       {/* 3 · Custom portraits: your photo → drawn by hand. Kumkum floor when festive, an ink-wash sheet on everyday days. */}
-      <section className="floor floor-kumkum py-10 lg:py-28">
+      <section className="look-festive floor floor-kumkum py-10 lg:py-28">
         <div className="wrap grid gap-12 lg:grid-cols-12 lg:items-center">
           <div className="grid gap-5 lg:col-span-5">
             <h2 className="font-heading text-h1">{h.portraits.title}</h2>
@@ -206,8 +209,15 @@ export default async function HomePage() {
 
       <Threshold />
 
+      {/* How it works (everyday): a white band right under the hero. */}
+      {season !== 'festive' && (
+        <div className="look-everyday" style={{ order: 2 }}>
+          <HowItWorks t={h.how} />
+        </div>
+      )}
+
       {/* 5 · New from the studio: framed, taped, different sizes. */}
-      <section className="bg-paper grain py-10 lg:py-28">
+      <section className="bg-paper grain py-10 lg:py-28" style={{ order: 3 }}>
         <div className="wrap grid gap-10">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -260,15 +270,39 @@ export default async function HomePage() {
             href={whatsappLink(t.whatsapp.message)}
             target="_blank"
             rel="noopener noreferrer"
-            className="ink-link inline-flex min-h-11 items-center justify-self-start font-semibold text-leaf"
+            className="look-festive ink-link inline-flex min-h-11 items-center justify-self-start font-semibold text-leaf"
           >
             {h.featured.ask}
           </a>
+          <p className="look-everyday flex flex-wrap items-center gap-x-3">
+            <span>{h.featured.askMore}</span>
+            <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="ink-link inline-flex min-h-11 items-center font-semibold text-leaf">
+              {h.featured.ask}
+            </a>
+          </p>
         </div>
       </section>
 
+      {/* Everyday: event tiles, the portrait band and the featured course follow the studio's new pieces. */}
+      {season !== 'festive' && (
+        <>
+          <div className="look-everyday" style={{ order: 4 }}>
+            <EventTiles t={h.events} price={eventPrice} />
+          </div>
+          <div className="look-everyday" style={{ order: 5 }}>
+            <PortraitBand t={h.portraits} price={portraitPrice} locale={locale} />
+          </div>
+          {/* Phones skip the course band: the Courses tab leads there. */}
+          {courses[0] && (
+            <div className="look-everyday max-lg:hidden" style={{ order: 6 }}>
+              <CourseBand course={courses[0]} t={h.course} c={t.courses} locale={locale} />
+            </div>
+          )}
+        </>
+      )}
+
       {/* 5b · Watch it being made: the time-lapse (or a drawn stand-in). Phones skip it to keep the page short. */}
-      <div className="max-lg:hidden">
+      <div className="max-lg:hidden" style={{ order: 7 }}>
         <Threshold />
         <MakingOf t={t.makingOf} makingOf={makingOf} />
       </div>
@@ -277,7 +311,7 @@ export default async function HomePage() {
       <Threshold className="max-lg:hidden" />
 
       {/* 6 · Meet the artist on the charcoal floor (the one dark gallery floor in both looks). */}
-      <section className="floor floor-charcoal relative overflow-hidden py-20 max-lg:hidden lg:py-32">
+      <section className="floor floor-charcoal relative overflow-hidden py-20 max-lg:hidden lg:py-32" style={{ order: 8 }}>
         <DisplayWord className="absolute top-2 -left-6 text-paper/[0.07]">सिद्धेश</DisplayWord>
         <div className="wrap relative grid gap-14 lg:grid-cols-12 lg:items-center">
           <div className="relative mx-4 lg:col-span-5 lg:mx-0">
@@ -298,7 +332,7 @@ export default async function HomePage() {
       {/* 7 · Course on a peacock floor: a kolam line weaves through the dots as you scroll. (phones: the hero Courses button covers it) */}
       {site.coursesLive && <Threshold className="max-lg:hidden" />}
       {site.coursesLive && (
-      <section className="floor floor-peacock py-10 max-lg:hidden lg:py-28">
+      <section className="look-festive floor floor-peacock py-10 max-lg:hidden lg:py-28">
         <div className="wrap grid gap-10 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-5">
             <KolamWeave className="scroll-draw mx-auto w-full max-w-sm max-lg:hidden" />
@@ -322,7 +356,7 @@ export default async function HomePage() {
 
       {/* 8 · Festival calendar: the next festival is the big tile, with a countdown. */}
       {festivals.length > 0 && (
-        <section className="bg-paper py-10 lg:py-24">
+        <section className="bg-paper py-10 lg:py-24" style={{ order: 9 }}>
           <div className="wrap grid gap-8">
             <h2 className="font-heading text-h1">{h.festivals.title}</h2>
             <FestivalTiles festivals={festivals} t={h.festivals} locale={locale} remind={{ t: t.remind, forms: { errors: t.forms.errors, required: t.forms.required } }} />
@@ -330,14 +364,16 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Testimonials items={testimonials} t={t.testimonials} />
+      <div style={{ order: 10 }}>
+        <Testimonials items={testimonials} t={t.testimonials} />
+      </div>
 
-      <div className="max-lg:hidden">
+      <div className="max-lg:hidden" style={{ order: 11 }}>
         <InstagramStrip {...instagram} t={h.instagram} />
       </div>
 
       {/* 9 · A note for first-time online buyers. */}
-      <section className="bg-paper pt-4 pb-20 lg:pb-28">
+      <section className="bg-paper pt-4 pb-20 lg:pb-28" style={{ order: 12 }}>
         <div className="wrap">
           <div className="lined-paper torn mx-auto max-w-3xl rotate-[0.5deg] py-12 pr-6 pl-14 shadow-frame sm:pr-12 lg:pl-20">
             <h2 className="font-heading text-h2">{h.help.title}</h2>
@@ -358,6 +394,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </div>
     </>
   )
 }
