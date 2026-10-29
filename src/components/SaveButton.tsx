@@ -19,7 +19,7 @@ export function SaveButton({ slug, title, labels, className = '' }: { slug: stri
         if (!on) pinch(e.currentTarget, 'saved')
         savedActions.toggle(slug)
       }}
-      className={`press inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-charcoal bg-surface px-3 font-semibold text-charcoal aria-pressed:border-kumkum aria-pressed:text-kumkum ${className}`}
+      className={`press inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border-[1.5px] border-charcoal bg-surface px-3 font-semibold text-charcoal aria-pressed:border-kumkum aria-pressed:text-kumkum ${className}`}
     >
       <Heart aria-hidden="true" className={`size-5 ${on ? 'tab-bloom fill-kumkum' : ''}`} />
       {on ? labels.saved : labels.save}

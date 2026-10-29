@@ -61,16 +61,17 @@ export function ProductBuy({ slug, title, physical, variants, framing, t, cart, 
   const add = (e: MouseEvent<HTMLButtonElement>) => {
     const button = e.currentTarget
     // Everyday: the picture flies to the cart first and the cart updates as it lands (at once when motion is off).
+    // The cart updates at once (so opening it right away never shows it empty); the picture flying there is only decoration.
+    cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
+    pinch(button, 'cart')
+    setAdded(true)
+    setFlash(document.documentElement.dataset.season !== 'festive')
+    setTimeout(() => setFlash(false), 1800)
+    // The product picture flies from itself, or from the button when the picture has scrolled out of view.
     const main = document.querySelector('.art-main > div')
     const box = main?.getBoundingClientRect()
     const onScreen = box && box.bottom > 0 && box.top < innerHeight
-    flyToCart(onScreen ? main : button).then(() => {
-      cartActions.add({ slug, variantId: variant.id, frameId: frame?.id, qty: 1 })
-      pinch(button, 'cart')
-      setAdded(true)
-      setFlash(document.documentElement.dataset.season !== 'festive')
-      setTimeout(() => setFlash(false), 1800)
-    })
+    void flyToCart(main, onScreen ? main : button)
   }
 
   const option = 'flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-ui border-[1.5px] border-border px-4 has-checked:border-charcoal has-checked:bg-charcoal/5 has-disabled:opacity-50'

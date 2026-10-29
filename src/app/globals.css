@@ -1696,6 +1696,8 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   font-size: 1rem;
   font-weight: 600;
   color: var(--ws-body);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .rim-badge {
   position: absolute;
@@ -2123,12 +2125,6 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     transform: scale(1.35);
   }
 }
-@keyframes rv-safe {
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
   /* Hero, once (≈1.3s): text rises with a 60ms stagger; then the plate: rim dots pop one by one, the disc, the ring, and the colour blooms. */
   :root:not([data-season='festive']) .ws-hero-text > * {
@@ -2185,7 +2181,8 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     animation: badge-pop 420ms var(--ease-pop);
   }
 }
-/* Scroll reveals (once; <html data-rv> is only set when script and motion are available): opacity and a 14px rise. */
+/* Scroll reveals (once): opacity and a 14px rise. <html data-rv> is set by the head script only when motion is available, and removed again
+   after 3s if the page's script never started the reveals (data-rv-live), so content is never left hidden. */
 :root[data-rv]:not([data-season='festive']) .rv {
   transition:
     opacity 560ms var(--ease-pour),
@@ -2195,8 +2192,6 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
 :root[data-rv]:not([data-season='festive']) .rv:not(.in) {
   opacity: 0;
   transform: translateY(14px);
-  /* If script never reveals it, it shows after 3s anyway. */
-  animation: rv-safe 1ms 3s forwards;
 }
 .rv:nth-child(4n + 2) {
   --i: 1;
@@ -2281,6 +2276,21 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   min-width: 3.25rem;
   padding-inline: 0.4rem;
   white-space: nowrap;
+  /* 1024–1279: icons only (the words stay for screen readers), so the row fits. */
+  @media (width < 80rem) {
+    min-width: 2.5rem;
+    padding-inline: 0.2rem;
+  }
+}
+/* Book an Event and the nav pills are a little tighter below 1440, so the whole row fits from 1024 up. */
+@media (width < 90rem) {
+  :root:not([data-season='festive']) .hdr-icons > a.bg-marigold {
+    padding-inline: 0.75rem;
+    margin-right: 0;
+  }
+  :root:not([data-season='festive']) .site-header nav a {
+    padding-inline: 0.5rem;
+  }
 }
 :root:not([data-season='festive']) .site-header > .lg\:hidden.border-b {
   padding-block: 4px;
@@ -2303,4 +2313,23 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   .dl::after {
     display: none !important;
   }
+}
+/* The Save button sits beside the card (a button can't live inside its link): it lifts with the card, so it stays on the photo's corner. */
+:root:not([data-season='festive']) li > .art-card ~ button {
+  transition: transform 280ms var(--ease-pour);
+}
+@media (hover: hover) {
+  :root:not([data-season='festive']) li:hover > .art-card ~ button {
+    transform: translate(3px, -11px);
+  }
+}
+:root:not([data-season='festive']) li:hover > .art-card ~ button:active {
+  transform: translate(3px, -11px) scale(0.98);
+}
+:root:not([data-season='festive']) li:has(> .art-card:focus-visible) > .art-card ~ button {
+  transform: translate(3px, -11px);
+}
+/* The powder-grain SVG filter repaints slowly while scrolling (first-time frames over 100ms on home); everyday stand-ins stay clean vectors. */
+:root:not([data-season='festive']) .fx {
+  filter: none;
 }

@@ -10,7 +10,7 @@ import { isSignedIn } from '@/server/auth-actions'
  * Header link: "Account" when signed in, "Sign in" when not.
  * The pages are cached for everyone, so whether this visitor is signed in is asked after load (and again on each page change).
  */
-export function AccountLink({ account, signIn, accountHref, loginHref, className }: { account: string; signIn: string; accountHref: string; loginHref: string; className: string }) {
+export function AccountLink({ account, signIn, accountHref, loginHref, className, wordsClass }: { account: string; signIn: string; accountHref: string; loginHref: string; className: string; wordsClass?: string }) {
   const path = usePathname()
   const [on, setOn] = useState<boolean | null>(null)
   useEffect(() => {
@@ -25,7 +25,7 @@ export function AccountLink({ account, signIn, accountHref, loginHref, className
   return (
     <Link href={on === false ? loginHref : accountHref} className={className}>
       <User aria-hidden="true" className="size-6" />
-      {on === false ? signIn : account}
+      <span className={wordsClass}>{on === false ? signIn : account}</span>
     </Link>
   )
 }

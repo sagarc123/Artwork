@@ -108,14 +108,18 @@ export function ShopGrid({ items, t, controls = true }: { items: ShopItem[]; t: 
                     className={item.sold ? 'opacity-70 grayscale-[.3]' : ''}
                   />
                   </ViewTransition>
-                  {item.sold && <SoldBadge label={t.sold} className="absolute top-4 left-4" />}
+                  {item.sold && <SoldBadge label={t.sold} className="look-festive max-sm:hidden absolute top-4 left-4" />}
                   <RimBadge category={thaliFor(item.medium)} seed={item.seed} className="look-everyday" />
                 </span>
                 <span className="kind look-everyday">{t.types[item.type]}</span>
                 <span className="font-heading text-h3-sm">{item.title}</span>
                 <span className="text-muted">{item.meta}</span>
                 {item.sold ? (
-                  <s className="text-muted">{formatPrice(item.price)}</s>
+                  // Beside the price, not over the photo: the Save button owns that corner and the words can be long in Marathi.
+                  <span className="flex flex-wrap items-center gap-2">
+                    <s className="text-muted">{formatPrice(item.price)}</s>
+                    <SoldBadge label={t.sold} className="[:root[data-season=festive]_&]:sm:hidden" />
+                  </span>
                 ) : item.price <= 0 ? null : (
                   <span className="price-pill font-semibold">
                     {item.hasMorePrices && <span className="font-normal text-muted">{t.from} </span>}

@@ -5,8 +5,8 @@ export function Filled({ text, values, missing }: { text: string; values: Record
   return fillParts(text, values).map((part, i) =>
     typeof part === 'string' ? (
       part
-    ) : (
-      <mark key={i} data-missing={part.missing} className="rounded-sm bg-turmeric/40 px-1 text-charcoal">
+    ) : process.env.NODE_ENV === 'production' ? null : ( // dev-only marker: visitors never see "[to be filled in]"
+      <mark key={i} data-missing={part.missing} className="inline-block rounded-sm bg-turmeric/40 px-1 whitespace-nowrap text-charcoal">
         [{missing}]
       </mark>
     ),

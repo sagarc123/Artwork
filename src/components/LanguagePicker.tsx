@@ -35,7 +35,7 @@ export function LanguageSwitcher({ current, label }: { current: Locale; label: s
           lang={l}
           aria-pressed={l === current}
           onClick={() => switchTo(l)}
-          className="min-h-11 rounded-ui px-3 text-charcoal hover:bg-charcoal/5 aria-pressed:bg-charcoal aria-pressed:text-paper"
+          className="min-h-11 min-w-11 rounded-ui px-3 text-charcoal hover:bg-charcoal/5 aria-pressed:bg-charcoal aria-pressed:text-paper"
         >
           {localeNames[l]}
         </button>
@@ -57,7 +57,7 @@ export function LanguageLinks({ current, label }: { current: Locale; label: stri
             lang={l}
             aria-current={l === current ? 'true' : undefined}
             onClick={() => switchTo(l)}
-            className="min-h-11 px-2 text-charcoal aria-[current=true]:font-bold aria-[current=true]:underline aria-[current=true]:underline-offset-4"
+            className="min-h-11 min-w-11 px-2 text-charcoal aria-[current=true]:font-bold aria-[current=true]:underline aria-[current=true]:underline-offset-4"
           >
             {localeNames[l]}
           </button>
@@ -78,6 +78,7 @@ export function LanguageChooser({ current, labels }: { current: Locale; labels: 
   const ref = useRef<HTMLDialogElement>(null)
   const switchTo = useSwitchLocale(current)
   const [show, setShow] = useState(false)
+  const returnTo = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     let stored: string | null = null
@@ -93,9 +94,10 @@ export function LanguageChooser({ current, labels }: { current: Locale; labels: 
 
   useEffect(() => {
     if (!show) return
+    returnTo.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     ref.current?.showModal()
     // The page's language (from the browser's preference) is the one ready to confirm.
-    ref.current?.querySelector<HTMLButtonElement>(`[lang="${current}"]`)?.focus()
+    ref.current?.querySelector<HTMLButtonElement>(`button[lang="${current}"]`)?.focus()
   }, [show, current])
 
   if (!show) return null
@@ -104,7 +106,12 @@ export function LanguageChooser({ current, labels }: { current: Locale; labels: 
       ref={ref}
       aria-labelledby="lang-title"
       // Esc or "Not now" keeps the current language.
-      onClose={() => rememberLocale(current)}
+      onClose={() => {
+        rememberLocale(current)
+        // Focus goes back to where it was (or the page's main area), never to the bare body.
+        const back = returnTo.current?.isConnected && returnTo.current !== document.body ? returnTo.current : document.getElementById('main')
+        back?.focus()
+      }}
       className="m-0 h-dvh max-h-none w-screen max-w-none bg-paper p-0 text-charcoal"
     >
       <div className="grain flex min-h-full flex-col">

@@ -20,7 +20,7 @@ function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
     <Link href={localePath(locale, '/')} className="flex min-h-12 items-center gap-2" aria-label={`${brand} — home`}>
       <BrandMark thali className="size-8 shrink-0 min-[360px]:size-9" />
-      <span className="font-heading text-[1.125rem] leading-[1.1] lg:whitespace-nowrap min-[375px]:text-[1.375rem] xl:text-[1.625rem]">{brand}</span>
+      <span className="font-heading text-[1.125rem] leading-[1.1] max-[339px]:text-base max-[339px]:whitespace-nowrap lg:whitespace-nowrap min-[375px]:text-[1.375rem] lg:max-xl:text-[1.125rem] xl:text-[1.625rem]">{brand}</span>
     </Link>
   )
 }
@@ -96,10 +96,10 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
       </div>
 
       {/* Desktop main row */}
-      <div className="wrap hidden h-20 items-center justify-between gap-4 lg:flex xl:gap-6">
+      <div className="wrap hidden h-20 items-center justify-between gap-4 lg:flex lg:max-xl:gap-2 xl:gap-6">
         <Logo locale={locale} brand={t.brand} />
         <nav aria-label={t.nav.mainNav}>
-          <ul className="flex items-center gap-4 xl:gap-6">
+          <ul className="flex items-center gap-4 lg:max-xl:gap-2 xl:gap-6">
             {commissions.map((item) => (
               <li key={item.href} className={item.href === p('/events') ? 'look-festive' : undefined}>
                 <NavLink href={item.href} className={navClass}>
@@ -125,18 +125,18 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           </Link>
           <Link href={p('/search')} className={iconLink}>
             <Search aria-hidden="true" className="size-6" />
-            {t.nav.search}
+            <span className="max-xl:sr-only">{t.nav.search}</span>
           </Link>
           <Link href={p('/wishlist')} data-pinch="saved" className={`relative ${iconLink}`}>
             <SavedCount label={t.savedPage.count} />
             <Heart aria-hidden="true" className="size-6" />
-            {t.nav.saved}
+            <span className="max-xl:sr-only">{t.nav.saved}</span>
           </Link>
-          {site.accountsLive && <AccountLink account={t.nav.account} signIn={t.nav.signIn} accountHref={p('/account')} loginHref={p('/login')} className={iconLink} />}
+          {site.accountsLive && <AccountLink wordsClass="max-xl:sr-only" account={t.nav.account} signIn={t.nav.signIn} accountHref={p('/account')} loginHref={p('/login')} className={iconLink} />}
           <Link href={p('/cart')} data-pinch="cart" className={`relative ${iconLink}`}>
             <CartCount label={t.cart.items} />
             <ShoppingCart aria-hidden="true" className="size-6" />
-            {t.nav.cart}
+            <span className="max-xl:sr-only">{t.nav.cart}</span>
           </Link>
         </div>
       </div>

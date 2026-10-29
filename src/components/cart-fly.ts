@@ -11,11 +11,14 @@ const still = () => {
 
 const cartIcon = () => [...document.querySelectorAll<HTMLElement>('[data-pinch="cart"]')].find((e) => e.getBoundingClientRect().width > 0)
 
-/** Resolves when the copy has landed (≈760ms), so the caller can add to the cart then. */
-export function flyToCart(from: Element | null): Promise<void> {
+/**
+ * A small round copy of `art` (the product picture) flies from `origin` (the picture itself, or the button when the picture is off screen)
+ * to the cart icon. Visual only: the caller has already updated the cart. Resolves when it has landed (≈760ms).
+ */
+export function flyToCart(art: Element | null, origin: Element | null = art): Promise<void> {
   const to = cartIcon()
-  if (!from || !to || still()) return Promise.resolve()
-  const s = from.getBoundingClientRect()
+  if (!art || !origin || !to || still()) return Promise.resolve()
+  const s = origin.getBoundingClientRect()
   const t = to.getBoundingClientRect()
   const z = Math.min(88, s.width * 0.5)
   const dx = t.left + t.width / 2 - (s.left + s.width / 2)
@@ -25,7 +28,7 @@ export function flyToCart(from: Element | null): Promise<void> {
   outer.setAttribute('aria-hidden', 'true')
   outer.style.cssText = `position:fixed;z-index:50;pointer-events:none;left:${s.left + s.width / 2 - z / 2}px;top:${s.top + s.height / 2 - z / 2}px;width:${z}px;height:${z}px`
   inner.style.cssText = 'width:100%;height:100%;border-radius:50%;overflow:hidden;background:#FFF4DC;box-shadow:0 0 0 4px #FDEBC0,0 0 0 6px #F2C46B,0 10px 18px rgb(14 63 76 / .25)'
-  const img = from.querySelector('img, svg')?.cloneNode(true) as HTMLElement | undefined
+  const img = art.querySelector('img, svg')?.cloneNode(true) as HTMLElement | undefined
   if (img) {
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block'
     img.removeAttribute('class')

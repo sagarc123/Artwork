@@ -18,19 +18,19 @@ const calm = () => {
 /** 8 small marigold dots fly 26–40px from the tap point over 520ms (4 on slow phones); the nodes remove themselves. */
 function powder(btn: HTMLElement, x: number | null, y: number | null) {
   if (calm()) return
-  if (getComputedStyle(btn).position === 'static') btn.style.position = 'relative'
   const r = btn.getBoundingClientRect()
   const n = document.documentElement.dataset.fx === 'lite' ? 4 : 8
-  const cx = x === null ? r.width / 2 : x - r.left
-  const cy = y === null ? r.height / 2 : y - r.top
+  // Fixed dots on <body>: the button itself is never touched or clipped.
+  const cx = x ?? r.left + r.width / 2
+  const cy = y ?? r.top + r.height / 2
   for (let i = 0; i < n; i++) {
     const d = document.createElement('i')
     d.setAttribute('aria-hidden', 'true')
-    d.style.cssText = `position:absolute;left:${cx - 3.5}px;top:${cy - 3.5}px;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:3;background:${COLOURS[i % 2]}`
+    d.style.cssText = `position:fixed;left:${cx - 3.5}px;top:${cy - 3.5}px;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:3;background:${COLOURS[i % 2]}`
     const a = (i / n) * Math.PI * 2 + 0.4
     const k = 26 + (i % 3) * 7
     const [dx, dy] = [Math.cos(a) * k, Math.sin(a) * k]
-    btn.append(d)
+    document.body.append(d)
     d.animate(
       [
         { transform: 'translate(0,0) scale(.4)', opacity: 1 },
@@ -52,6 +52,7 @@ export function EverydayMotion() {
 
   useEffect(() => {
     const root = document.documentElement
+    root.dataset.rvLive = '' // the reveals are running: the head script's failsafe stands down
 
     // Header shadow: a 6px sentinel at the very top; when it scrolls out, the header says so.
     const sentinel = document.createElement('div')
@@ -83,23 +84,19 @@ export function EverydayMotion() {
     })
     mo.observe(document.body, { childList: true, subtree: true })
 
-    const down = (e: PointerEvent) => {
+    // On click (not pointerdown), so a swipe that starts on a button makes no burst; keyboard activation (detail 0) bursts from the button's centre.
+    const tap = (e: MouseEvent) => {
       const b = (e.target as Element | null)?.closest<HTMLElement>(PRIMARY)
-      if (b) powder(b, e.clientX, e.clientY)
+      if (b) powder(b, e.detail === 0 ? null : e.clientX, e.detail === 0 ? null : e.clientY)
     }
-    const key = (e: MouseEvent) => {
-      const b = (e.target as Element | null)?.closest<HTMLElement>(PRIMARY)
-      if (b && e.detail === 0) powder(b, null, null) // keyboard activation
-    }
-    document.addEventListener('pointerdown', down)
-    document.addEventListener('click', key)
+    document.addEventListener('click', tap)
     return () => {
       header.disconnect()
       seen.disconnect()
       mo.disconnect()
       sentinel.remove()
-      document.removeEventListener('pointerdown', down)
-      document.removeEventListener('click', key)
+      delete root.dataset.rvLive
+      document.removeEventListener('click', tap)
     }
   }, [])
   return null

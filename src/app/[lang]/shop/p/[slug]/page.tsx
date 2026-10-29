@@ -118,9 +118,9 @@ export default async function ProductPage({ params }: PageProps<'/[lang]/shop/p/
         </div>
 
         <div className="grid content-start gap-4 md:col-span-6 md:gap-6 lg:sticky lg:top-32 lg:col-span-5">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <p className="font-semibold text-accent max-[359px]:sr-only">{s.types[product.type]}</p>
-            <div className="flex justify-end gap-2 whitespace-nowrap max-[359px]:w-full">
+            <div className="flex flex-wrap justify-end gap-2 max-[359px]:w-full">
               <ShareButton label={s.share} shortLabel={s.shareShort} text={s.shareText} links={[{ title: product.title, href: localePath(locale, `/shop/p/${product.slug}`) }]} />
               <SaveButton slug={product.slug} title={product.title} labels={s} />
             </div>
