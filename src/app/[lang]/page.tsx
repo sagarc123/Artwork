@@ -8,6 +8,8 @@ import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { JsonLd, org } from '@/components/JsonLd'
 import { InstagramStrip } from '@/components/InstagramStrip'
 import { MakingOf } from '@/components/MakingOf'
+import { PulliType } from '@/components/PulliType'
+import { TodayCaption, TodayRangoli } from '@/components/TodayRangoli'
 import { MediaImage, photoSrc } from '@/components/MediaImage'
 import { PhotoPlaceholder } from '@/components/PhotoPlaceholder'
 import { Signature } from '@/components/Signature'
@@ -82,6 +84,8 @@ export default async function HomePage() {
     order: f.order ?? 0,
     ...festivalLook(f.slug),
   }))
+  const todayFestivals = festivals.map(({ slug, name, nextDate }) => ({ slug, name, nextDate }))
+  const standIn = <MediaImage media={wall('rangoli')?.media ?? null} alt={wall('rangoli')?.alt ?? ''} ratio="1/1" seed="siddesh-home" medium="rangoli" floor="paper" sizes="(min-width: 1024px) 400px, 232px" priority />
   const eventPrice = fromText(h.events.from, eventFrom(prices), formatPrice)
   const portraitPrice = fromText(h.portraits.from, portraitFrom(prices), formatPrice)
 
@@ -92,10 +96,13 @@ export default async function HomePage() {
       {/* 1 (everyday) · Warm Studio hero: headline and actions beside one big plate with a small portrait plate on a soft disc. Phones: the plate first. */}
       {season !== 'festive' && (
         <section className="look-everyday ws-hero" style={{ order: 1 }}>
+          <PulliType />
           <div className="wrap">
             <div className="ws-hero-text">
-              <h1 className="hero-title font-heading text-display">{h.studio.title}</h1>
-              <p lang="mr" className="tagline">
+              <h1 className="hero-title font-heading text-display" data-pulli="ink">
+                {h.studio.title}
+              </h1>
+              <p lang="mr" className="tagline" data-pulli="peacock">
                 {h.studio.tagline}
               </p>
               <p className="hero-in max-w-[42ch] text-[1.1875rem]" style={n(1)}>
@@ -114,8 +121,16 @@ export default async function HomePage() {
               </div>
               <TrustLine trust={trust} t={h.trust} />
             </div>
+            {/* A real rangoli photo wins; until there is one, today's rangoli is drawn in the plate (from the visitor's own date, in the browser). */}
             <HeroStage
-              rangoli={<MediaImage media={wall('rangoli')?.media ?? null} alt={wall('rangoli')?.alt ?? ''} ratio="1/1" seed="siddesh-home" medium="rangoli" floor="paper" sizes="(min-width: 1024px) 400px, 232px" priority />}
+              rangoli={
+                wall('rangoli') ? (
+                  standIn
+                ) : (
+                  <TodayRangoli festivals={todayFestivals}>{standIn}</TodayRangoli>
+                )
+              }
+              caption={wall('rangoli') ? null : <TodayCaption festivals={todayFestivals} locale={locale} t={h.today} />}
               portrait={<MediaImage media={wall('portrait', 'drawing')?.media ?? null} alt={wall('portrait', 'drawing')?.alt ?? ''} ratio="1/1" seed="siddesh-portrait" medium="portrait" floor="paper" sizes="200px" />}
             />
           </div>

@@ -2333,3 +2333,162 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
 :root:not([data-season='festive']) .fx {
   filter: none;
 }
+
+/* ─────────────── Everyday: Aangan v2, stage A ───────────────
+   1. The courtyard through the day: <html data-tod> (morning | noon | evening) comes from the visitor's local hour (head script).
+      Noon is the default look above. Only tokens change, so every state keeps the same contrast (checked at 4.5:1 or better).
+   2. Today's rangoli in the hero plate. 3. Pulli type on the home headline and the Marathi tagline. */
+:root:not([data-season='festive'])[data-tod='morning'] {
+  --color-paper: #f5faf9;
+  --color-placeholder: #e6f2ef;
+  --wash: #e6f2ef;
+  --ws-cream: #e6f2ef;
+  --ws-disc: #d3e8e3;
+  --ws-line: #d8e8e4;
+  --ws-card: #dcebe7;
+  --ws-body: #2f525b;
+  --color-muted: #44606a;
+}
+:root:not([data-season='festive'])[data-tod='evening'] {
+  --color-paper: #fff3df;
+  --color-placeholder: #ffe6ba;
+  --wash: #ffe6ba;
+  --ws-cream: #ffe6ba;
+  --ws-disc: #fbd58b;
+  --ws-line: #efd9ae;
+  --ws-card: #f5dca4;
+  --ws-body: #3a4f52;
+  --color-muted: #435b62;
+  --color-charcoal: #082c37;
+  --color-peacock: #09566b;
+  --ws-peacock-d: #073f4e;
+}
+/* A light wash over the hero: cool sky from the top right in the morning, diya glow from the bottom left in the evening. */
+:root:not([data-season='festive'])[data-tod='morning'] .ws-hero {
+  background: radial-gradient(120% 60% at 80% 0%, rgb(150 205 225 / 0.38), transparent 70%), var(--ws-cream);
+}
+:root:not([data-season='festive'])[data-tod='evening'] .ws-hero {
+  background:
+    radial-gradient(70% 55% at 6% 100%, rgb(242 162 12 / 0.24), transparent 70%),
+    radial-gradient(60% 40% at 100% 0%, rgb(200 40 30 / 0.06), transparent 70%),
+    var(--ws-cream);
+}
+
+/* Today's rangoli: the art fills the plate's opening; the caption sits over the plate's edge on wide screens, under it on phones. */
+.rgw {
+  position: absolute;
+  inset: 0;
+  background: var(--ws-cream);
+}
+.rg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.rg .d {
+  transform-box: fill-box;
+  transform-origin: center;
+  fill: var(--color-charcoal);
+}
+.rg .f {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.rg .gl path {
+  fill: none;
+  stroke: var(--color-charcoal);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+}
+.tcap {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  top: 1%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 62%;
+  padding: 0.35rem 0.5rem 0.35rem 1rem;
+  border: 1.5px solid var(--color-marigold);
+  border-radius: 30px;
+  background: var(--color-paper);
+  color: var(--color-charcoal);
+  font-family: var(--heading-face);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.tcap button {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-block: -6px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ws-cream);
+  color: var(--color-peacock);
+  cursor: pointer;
+}
+@media (width < 64rem) {
+  .ws-stage[data-cap] {
+    margin-bottom: 3.6rem;
+  }
+  .tcap {
+    top: calc(100% + 0.7rem);
+    left: 50%;
+    translate: -50% 0;
+    width: max-content;
+    max-width: min(92vw, 21rem);
+    font-size: 0.9rem;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rgw {
+    animation: ws-fade 300ms ease-out both;
+  }
+  .rg .d {
+    animation: rg-dot 450ms var(--ease-pop) calc(var(--i) * 6ms * var(--tm, 1)) both;
+  }
+  .rg .gl path {
+    animation: rg-line calc(1s * var(--tm, 1)) cubic-bezier(0.5, 0, 0.25, 1) calc(0.22s * var(--tm, 1)) both;
+  }
+  .rg .f {
+    animation: rg-fill 550ms var(--ease-pour) calc(0.62s * var(--tm, 1) + var(--i) * 14ms * var(--tm, 1)) both;
+  }
+}
+@keyframes rg-dot {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+@keyframes rg-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes rg-fill {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+/* Pulli type: the real text is the page's headline; while the dots draw over it (the head script sets data-pl, only with motion on) it is
+   see-through, then it fades in as the canvas fades out. No data-pl (no JS, calm modes, reduced motion) means plain text from the first frame. */
+[data-pulli] {
+  position: relative;
+  transition: color 500ms;
+}
+:root:not([data-season='festive'])[data-pl] [data-pulli]:not([data-pl-done]) {
+  color: transparent;
+}
+.plcv {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}

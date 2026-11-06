@@ -63,9 +63,9 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
   return (
     <html lang={locale} className={`${tiro.variable} ${mukta.variable} ${rozha.variable} ${lexend.variable} ${hind.variable}`} data-festive={fixedLook} data-season={season ?? undefined} suppressHydrationWarning>
       <head>
-        {/* Before first paint: a saved "Stop animations" and the slow-phone test (so effects don't start and then jump), an announcement closed earlier this visit, and the automatic look. */}
+        {/* Before first paint: the time of day (data-tod), the pulli intro (data-pl, only with motion on), a saved "Stop animations" and the slow-phone test (so effects don't start and then jump), an announcement closed earlier this visit, and the automatic look. */}
         <InlineScript
-          html={`try{var d=document.documentElement;if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";if(window.IntersectionObserver&&d.dataset.motion!=="off"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.rv="";setTimeout(function(){d.dataset.rvLive===undefined&&delete d.dataset.rv},3000)}var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
+          html={`try{var d=document.documentElement;var h=new Date().getHours();d.dataset.tod=h>4&&h<11?"morning":h<16?"noon":"evening";if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";if(window.IntersectionObserver&&d.dataset.motion!=="off"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.rv="";setTimeout(function(){d.dataset.rvLive===undefined&&delete d.dataset.rv},3000)}if(d.dataset.motion!=="off"&&d.dataset.fx!=="lite"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.pl="";setTimeout(function(){d.dataset.plLive===undefined&&delete d.dataset.pl},4000)}var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
         />
       </head>
       <body className="flex min-h-dvh flex-col">

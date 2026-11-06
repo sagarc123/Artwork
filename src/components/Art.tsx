@@ -132,7 +132,7 @@ export function BrandMark({ className = '', animate = true, thali = false }: { c
   return (
     <>
       {/* viewBox starts at 0 so "50% 50%" is the centre in every browser; the shapes are drawn around 0,0 and moved in. */}
-      <svg aria-hidden="true" focusable="false" viewBox="0 0 34 34" className={`bm ${still}${thali ? 'look-festive ' : ''}${className}`}>
+      <svg aria-hidden="true" focusable="false" viewBox="0 0 34 34" width="34" height="34" className={`bm ${still}${thali ? 'look-festive ' : ''}${className}`}>
         <mask id={uid} maskUnits="userSpaceOnUse" x="-17" y="-17" width="34" height="34">
           {/* The stroke is revealed along its own arc, start to end, like powder being trickled. */}
           <path className="bm-reveal" d="M12.91,-2.74A13.2,13.2 0 1 1 5.58,-11.96" fill="none" stroke="#fff" strokeWidth="7" pathLength={1} />
@@ -147,7 +147,7 @@ export function BrandMark({ className = '', animate = true, thali = false }: { c
         </g>
       </svg>
       {thali && (
-        <svg aria-hidden="true" focusable="false" viewBox="0 0 120 120" className={`bm bm-thali look-everyday ${still}${className}`}>
+        <svg aria-hidden="true" focusable="false" viewBox="0 0 120 120" width="34" height="34" className={`bm bm-thali look-everyday ${still}${className}`}>
           <circle cx="60" cy="60" r="58" fill="#FFF1D2" />
           {THALI_RIM.map(([x, y, r], i) => (
             <circle key={i} cx={x} cy={y} r={r} fill={i % 2 ? '#0B5E73' : '#F2A20C'} />

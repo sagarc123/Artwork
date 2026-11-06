@@ -119,6 +119,12 @@
       "kicker": "Online course",
       "tag": "Beginner friendly"
     },
+    "today": {
+      "label": "Today's rangoli",
+      "share": "Share today's rangoli",
+      "shareText": "{caption} · Siddesh Mokashi",
+      "copied": "Link copied"
+    },
     "festivals": {
       "title": "Rangoli through the festivals",
       "diwali": "Diwali",
