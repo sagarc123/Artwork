@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { festivalWeek, rangoliFor, rangoliToday, seedOf } from './rangoli.ts'
+import { festivalWeek, rangoliFor, rangoliToday, seedOf, seedOfColours } from './rangoli.ts'
 
 const festivals = [
   { slug: 'diwali', name: 'Diwali', nextDate: '2026-11-08T12:00:00.000Z' },
@@ -52,4 +52,13 @@ test('a festival week adds its edge motif', () => {
   assert.equal(rangoliFor(20261108, 'diwali').shapes.length, plain + 8)
   assert.equal(rangoliFor(20261108, 'ganesh').shapes.length, plain + 8)
   assert.equal(rangoliFor(20261108, 'gudi').shapes.length, plain + 12)
+})
+
+test('chosen colours: used as the palette, same colours same rangoli', () => {
+  const c = ['#F2A20C', '#C8281E', '#4FA04A']
+  const r = rangoliFor(seedOfColours([0, 1, 3]), null, [c[0], c[1], c[2], c[1]])
+  assert.deepEqual(r, rangoliFor(seedOfColours([0, 1, 3]), null, [c[0], c[1], c[2], c[1]]))
+  for (const s of r.shapes) if (s.kind === 'petal') assert.ok(c.includes(s.fill))
+  assert.notEqual(seedOfColours([0, 1, 3]), seedOfColours([1, 0, 3]))
+  assert.equal(rangoliFor(1, null, ['#000']).palette.length, 4)
 })

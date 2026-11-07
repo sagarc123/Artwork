@@ -119,6 +119,24 @@
       "kicker": "Online course",
       "tag": "Beginner friendly"
     },
+    "fill": {
+      "title": "Fill the thali",
+      "hint": "Tap 3 powder colours",
+      "plate": "Empty thali",
+      "progress": "{n} of 3 colours chosen: {names}",
+      "ready": "Your rangoli in {names} is ready. You can send it to Siddesh.",
+      "send": "Send this to Siddesh on WhatsApp",
+      "again": "Start again",
+      "message": "Namaste! I'd like a rangoli in these colours: {names}",
+      "colours": {
+        "marigold": "Marigold",
+        "kumkum": "Kumkum",
+        "peacock": "Peacock blue",
+        "leaf": "Leaf green",
+        "rose": "Rose pink",
+        "white": "White"
+      }
+    },
     "today": {
       "label": "Today's rangoli",
       "share": "Share today's rangoli",

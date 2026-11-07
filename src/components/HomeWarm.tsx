@@ -9,6 +9,7 @@ import { coursePrice, formatDuration } from '@/lib/courses'
 import { formatPrice, whatsappLink } from '@/lib/site'
 import type { CourseCard as Course, getTrust } from '@/server/content'
 import { lessonCount } from './CourseCard'
+import { FillThali } from './FillThali'
 import { MediaImage } from './MediaImage'
 import { PhotoPlaceholder } from './PhotoPlaceholder'
 import { PhotoStandIn, SketchStandIn } from './StandIns'
@@ -102,7 +103,7 @@ export function HowItWorks({ t }: { t: Home['how'] }) {
 }
 
 /** Wedding, Festival, Society: a stand-in, the real "from" price, and "Check my date" on WhatsApp naming the event type. */
-export function EventTiles({ t, price }: { t: Home['events']; price: string | null }) {
+export function EventTiles({ t, price, fill }: { t: Home['events']; price: string | null; fill: Home['fill'] }) {
   return (
     <section className="ws-section">
       <div className="dotline dl" aria-hidden="true" />
@@ -134,6 +135,7 @@ export function EventTiles({ t, price }: { t: Home['events']; price: string | nu
             </li>
           ))}
         </ul>
+        <FillThali t={fill} />
       </div>
     </section>
   )

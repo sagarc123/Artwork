@@ -9,6 +9,8 @@ import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { JsonLd, org } from '@/components/JsonLd'
 import { InstagramStrip } from '@/components/InstagramStrip'
 import { MakingOf } from '@/components/MakingOf'
+import { HeroPowder } from '@/components/HeroPowder'
+import { KolamThread } from '@/components/KolamThread'
 import { PulliType } from '@/components/PulliType'
 import { TodayCaption, TodayRangoli } from '@/components/TodayRangoli'
 import { MediaImage, photoSrc } from '@/components/MediaImage'
@@ -98,6 +100,8 @@ export default async function HomePage() {
       {season !== 'festive' && (
         <section className="look-everyday ws-hero" style={{ order: 1 }}>
           <PulliType />
+          <HeroPowder />
+          <KolamThread />
           <div className="wrap">
             <div className="ws-hero-text">
               <h1 className="hero-title font-heading text-display" data-pulli="ink">
@@ -308,7 +312,7 @@ export default async function HomePage() {
       {season !== 'festive' && (
         <>
           <div className="look-everyday" style={{ order: 4 }}>
-            <EventTiles t={h.events} price={eventPrice} />
+            <EventTiles t={h.events} price={eventPrice} fill={h.fill} />
           </div>
           <div className="look-everyday" style={{ order: 5 }}>
             <PortraitBand t={h.portraits} price={portraitPrice} locale={locale} />

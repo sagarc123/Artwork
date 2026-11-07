@@ -69,9 +69,9 @@ export const seedOf = (today: string) => Number(today.slice(0, 10).replaceAll('-
 const f1 = (n: number) => n.toFixed(1)
 const at = (r: number, a: number) => [r * Math.sin(a), -r * Math.cos(a)] as const
 
-/** The design for one day. `kind` (a festival week) swaps the palette and adds the festival's edge motif. */
-export function rangoliFor(seed: number, kind: RangoliKind | null): Rangoli {
-  const palette = kind ? FESTIVAL_PALETTES[kind] : PALETTES[(rng(seed)() * 5) | 0]
+/** The design for one day. `kind` (a festival week) swaps the palette and adds the festival's edge motif; `colours` (up to 4) is a palette of the visitor's choosing. */
+export function rangoliFor(seed: number, kind: RangoliKind | null, colours?: string[]): Rangoli {
+  const palette = colours?.length ? Array.from({ length: 4 }, (_, i) => colours[i % colours.length]) : kind ? FESTIVAL_PALETTES[kind] : PALETTES[(rng(seed)() * 5) | 0]
   const R = rng(seed)
   const n = [6, 8, 8, 10, 12][(R() * 5) | 0]
   const TAU = Math.PI * 2
@@ -117,6 +117,9 @@ export function rangoliFor(seed: number, kind: RangoliKind | null): Rangoli {
   if (kind === 'gudi') petals(12, 0.5, 92, 2.6, 7, '#3F7A3A')
   return { seed, kind, petals: n, palette, dots, lines, shapes }
 }
+
+/** The seed for a chosen set of colours (their indexes in the picker): the same colours always draw the same rangoli. */
+export const seedOfColours = (picked: number[]) => picked.reduce((s, i) => s * 7 + i + 3, 11)
 
 /** Today's design from the visitor's date (YYYY-MM-DD) and the real festival dates. */
 export function rangoliToday(today: string, festivals: Festival[]) {

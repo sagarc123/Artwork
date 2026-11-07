@@ -1,11 +1,12 @@
 'use client'
 
 import { Share2 } from 'lucide-react'
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { localToday } from '@/lib/dates'
 import { rangoliToday, type Festival } from '@/lib/rangoli'
 import type { Locale } from '@/i18n/config'
 import type { Dictionary } from '@/i18n/dictionaries'
+import { RangoliArt } from './RangoliArt'
 
 // Today's rangoli in the everyday hero plate. The design depends on the visitor's own date, which the server cannot know (and a page cached
 // for a day would show yesterday's). So the server sends the stable plate (the photo or drawn stand-in), and the browser draws today's
@@ -15,44 +16,16 @@ const subscribe = () => () => {}
 /** The visitor's local date (YYYY-MM-DD), "" until the browser has taken over. */
 const useToday = () => useSyncExternalStore(subscribe, () => localToday(), () => '')
 
-const idx = (i: number) => ({ '--i': i }) as CSSProperties
-
 /** The art, drawn over `children` (the server's plate). Renders just the children until the date is known. */
 export function TodayRangoli({ festivals, children }: { festivals: Festival[]; children?: ReactNode }) {
   const today = useToday()
   if (!today) return children
   const { rangoli: r } = rangoliToday(today, festivals)
-  let f = 0
   return (
     <>
       {children}
       <div className="rgw" aria-hidden="true">
-        <svg className="rg" viewBox="-100 -100 200 200" width="200" height="200" focusable="false" style={{ '--tm': 1.35 } as CSSProperties}>
-          <g>
-            {r.dots.map((d, i) => (
-              <circle key={i} className="d" cx={d.x} cy={d.y} r={d.r} style={idx(i)} />
-            ))}
-          </g>
-          <g className="gl">
-            {r.lines.map((d, i) => (
-              <path key={i} d={d} pathLength={1} />
-            ))}
-          </g>
-          <g>
-            {r.shapes.map((s, i) => (
-              <g key={i} className="f" style={idx(f++)}>
-                {s.kind === 'dot' && <circle r={s.r} fill={s.fill} />}
-                {s.kind === 'petal' && <ellipse transform={`rotate(${s.angle.toFixed(1)}) translate(0,${-s.at})`} rx={s.rx} ry={s.ry} fill={s.fill} />}
-                {s.kind === 'diya' && (
-                  <g transform={`rotate(${s.angle.toFixed(1)}) translate(0,-92)`}>
-                    <ellipse rx="5" ry="2.6" fill={s.fill} />
-                    <path d="M0 -2.4 C3 -7 0 -9 0 -11 C-1 -8 -3 -6 0 -2.4Z" fill="#FFE7A8" />
-                  </g>
-                )}
-              </g>
-            ))}
-          </g>
-        </svg>
+        <RangoliArt rangoli={r} />
       </div>
     </>
   )

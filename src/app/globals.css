@@ -2745,3 +2745,194 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   min-width: 12.5rem;
   justify-content: center;
 }
+
+/* ─────────────── Everyday: Aangan v2, stage C ───────────────
+   1. The kolam thread (KolamThread.tsx): one SVG on the page, in the right-hand gutter.
+   2. Powder you can touch (HeroPowder.tsx): one canvas under the hero's text column.
+   3. Fill the thali (FillThali.tsx): the panel under the event tiles. */
+.kolam-thread {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  overflow: visible;
+  pointer-events: none;
+}
+.kolam-thread path {
+  fill: none;
+  stroke: var(--color-marigold);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.ws-hero {
+  position: relative;
+  isolation: isolate;
+}
+.ws-hero-text {
+  position: relative;
+  z-index: 2;
+}
+.ws-powder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+@media (pointer: coarse), (width < 64rem) {
+  .ws-stage {
+    touch-action: pan-y;
+  }
+}
+.ws-fill {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 2.5rem;
+  margin-top: 1rem;
+  padding: 2rem;
+  border-radius: 30px;
+  background: var(--ws-peacock-d);
+  color: var(--color-paper);
+}
+.ws-fill-plate {
+  width: 100%;
+}
+.ws-fill-face {
+  position: absolute;
+  inset: 0;
+  background: #14515f;
+  color: #7fb0bc;
+}
+.ws-fill-empty,
+.ws-fill-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 400ms;
+}
+.ws-fill-art .rg .d {
+  fill: #cfe0e4;
+}
+.ws-fill-art .rg .gl path {
+  stroke: #e8f1f3;
+}
+.ws-slot {
+  transition: r 500ms var(--ease-pop);
+}
+.ws-fill-ctl {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  min-width: 0;
+}
+.ws-fill-ctl h3 {
+  color: var(--color-paper);
+}
+.ws-fill-hint {
+  color: #cfe0e4;
+  font-size: 1.0625rem;
+}
+.ws-sws {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+}
+.ws-sw {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.3rem;
+  width: 5rem;
+  min-height: 5.4rem;
+  padding: 0.3rem 0.1rem;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: #e6f0f2;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+}
+.ws-sw i {
+  display: block;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 3px solid rgb(255 255 255 / 0.35);
+  border-radius: 50%;
+  transition:
+    transform 350ms var(--ease-pop),
+    border-color 300ms,
+    box-shadow 300ms;
+}
+.ws-sw[aria-pressed='true'] i {
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgb(242 162 12 / 0.7);
+  transform: scale(1.1);
+}
+.ws-sw:focus-visible,
+.ws-fill-again:focus-visible {
+  outline: 3px solid var(--color-marigold);
+  outline-offset: 3px;
+}
+.ws-fill-prog {
+  min-height: 1.5rem;
+  color: #e6f0f2;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+.ws-fill-btns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+}
+.ws-fill-btns .ws-wa:disabled {
+  background: rgb(255 255 255 / 0.18);
+  color: rgb(255 255 255 / 0.7);
+  cursor: not-allowed;
+}
+.ws-fill-again {
+  min-height: 56px;
+  padding: 0 1.4rem;
+  border: 1.5px solid rgb(255 231 168 / 0.55);
+  border-radius: 16px;
+  background: none;
+  color: var(--ws-cream);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ws-fill-again:hover {
+  background: rgb(255 231 168 / 0.12);
+}
+@media (width < 64rem) {
+  .ws-fill {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 1.5rem;
+    padding: 1.4rem 1rem;
+    text-align: center;
+  }
+  .ws-fill-plate {
+    max-width: 15rem;
+  }
+  .ws-fill-ctl {
+    justify-items: center;
+    width: 100%;
+  }
+  .ws-sws {
+    justify-content: center;
+  }
+  .ws-fill-btns {
+    justify-content: center;
+    width: 100%;
+  }
+  .ws-fill-btns .ws-wa {
+    width: 100%;
+  }
+}
