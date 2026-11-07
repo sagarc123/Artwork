@@ -107,12 +107,25 @@ export function KolamThread() {
     }
     let timer = 0
     const later = (ms = 250) => {
+      if (root.dataset.splash !== undefined) return // measured once the splash has gone
       clearTimeout(timer)
       timer = window.setTimeout(measure, ms)
     }
-    measure()
-    later(900) // once hydration and the first images have settled
-    document.fonts?.ready.then(() => later(50))
+    // Measuring walks every line of text on the page: not while the splash is playing (nobody can see the thread yet); a moment after it, instead.
+    let splashWait: number | undefined
+    const first = () => {
+      measure()
+      later(900) // once hydration and the first images have settled
+      document.fonts?.ready.then(() => later(50))
+    }
+    const onSplashEnd = () => {
+      splashWait = window.setTimeout(first, 700)
+    }
+    if (root.dataset.splash === undefined) first()
+    else {
+      addEventListener('splash-end', onSplashEnd, { once: true })
+      splashWait = window.setTimeout(first, 4800)
+    }
     const onResize = () => later()
     const onLoad = () => later(50)
     addEventListener('resize', onResize)
@@ -124,6 +137,8 @@ export function KolamThread() {
     ro.observe(document.body)
     return () => {
       clearTimeout(timer)
+      clearTimeout(splashWait)
+      removeEventListener('splash-end', onSplashEnd)
       cancelAnimationFrame(raf)
       ro.disconnect()
       removeEventListener('scroll', onScroll)

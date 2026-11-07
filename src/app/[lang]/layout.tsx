@@ -6,6 +6,8 @@ import { BottomTabBar } from '@/components/BottomTabBar'
 import { ConsentTrackers } from '@/components/ConsentTrackers'
 import { CookieBanner } from '@/components/CookieBanner'
 import { EverydayMotion } from '@/components/EverydayMotion'
+import { PageBroom } from '@/components/PageBroom'
+import { Splash } from '@/components/Splash'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { LanguageChooser } from '@/components/LanguagePicker'
@@ -15,6 +17,7 @@ import { locales } from '@/i18n/config'
 import { GA_ID, META_ID } from '@/lib/consent'
 import { getDictionary, getLocale } from '@/i18n/dictionaries'
 import { site } from '@/lib/site'
+import { splashScript } from '@/lib/splash-script'
 import { InlineScript } from '@/components/InlineScript'
 import { FESTIVE_KINDS, festiveWindows, fixedSeason } from '@/lib/festive'
 import { getFestivals, getSiteExtras } from '@/server/content'
@@ -65,7 +68,7 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
       <head>
         {/* Before first paint: the time of day (data-tod), the pulli intro (data-pl, only with motion on), a saved "Stop animations" and the slow-phone test (so effects don't start and then jump), an announcement closed earlier this visit, and the automatic look. */}
         <InlineScript
-          html={`try{var d=document.documentElement;var h=new Date().getHours();d.dataset.tod=h>4&&h<11?"morning":h<16?"noon":"evening";if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";if(window.IntersectionObserver&&d.dataset.motion!=="off"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.rv="";setTimeout(function(){d.dataset.rvLive===undefined&&delete d.dataset.rv},3000)}if(d.dataset.motion!=="off"&&d.dataset.fx!=="lite"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.pl="";setTimeout(function(){d.dataset.plLive===undefined&&delete d.dataset.pl},4000)}var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}`}
+          html={`try{var d=document.documentElement;var h=new Date().getHours();d.dataset.tod=h>4&&h<11?"morning":h<16?"noon":"evening";if(localStorage.getItem("motion")==="off")d.dataset.motion="off";var n=navigator,c=n.connection;if(c&&(c.saveData||/(^|-)(2g|3g)$/.test(c.effectiveType||""))||n.deviceMemory<4||n.hardwareConcurrency<4)d.dataset.fx="lite";if(window.IntersectionObserver&&d.dataset.motion!=="off"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.rv="";setTimeout(function(){d.dataset.rvLive===undefined&&delete d.dataset.rv},3000)}if(d.dataset.motion!=="off"&&d.dataset.fx!=="lite"&&!matchMedia("(prefers-reduced-motion:reduce)").matches){d.dataset.pl="";setTimeout(function(){d.dataset.plLive===undefined&&delete d.dataset.pl},4000)}var a=sessionStorage.getItem("ann");if(a)d.dataset.annOff=a}catch(e){}${lookScript}${season === 'festive' ? '' : splashScript}`}
         />
       </head>
       <body className="flex min-h-dvh flex-col">
@@ -78,11 +81,13 @@ export default async function LocaleLayout({ children }: LayoutProps<'/[lang]'>)
         <ConsentTrackers />
         <Header locale={locale} t={t} />
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
-          <ViewTransition default={{ form: 'none', default: 'page' }}>{children}</ViewTransition>
+          <ViewTransition default={{ form: 'none', broom: 'none', default: 'page' }}>{children}</ViewTransition>
         </main>
         <Footer locale={locale} t={t} />
         <WhatsAppButton {...t.whatsapp} />
         <EverydayMotion />
+        {season !== 'festive' && <PageBroom />}
+        {season !== 'festive' && <Splash festivals={festivals.map((f) => ({ slug: f.slug, name: f.name, nextDate: f.nextDate }))} name={t.brand} skip={t.splash.skip} />}
         <LanguageChooser current={locale} labels={t.langStrip} />
         <BottomTabBar locale={locale} labels={t.tabs} navLabel={t.nav.mainNav} itemsLabel={t.cart.items} />
       </body>

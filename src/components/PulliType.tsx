@@ -29,10 +29,15 @@ export function PulliType() {
     const stop = new AbortController()
     const phone = innerWidth < 640
     const style = getComputedStyle(root)
+    // Behind the splash the headline would play unseen: it starts when the splash has swept away (or after 4.5s whatever happens).
+    const ready = root.dataset.splash === undefined ? Promise.resolve() : new Promise<void>((r) => {
+      addEventListener('splash-end', () => setTimeout(r, 350), { once: true }) // a beat after the hand-off, so the two do not land in one frame
+      setTimeout(r, 4500)
+    })
     // Start the big headline first, the tagline half a second behind it.
     const runs = els.map((el, i) => {
       const small = el.dataset.pulli !== 'ink'
-      const run = () => pulli(el, { duration: small ? (phone ? 1400 : 1700) : phone ? 1900 : 2500, step: small ? (phone ? 6 : 7) : phone ? 7 : 9, ink: style.getPropertyValue(INK[el.dataset.pulli === 'peacock' ? 'peacock' : 'ink']) }, stop.signal)
+      const run = () => ready.then(() => pulli(el, { duration: small ? (phone ? 1400 : 1700) : phone ? 1900 : 2500, step: small ? (phone ? 6 : 7) : phone ? 7 : 9, ink: style.getPropertyValue(INK[el.dataset.pulli === 'peacock' ? 'peacock' : 'ink']) }, stop.signal))
       return i === 0 ? run() : new Promise((r) => setTimeout(r, 500)).then(run)
     })
     // A resized window no longer fits the lattice: show the text.

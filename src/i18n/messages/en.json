@@ -46,6 +46,9 @@
     "needHelp": "Need help? WhatsApp me",
     "call": "Call me"
   },
+  "splash": {
+    "skip": "Tap to skip"
+  },
   "home": {
     "hero": {
       "title": "Art That Brings Colour to Every Celebration",

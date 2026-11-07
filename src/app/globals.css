@@ -2936,3 +2936,75 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     width: 100%;
   }
 }
+
+/* ─────────────── Everyday: Aangan v2, stage D ───────────────
+   The splash (Splash.tsx; the head script sets <html data-splash>) and the broom page transition (PageBroom.tsx, sweep.ts).
+   The CSS cover below paints the peacock from the very first frame and removes itself after 3s on its own, so a page whose scripts never run is never stuck behind it. */
+:root:not([data-season='festive'])[data-splash]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2147482998;
+  background: var(--ws-peacock-d);
+  animation: splash-failsafe 10ms linear 3s forwards;
+}
+:root:not([data-season='festive'])[data-splash='live']::before {
+  display: none;
+}
+:root:not([data-season='festive'])[data-splash='fade']::before {
+  animation: splash-fade 300ms ease-out forwards;
+}
+@keyframes splash-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes splash-fade {
+  to {
+    opacity: 0;
+  }
+}
+/* Behind the splash the page waits: its entrance animations start when the splash has gone. */
+:root[data-splash]:not([data-splash='fade']) :is(main, main *) {
+  animation-play-state: paused !important;
+}
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482999;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.4rem;
+  background: var(--ws-peacock-d);
+  color: #fff;
+  text-align: center;
+}
+.splash-art {
+  width: min(52vmin, 22rem);
+  aspect-ratio: 1;
+}
+.splash .rg .d {
+  fill: #e8f1f3;
+}
+.splash .rg .gl path {
+  stroke: #e8f1f3;
+}
+.splash-name {
+  font-family: var(--heading-face);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0;
+  transition: opacity 600ms;
+}
+.splash-name.on {
+  opacity: 1;
+}
+.splash-skip {
+  position: absolute;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  color: #cfe0e4;
+  font-size: 1rem;
+}

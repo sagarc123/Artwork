@@ -40,7 +40,7 @@ export function BottomTabBar({ locale, labels, navLabel, itemsLabel }: { locale:
     <nav
       aria-label={navLabel}
       style={{ viewTransitionName: 'tabbar' }}
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border/25 bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="tab-bar fixed inset-x-0 bottom-0 z-30 border-t border-border/25 bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <ul className="mx-auto flex h-16 max-w-lg">
         {TABS.map((t) => {
