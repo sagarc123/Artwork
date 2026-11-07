@@ -10,7 +10,7 @@ import { whatsappLink } from '@/lib/site'
 import { EmptyState } from './EmptyState'
 import { MediaImage, photoSrc } from './MediaImage'
 import { ShareButton } from './ShareButton'
-import { RimBadge, thaliFor } from './Thali'
+import { ArtShape, focusFor, RimBadge, shapeFor, thaliFor } from './Thali'
 import type { Floor } from './PhotoPlaceholder'
 
 export type GalleryItem = {
@@ -33,7 +33,7 @@ const FILTER_FROM = 8
  * Masonry wall with category tabs and a full-screen viewer (native <dialog>: Esc closes, focus stays inside).
  * `morph`: the open piece carries over into its shop page (only where no shop grid on the page uses the same name).
  */
-export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryItem[]; t: Dictionary['gallery']; enquiryMessage: string; morph?: boolean }) {
+export function Gallery({ items, t, enquiryMessage, morph, season }: { items: GalleryItem[]; t: Dictionary['gallery']; enquiryMessage: string; morph?: boolean; season?: 'everyday' | 'festive' | null }) {
   const [tab, setTab] = useState('all')
   const [open, setOpen] = useState<number | null>(null)
   const dialog = useRef<HTMLDialogElement>(null)
@@ -79,15 +79,25 @@ export function Gallery({ items, t, enquiryMessage, morph }: { items: GalleryIte
         {shown.map((item, i) => (
           <li key={item.id} className="rv mb-4 break-inside-avoid lg:mb-6">
             <button type="button" onClick={() => setOpen(i)} className="card art-card peek grid w-full gap-2 text-left">
-              <span className="relative block overflow-hidden bg-surface p-2 shadow-frame">
-                <span className="peek-art block">
-                  <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} medium={item.medium} style={styles[i]} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
+              {season !== 'everyday' && (
+                <span className="look-festive relative block overflow-hidden bg-surface p-2 shadow-frame">
+                  <span className="peek-art block">
+                    <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} medium={item.medium} style={styles[i]} floor={item.floor} sizes="(min-width: 1024px) 25vw, 50vw" />
+                  </span>
+                  <span aria-hidden="true" className="peek-info">
+                    <span className="peek-view">{t.view}</span>
+                  </span>
+                  <RimBadge category={thaliFor(item.medium)} seed={item.seed} className="look-everyday" />
                 </span>
-                <span aria-hidden="true" className="peek-info">
-                  <span className="peek-view">{t.view}</span>
+              )}
+              {/* Everyday: the piece in the shape of its medium (arch, frame or plate); it is revealed by medium as it scrolls in. */}
+              {season !== 'festive' && (
+                <span className="look-everyday gal-shape">
+                  <ArtShape medium={item.medium} seed={item.seed} photo={!!photoSrc(item.image)}>
+                    <MediaImage media={item.image} alt="" ratio={item.ratio} seed={item.seed} medium={item.medium} style={styles[i]} floor="paper" focus={focusFor(shapeFor(item.medium))} sizes="(min-width: 1024px) 25vw, 50vw" className="size-full" />
+                  </ArtShape>
                 </span>
-                <RimBadge category={thaliFor(item.medium)} seed={item.seed} className="look-everyday" />
-              </span>
+              )}
               {item.category && <span className="kind look-everyday">{item.category.name}</span>}
               <span className="font-heading text-h3-sm">{item.title}</span>
               <span className={item.productHref ? 'font-semibold text-leaf' : 'text-muted'}>{item.productHref ? t.forSale : t.private}</span>

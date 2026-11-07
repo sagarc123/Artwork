@@ -106,7 +106,7 @@ export function MakingOfPlayer({ video, poster, describedBy, labels, note, child
         <button
           type="button"
           onClick={onClick}
-          className={`press inline-flex min-h-12 items-center gap-2 rounded-ui border-[1.5px] border-charcoal px-5 font-semibold hover:bg-charcoal hover:text-paper ${video ? '' : 'mo-ctl'}`}
+          className={`mo-btn press inline-flex min-h-12 items-center gap-2 rounded-ui border-[1.5px] border-charcoal px-5 font-semibold hover:bg-charcoal hover:text-paper ${video ? '' : 'mo-ctl'}`}
         >
           <Icon aria-hidden="true" className="size-5" />
           {label}

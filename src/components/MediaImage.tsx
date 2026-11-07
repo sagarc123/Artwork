@@ -15,6 +15,8 @@ type Props = {
   floor?: Floor
   sizes: string
   priority?: boolean
+  /** Where a photo is cropped around (CSS object-position), e.g. "50% 22%" so faces stay in the frame. */
+  focus?: string
   className?: string
 }
 
@@ -28,13 +30,13 @@ export function photoSrc(media: number | Media | null | undefined) {
 }
 
 /** An uploaded photo (responsive, AVIF/WebP), or the code-drawn stand-in if there is none yet. */
-export function MediaImage({ media, alt, ratio, seed, medium, style, floor, sizes, priority, className = '' }: Props) {
+export function MediaImage({ media, alt, ratio, seed, medium, style, floor, sizes, priority, focus, className = '' }: Props) {
   // Payload-hosted files are served by this same site: a path, so image optimisation treats them as local.
   const src = photoSrc(media)
   if (src && media && typeof media === 'object') {
     return (
       <div className={`relative overflow-hidden ${className}`} style={{ aspectRatio: ratio }}>
-        <Image src={src} alt={alt === '' ? '' : media.alt || alt} fill sizes={sizes} priority={priority} className="object-cover" />
+        <Image src={src} alt={alt === '' ? '' : media.alt || alt} fill sizes={sizes} priority={priority} className="object-cover" style={focus ? { objectPosition: focus } : undefined} />
       </div>
     )
   }

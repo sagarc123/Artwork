@@ -49,16 +49,16 @@ function Bindu({ r, w, dot }: { r: number; w: number; dot: number }) {
  * A plate. `children` (a photo or a stand-in) sit inside the round opening; `width` is any CSS length.
  * Decorative frame: the art inside carries the alt text.
  */
-export function Thali({ category, seed, children, width = '100%', n = 20, className = '' }: { category: ThaliCategory; seed: string; children?: ReactNode; width?: string; n?: number; className?: string }) {
+export function Thali({ category, seed, children, width = '100%', n = 20, className = '', med }: { category: ThaliCategory; seed: string; children?: ReactNode; width?: string; n?: number; className?: string; med?: boolean }) {
   const { rim, disc } = LOOK[category]
   return (
-    <div className={`thali relative aspect-square ${className}`} style={{ width }}>
+    <div className={`thali relative aspect-square ${className}`} style={{ width }} data-med={med ? 'rangoli' : undefined}>
       <svg aria-hidden="true" focusable="false" viewBox="0 0 120 120" className="absolute inset-0 size-full overflow-visible">
         <circle cx="60" cy="60" r="58" fill={disc} />
         <Rim n={n} seed={seed} colours={rim} r={52.5} base={3.6} jit={1.1} sjit={0.55} />
         <circle cx="60" cy="60" r="45" fill="#fff" stroke="#F1E6D0" strokeWidth="1.5" />
       </svg>
-      <div className="absolute inset-[13.3%] overflow-hidden rounded-full bg-white">{children}</div>
+      <div className="absolute inset-[13.3%] overflow-hidden rounded-full bg-white">{med ? <Face>{children}</Face> : children}</div>
       <svg aria-hidden="true" focusable="false" viewBox="0 0 120 120" className="pointer-events-none absolute inset-0 size-full">
         <Bindu r={45.5} w={2.2} dot={3.8} />
       </svg>
@@ -79,3 +79,57 @@ export function RimBadge({ category, seed, className = '' }: { category: ThaliCa
 
 /** Which plate colours suit a piece of work. */
 export const thaliFor = (medium: string): ThaliCategory => (medium === 'portrait' || medium === 'drawing' ? 'portrait' : medium === 'painting' ? 'painting' : 'rangoli')
+
+/**
+ * The art inside a shape, in the two layers the reveals need (globals.css, reveal.ts): [data-face] is what is hidden and then revealed
+ * (and carries the mask), and .fxw around it takes the watercolour bleed filter, so the shape's own edge never wobbles.
+ */
+export function Face({ children }: { children: ReactNode }) {
+  return (
+    <div className="fxw absolute inset-0">
+      <div data-face className="absolute inset-0">
+        {children}
+      </div>
+    </div>
+  )
+}
+
+/** Thin sketch lines drawn over a real portrait photo while it reveals (the stand-ins draw their own paths). Decorative. */
+function Contour() {
+  return (
+    <svg aria-hidden="true" focusable="false" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" className="sk-over pointer-events-none absolute inset-0 size-full" fill="none" stroke="#1c2125" strokeWidth={0.9} strokeLinecap="round">
+      <path d="M50 14C33 14 29 34 31 48C33 62 41 72 50 72C59 72 67 62 69 48C71 34 67 14 50 14Z" pathLength={1} />
+      <path d="M26 100C28 82 38 76 50 76C62 76 72 82 74 100" pathLength={1} />
+      <path d="M36 30C44 22 58 22 66 31M40 50q4-3 8 0M54 50q4-3 8 0M50 52v8" pathLength={1} />
+    </svg>
+  )
+}
+
+export type Shape = 'plate' | 'arch' | 'frame'
+/** The shape that follows a piece's real medium: rangoli → round plate, portraits and drawings → jharokha arch, paintings → framed rectangle. */
+export const shapeFor = (medium: string): Shape => (medium === 'portrait' || medium === 'drawing' ? 'arch' : medium === 'painting' ? 'frame' : 'plate')
+/** Where a photo is cropped around: faces sit high in a portrait. */
+export const focusFor = (shape: Shape) => (shape === 'arch' ? '50% 22%' : '50% 50%')
+
+/**
+ * A piece on the courtyard wall: plate (Thali), arch or frame. `photo`: a real photo sits inside (portraits get the contour overlay for the reveal).
+ * `rim` is the plate's dot rim seed. The shape reports its medium to the reveals in data-med.
+ */
+export function ArtShape({ medium, seed, children, photo = false, className = '' }: { medium: string; seed: string; children: ReactNode; photo?: boolean; className?: string }) {
+  const shape = shapeFor(medium)
+  if (shape === 'plate') {
+    return (
+      <Thali category="rangoli" seed={seed} n={18} med className={className}>
+        {children}
+      </Thali>
+    )
+  }
+  return (
+    <div className={`shape shape-${shape} ${className}`} data-med={shape === 'arch' ? 'portrait' : 'watercolour'} data-photo={photo ? '' : undefined}>
+      <div className="face">
+        <Face>{children}</Face>
+        {shape === 'arch' && photo && <Contour />}
+      </div>
+    </div>
+  )
+}

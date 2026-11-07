@@ -65,17 +65,26 @@ export function EverydayMotion() {
     })
     header.observe(sentinel)
 
+    // Pieces (data-med) are revealed by medium (reveal.ts), once, by this same observer. Only with motion on: otherwise the art is simply there.
+    const stop = new AbortController()
+    const piece = (el: HTMLElement) => {
+      el.dataset.run = ''
+      const live = root.dataset.rv !== undefined && root.dataset.fx !== 'lite' && !calm()
+      if (!live) return void (el.dataset.done = '')
+      import('./reveal').then(({ reveal }) => reveal(el, stop.signal), () => void (el.dataset.done = ''))
+    }
     // Reveals and dividers: each element is revealed once; new ones (client navigation, filters) are picked up as they appear.
     const seen = new IntersectionObserver(
       (list) =>
         list.forEach((e) => {
           if (!e.isIntersecting) return
-          e.target.classList.add('in')
+          if (e.target instanceof HTMLElement && e.target.dataset.med) piece(e.target)
+          else e.target.classList.add('in')
           seen.unobserve(e.target)
         }),
       { threshold: 0.15, rootMargin: '0px 0px -6% 0px' },
     )
-    const watch = () => document.querySelectorAll('.rv:not(.in), .dl:not(.in)').forEach((el) => seen.observe(el))
+    const watch = () => document.querySelectorAll('.rv:not(.in), .dl:not(.in), [data-med]:not([data-run])').forEach((el) => seen.observe(el))
     watch()
     let queued = 0
     const mo = new MutationObserver(() => {
@@ -91,6 +100,7 @@ export function EverydayMotion() {
     }
     document.addEventListener('click', tap)
     return () => {
+      stop.abort() // reveals in flight finish at once (the art shows)
       header.disconnect()
       seen.disconnect()
       mo.disconnect()

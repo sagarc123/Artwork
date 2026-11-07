@@ -2492,3 +2492,256 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   z-index: 2;
   pointer-events: none;
 }
+
+/* ─────────────── Everyday: Aangan v2, stage B ───────────────
+   1. The courtyard wall: shapes by medium (plate, arch, frame), a toran, threads, a dotted floor.
+   2. Reveals by medium (reveal.ts): the art is hidden only while <html data-rv> is set (the head script; its failsafe removes it) and until the piece is
+      marked data-done. Lite shows the art at once (the cards' own fade stays); off and reduced motion never set data-rv.
+   3. The round WhatsApp button steps aside on phones (WhatsAppButton.tsx). */
+.shape {
+  position: relative;
+  width: 100%;
+  border: 2.5px solid var(--color-charcoal);
+  background: var(--ws-cream);
+}
+.shape-arch {
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px 16px 16px;
+}
+.shape-frame {
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+}
+.shape .face {
+  position: absolute;
+  inset: 9px;
+  overflow: hidden;
+}
+.shape-arch .face {
+  border-radius: 999px 999px 8px 8px;
+}
+.shape-frame .face {
+  border-radius: 9px;
+}
+.shape::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border: 2.5px dotted var(--color-marigold);
+  border-radius: 999px 999px 24px 24px;
+  pointer-events: none;
+  transition: transform 700ms var(--ease-pour);
+}
+.shape-frame::after {
+  border-radius: 24px;
+}
+/* Photos fill their shape and keep faces in view (the focal point comes from MediaImage's focus); stand-ins keep their own fit. */
+:root:not([data-season='festive']) :is(.shape, .thali) img {
+  object-fit: cover;
+}
+.shape [data-face] > *,
+.thali [data-face] > * {
+  width: 100%;
+  height: 100%;
+}
+.cy-wall {
+  position: relative;
+  padding: 3.4rem 2rem 3rem;
+  border: 2px solid var(--ws-line);
+  border-bottom: 0;
+  border-radius: 30px 30px 0 0;
+  background: var(--ws-cream);
+}
+.cy-wall::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  right: 14px;
+  height: 24px;
+  background:
+    radial-gradient(circle at 11px 12px, var(--color-marigold) 7px, transparent 8px) 0 0 / 44px 24px repeat-x,
+    radial-gradient(circle at 33px 12px, var(--color-kumkum) 6px, transparent 7px) 0 0 / 44px 24px repeat-x;
+}
+.cy-wall::after {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: rgb(14 63 76 / 0.35);
+}
+.cy-hangs {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr 1.15fr 0.95fr;
+  align-items: start;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cy-hang {
+  position: relative;
+  min-width: 0;
+  padding-top: var(--len);
+}
+.cy-hang::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: var(--len);
+  background: linear-gradient(rgb(14 63 76 / 0.55), rgb(14 63 76 / 0.35));
+}
+.cy-card {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  color: inherit;
+  text-decoration: none;
+}
+.cy-card > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.cy-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 14px;
+  transition: transform 500ms var(--ease-pour);
+}
+@media (hover: hover) {
+  .cy-card:hover .cy-art {
+    transform: translateY(-6px);
+  }
+  .cy-card:hover .shape::after {
+    transform: scale(1.025);
+  }
+}
+.cy-card:focus-visible {
+  outline: 3px solid var(--color-peacock);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+.cy-floor {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 3.5rem 2rem 4.5rem;
+  overflow: hidden;
+  border: 2px solid var(--ws-line);
+  border-top: 3px dotted var(--color-marigold);
+  border-radius: 0 0 30px 30px;
+  background:
+    radial-gradient(circle, rgb(14 63 76 / 0.22) 1.6px, transparent 2px) 0 0 / 30px 30px,
+    var(--ws-card);
+}
+.cy-plate:nth-child(1) {
+  grid-column: 2 / 7;
+  transform: rotate(-5deg);
+}
+.cy-plate:nth-child(2) {
+  grid-column: 8 / 12;
+  transform: rotate(7deg) translateY(2.5rem);
+}
+.gal-shape {
+  display: block;
+  padding: 12px;
+}
+.gal-shape .shape::after {
+  inset: -7px;
+}
+@media (width < 64rem) {
+  .cy-wall {
+    padding: 2.8rem 1rem 2rem;
+  }
+  .cy-hangs {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem 1rem;
+  }
+  .cy-hang {
+    padding-top: calc(var(--len) * 0.4);
+  }
+  .cy-hang::before {
+    height: calc(var(--len) * 0.4);
+  }
+  /* The second row hangs from its own rail. */
+  .cy-hang:nth-child(n + 3)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -0.5rem;
+    right: -0.5rem;
+    height: 2px;
+    background: rgb(14 63 76 / 0.35);
+  }
+  .cy-floor {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 2.5rem 1rem 4rem;
+  }
+  .cy-plate:nth-child(1),
+  .cy-plate:nth-child(2) {
+    grid-column: span 1;
+    transform: none;
+  }
+  .cy-plate:nth-child(2) {
+    transform: translateY(1.5rem);
+  }
+}
+.pcv {
+  pointer-events: none;
+}
+.sk-over {
+  opacity: 0;
+}
+@property --mr {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+@property --hw {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 9px;
+}
+[data-face] {
+  transition: opacity 600ms;
+}
+[data-face][data-hatch] {
+  mask-image: repeating-linear-gradient(115deg, #000 0, #000 var(--hw), transparent var(--hw), transparent 9px);
+}
+:root[data-rv]:not([data-fx='lite'], [data-motion='off']) [data-med]:not([data-done]) [data-face] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-med] [data-face] {
+    opacity: 1 !important;
+  }
+}
+/* Phones: the round WhatsApp button steps aside while the hero, another WhatsApp action, text or a control is under it. */
+@media (width < 64rem) {
+  .wa-float {
+    transition:
+      opacity 200ms,
+      visibility 0s;
+  }
+  .wa-float[data-away] {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 200ms,
+      visibility 0s 200ms;
+    pointer-events: none;
+  }
+}
+/* The making-of button changes its word (Play, Pause, Replay) when the drawing autoplays; a steady width keeps the line beside it from jumping (Marathi and Hindi words differ most). */
+:root:not([data-season='festive']) .mo-btn {
+  min-width: 12.5rem;
+  justify-content: center;
+}

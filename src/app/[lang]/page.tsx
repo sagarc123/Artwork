@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BrushUnderline, DisplayWord, DoorstepScene, KolamWeave, PortraitPair, StepList, Threshold } from '@/components/Art'
 import { ButtonLink } from '@/components/ButtonLink'
+import { CourtyardWall } from '@/components/CourtyardWall'
 import { FestivalTiles } from '@/components/FestivalTiles'
 import { GenerativeRangoli } from '@/components/GenerativeRangoli'
 import { JsonLd, org } from '@/components/JsonLd'
@@ -246,7 +247,9 @@ export default async function HomePage() {
           {featured.length === 0 ? (
             <p className="rounded-ui bg-surface p-8 text-center text-muted">{h.featured.empty}</p>
           ) : (
-            <ul className="grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4 lg:gap-y-10 lg:gap-x-8">
+            <>
+              {season !== 'everyday' && (
+            <ul className="look-festive grid grid-cols-2 gap-x-5 gap-y-6 lg:grid-cols-4 lg:gap-y-10 lg:gap-x-8">
               {featured.map((f, i) => (
                 <li key={f.slug} className={['rv', i === 0 && 'lg:col-span-2 lg:row-span-2', i === 4 && 'max-lg:hidden'].filter(Boolean).join(' ')}>
                   <Link href={f.href} className="card art-card grid gap-3">
@@ -280,6 +283,9 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
+              )}
+              {season !== 'festive' && <CourtyardWall items={featured} t={t} />}
+            </>
           )}
           <a
             href={whatsappLink(t.whatsapp.message)}
