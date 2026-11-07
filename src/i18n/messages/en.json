@@ -144,7 +144,8 @@
       "label": "Today's rangoli",
       "share": "Share today's rangoli",
       "shareText": "{caption} · Siddesh Mokashi",
-      "copied": "Link copied"
+      "copied": "Link copied",
+      "copyFailed": "Couldn't copy: long-press the link in the address bar"
     },
     "festivals": {
       "title": "Rangoli through the festivals",

@@ -42,9 +42,10 @@ export function PulliType() {
     })
     // A resized window no longer fits the lattice: show the text.
     addEventListener('resize', () => stop.abort('resize'), { signal: stop.signal })
-    Promise.all(runs).then(() => {
-      if (stop.signal.aborted) return
-      played = true
+    // Always clears data-pl when it ends (also after a resize abort); only an unmount leaves it to the next run.
+    Promise.all(runs).finally(() => {
+      if (stop.signal.reason === 'unmount') return
+      if (!stop.signal.aborted) played = true
       delete root.dataset.pl
     })
     return () => stop.abort('unmount')

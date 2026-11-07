@@ -34,6 +34,11 @@ function contentBoxes(top: number): Box[] {
   document.querySelectorAll('a,button,input,select,textarea,img,video,iframe,[role=img],.thali,.shape,.rim-badge,.price-pill').forEach((e) => {
     if (!skip(e)) push(e.getBoundingClientRect())
   })
+  // Corner motifs and other absolutely placed decoration (festival cards): the line goes round them too.
+  document.querySelectorAll('main svg:not(.kolam-thread)').forEach((e) => {
+    const r = e.getBoundingClientRect()
+    if (getComputedStyle(e).position === 'absolute' && r.width <= 480 && !skip(e)) push(r)
+  })
   return out
 }
 

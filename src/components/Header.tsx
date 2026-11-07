@@ -14,7 +14,7 @@ import { getBusiness, getSiteExtras } from '@/server/content'
 import { hashString } from '@/lib/seed'
 import { AnnouncementClose } from './AnnouncementClose'
 
-const iconLink = 'flex min-h-12 min-w-14 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
+const iconLink = 'flex min-h-12 min-w-11 shrink-0 flex-col items-center justify-center leading-tight text-charcoal hover:text-kumkum'
 
 function Logo({ locale, brand }: { locale: Locale; brand: string }) {
   return (
@@ -53,7 +53,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
     { href: p('/about'), label: t.nav.about },
   ]
   const navClass =
-    'py-2 font-medium whitespace-nowrap hover:text-kumkum aria-[current=page]:text-kumkum aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8'
+    'inline-flex min-h-11 min-w-11 items-center justify-center py-2 font-medium whitespace-nowrap hover:text-kumkum aria-[current=page]:text-kumkum aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8'
 
   return (
     <header className="site-header sticky top-0 z-30 border-b border-border/25 bg-paper/95 backdrop-blur" style={{ viewTransitionName: 'site-header' }}>
@@ -89,7 +89,7 @@ export async function Header({ locale, t }: { locale: Locale; t: Dictionary }) {
           ) : (
             reply
           )}
-          <Link href={p('/contact')} className="hover:text-charcoal">
+          <Link href={p('/contact')} className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-charcoal">
             {t.nav.contact}
           </Link>
         </div>

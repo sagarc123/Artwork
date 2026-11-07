@@ -90,7 +90,7 @@ export function RemindMe({ festival, locale, t, forms, onDark = false }: Props) 
             <input type="hidden" name="type" value="general" />
             <input type="hidden" name="reminder" value={festival.id} />
             <input type="hidden" name="locale" value={locale} />
-            <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+            <div aria-hidden="true" className="sr-only">
               <label>
                 Website <input type="text" name="website" tabIndex={-1} autoComplete="off" />
               </label>

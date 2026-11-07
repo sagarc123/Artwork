@@ -34,7 +34,7 @@ export function TodayRangoli({ festivals, children }: { festivals: Festival[]; c
 /** "Today's rangoli · 6 Nov · Diwali" with a share button (the phone's share sheet, or the text copied). Nothing until the date is known. */
 export function TodayCaption({ festivals, locale, t }: { festivals: Festival[]; locale: Locale; t: Dictionary['home']['today'] }) {
   const today = useToday()
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'ok' | 'failed' | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => () => clearTimeout(timer.current), [])
   if (!today) return null
@@ -53,17 +53,17 @@ export function TodayCaption({ festivals, locale, t }: { festivals: Festival[]; 
     }
     try {
       await navigator.clipboard.writeText(`${text} ${url}`)
-      setCopied(true)
-      clearTimeout(timer.current)
-      timer.current = setTimeout(() => setCopied(false), 1800)
+      setCopied('ok')
     } catch {
-      // No share sheet and no clipboard: nothing more to try.
+      setCopied('failed') // No share sheet and no clipboard: say so, so the visitor can copy it by hand.
     }
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setCopied(null), 4000)
   }
 
   return (
     <div className="tcap">
-      <span role="status">{copied ? `✓ ${t.copied}` : caption}</span>
+      <span role="status">{copied === 'ok' ? `✓ ${t.copied}` : copied === 'failed' ? t.copyFailed : caption}</span>
       <button type="button" onClick={share} aria-label={t.share}>
         <Share2 aria-hidden="true" width={20} height={20} />
       </button>

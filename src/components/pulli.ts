@@ -43,7 +43,8 @@ export async function pulli(el: HTMLElement, o: { duration: number; step: number
     if (signal.reason !== 'unmount') el.setAttribute('data-pl-done', '')
   }
   try {
-    await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))])
+    // Fonts not ready within 0.6s: the plain text shows and the animation is skipped (the text must never stay invisible).
+    if (!(await Promise.race([document.fonts.ready.then(() => true), new Promise((r) => setTimeout(() => r(false), 600))]))) return show()
     if (signal.aborted) return show()
     const box = el.getBoundingClientRect()
     const pad = 8

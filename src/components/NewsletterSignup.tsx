@@ -51,7 +51,7 @@ export function NewsletterSignup({ locale, t }: { locale: string; t: Dictionary[
       )}
       <input type="hidden" name="locale" value={locale} />
       {/* Honeypot: hidden from people, filled by bots. */}
-      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+      <div aria-hidden="true" className="sr-only">
         <label>
           Website <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>

@@ -169,7 +169,7 @@ export default async function SearchPage({ searchParams }: PageProps<'/[lang]/se
   return (
     <>
       <PageHero title={t.searchPage.title} word="शोध" />
-      <section className="bg-paper pb-20 lg:pb-28">
+      <section className="min-h-[85svh] bg-paper pb-20 lg:pb-28">
         <div className="wrap grid gap-10">
           {/* The query is only known per request: the page shell around it stays static. */}
           <Suspense fallback={<SearchForm locale={locale} t={t.searchPage} />}>

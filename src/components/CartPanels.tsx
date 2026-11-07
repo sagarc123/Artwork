@@ -300,7 +300,7 @@ export function CheckoutForm({ locale, t, orderPath, cartHref, me }: { locale: s
     return (
       <div className="grid justify-items-center gap-4 rounded-ui bg-surface p-8 text-center">
         <RemovedNote count={removed} t={t.cart} />
-        <Link href={cartHref} className="ink-link font-semibold text-peacock">
+        <Link href={cartHref} className="ink-link inline-flex min-h-11 items-center font-semibold text-peacock">
           {t.cart.empty}
         </Link>
       </div>

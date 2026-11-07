@@ -83,20 +83,20 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
           </div>
           <ul className="grid gap-2">
             <li>
-              <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 items-center">
+              <a href={whatsappLink(t.whatsapp.message)} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 min-w-11 items-center">
                 {t.footer.whatsapp}
               </a>
             </li>
             {b.phone && (
               <li>
-                <a href={`tel:${b.phone}`} className="footer-link inline-flex min-h-11 items-center">
+                <a href={`tel:${b.phone}`} className="footer-link inline-flex min-h-11 min-w-11 items-center">
                   {t.footer.call}: {b.phone}
                 </a>
               </li>
             )}
             {site.email && (
               <li>
-                <a href={`mailto:${site.email}`} className="footer-link inline-flex min-h-11 items-center">
+                <a href={`mailto:${site.email}`} className="footer-link inline-flex min-h-11 min-w-11 items-center">
                   {t.footer.email}: {site.email}
                 </a>
               </li>
@@ -109,7 +109,7 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
             <ul className="grid gap-1">
               {col.links.map((l) => (
                 <li key={l.label}>
-                  <Link href={l.href} className="footer-link inline-flex min-h-11 items-center">
+                  <Link href={l.href} className="footer-link inline-flex min-h-11 min-w-11 items-center">
                     {l.label}
                   </Link>
                 </li>
@@ -137,7 +137,7 @@ export async function Footer({ locale, t }: { locale: Locale; t: Dictionary }) {
           </p>
           <div className="flex flex-wrap items-center gap-4 [&_button]:text-paper [&_button:hover]:bg-paper/10 [&_button[aria-pressed=true]]:bg-paper [&_button[aria-pressed=true]]:text-charcoal [&_svg]:text-paper/70">
             {social.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 items-center">
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="footer-link inline-flex min-h-11 min-w-11 items-center">
                 {s.label}
               </a>
             ))}

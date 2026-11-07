@@ -1039,7 +1039,6 @@ dialog.drawer[open] {
 }
 @keyframes pin {
   from {
-    opacity: 0.6;
     transform: translateY(-14px) rotate(var(--pin-r, -1.8deg));
   }
 }
@@ -2245,9 +2244,11 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
 :root:not([data-season='festive']) :is(.ws-wa, .ws-pop, .card-btn, .footer-ask-btn, .press):active {
   transform: scale(0.98);
 }
-:root:not([data-season='festive']) button[data-done] {
+/* Also while hovered or pressed (the pointer is still on the button after the tap): peacock's hover colour put ink text on dark peacock (1.5:1). */
+:root:not([data-season='festive']) button[data-done].bg-kumkum:is(*, :hover, :active) {
   background: var(--color-marigold);
   color: var(--color-charcoal);
+  transition: none; /* no half-faded background under the ink text while it flips */
 }
 /* Header: a soft shadow fades in once the page has scrolled a few pixels (opacity only; no shrink, no hide). */
 :root:not([data-season='festive']) .site-header::before {
@@ -2278,7 +2279,7 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   white-space: nowrap;
   /* 1024–1279: icons only (the words stay for screen readers), so the row fits. */
   @media (width < 80rem) {
-    min-width: 2.5rem;
+    min-width: 2.75rem;
     padding-inline: 0.2rem;
   }
 }
@@ -2478,8 +2479,9 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
   }
 }
 
-/* Pulli type: the real text is the page's headline; while the dots draw over it (the head script sets data-pl, only with motion on) it is
-   see-through, then it fades in as the canvas fades out. No data-pl (no JS, calm modes, reduced motion) means plain text from the first frame. */
+/* Pulli type: the real text is the page's headline; while the dots spell it out (the head script sets data-pl, only with motion on) it is
+   see-through, then it fades in as the canvas fades out. Text over dots read as a smear. It can't stay hidden: fonts wait at most 0.6s
+   and the head script drops data-pl 1.5s after the splash if the dots never started. No data-pl means plain text from the first frame. */
 [data-pulli] {
   position: relative;
   transition: color 500ms;
@@ -2724,21 +2726,19 @@ body:has([data-under18]) :is(.newsletter-signup, .cookie-banner, .cookie-setting
     opacity: 1 !important;
   }
 }
-/* Phones: the round WhatsApp button steps aside while the hero, another WhatsApp action, text or a control is under it. */
-@media (width < 64rem) {
-  .wa-float {
-    transition:
-      opacity 200ms,
-      visibility 0s;
-  }
-  .wa-float[data-away] {
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity 200ms,
-      visibility 0s 200ms;
-    pointer-events: none;
-  }
+/* The WhatsApp button steps aside while scrolling and while the hero (phones), another WhatsApp action (phones), text or a control is under it. */
+.wa-float {
+  transition:
+    opacity 200ms,
+    visibility 0s;
+}
+.wa-float[data-away] {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 80ms,
+    visibility 0s 80ms;
+  pointer-events: none;
 }
 /* The making-of button changes its word (Play, Pause, Replay) when the drawing autoplays; a steady width keeps the line beside it from jumping (Marathi and Hindi words differ most). */
 :root:not([data-season='festive']) .mo-btn {

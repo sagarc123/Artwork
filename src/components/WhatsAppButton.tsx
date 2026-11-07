@@ -49,7 +49,8 @@ function useStepAside(ref: React.RefObject<HTMLAnchorElement | null>, path: stri
       return false
     }
     function decide() {
-      const away = phone.matches && (inView.size > 0 || covering())
+      // Phones also step aside for the hero and other WhatsApp actions; the wide pill only for text or a control under it.
+      const away = phone.matches ? inView.size > 0 || covering() : covering()
       if (away) el!.dataset.away = ''
       else delete el!.dataset.away
     }
@@ -58,7 +59,11 @@ function useStepAside(ref: React.RefObject<HTMLAnchorElement | null>, path: stri
       clearTimeout(t)
       t = window.setTimeout(decide, ms)
     }
-    const onScroll = () => later(140)
+    // Out of the way the moment scrolling starts (nothing can pass under it), back once it settles clear.
+    const onScroll = () => {
+      el!.dataset.away = ''
+      later(140)
+    }
     const mo = new MutationObserver(() => {
       watch()
       later(200)

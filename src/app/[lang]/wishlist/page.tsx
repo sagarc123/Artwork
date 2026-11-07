@@ -23,7 +23,7 @@ export default async function WishlistPage() {
   return (
     <>
       <PageHero title={t.savedPage.title} sub={t.savedPage.sub} word="आवड" />
-      <section className="bg-paper pb-20 lg:pb-28">
+      <section className="min-h-[85svh] bg-paper pb-20 lg:pb-28">
         <div className="wrap">
           <SavedList
             products={products}
